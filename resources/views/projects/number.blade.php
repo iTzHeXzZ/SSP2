@@ -21,7 +21,7 @@
                     <td>{{ $project->wohneinheiten }}</td>
                     <td>{{ $project->bestand }} </td>
                     <td>
-                        <form method="POST" action="{{ route('projects.update', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl, 'strasse' => $project->strasse])}}">
+                        <form method="POST" action="{{ route('projects.update', $project->id)}}">
                             @csrf
                             <input type="text" name="notiz" value="{{ $project->notiz }}">
                             <button type="submit" class="btn btn-primary">Speichern</button>

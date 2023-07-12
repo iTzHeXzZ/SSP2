@@ -82,15 +82,13 @@ class ProjectController extends Controller
         return redirect()->route('projects.index');
     }
 
-    public function update(Request $request,$ort, $postleitzahl, $strasse ){
+    public function update(Request $request, $id){
+        $projects = Project::findorfail($id);
 
-        $notiz = Project::findorfail($request->notiz);
+        $projects->notiz = $request->input('notiz');
 
-        $project->notiz = $request->input('notiz');
+        $projects->save();
 
-        $notiz->save();
-
-        #return view('projects.number', compact('projects','ort', 'postleitzahl','strasse'));
-        return redirect("test");
+        return redirect()->back()->with('success', 'Du bist ein Wixxer!');
 }
 }

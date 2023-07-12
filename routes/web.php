@@ -30,7 +30,7 @@ Route::get('/projects/create', [ProjectController::class, 'create'])->name('proj
 
 Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
 
-Route::post('/projects/{ort}/{postleitzahl}/{strasse}/number', [ProjectController::class, 'update'])->name('projects.update');
+Route::post('/projects/{id}', [ProjectController::class, 'update'])->name('projects.update');
 
 #Route::get('/projects/street', [ProjectController::class, 'street'])->name('projects.street');
 Route::get('/projects/{ort}/{postleitzahl}/street', [ProjectController::class, 'street'])->name('projects.street');
