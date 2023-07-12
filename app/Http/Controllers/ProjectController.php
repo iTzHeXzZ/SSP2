@@ -89,6 +89,6 @@ class ProjectController extends Controller
 
         $projects->save();
 
-        return redirect()->back()->with('success', 'Du bist ein Wixxer!');
+        return redirect()->back()->with('success', 'Aktualisiert');
 }
 }
