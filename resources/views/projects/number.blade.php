@@ -10,6 +10,7 @@
                 <th>Hausnummer</th>
                 <th>Wohneinheiten</th>
                 <th>Bestand</th>
+                <th>Status</th>
                 <th>Notiz</th>
                 <th>Bearbeitungsdatum</th>
             </tr>
@@ -22,12 +23,25 @@
                     <td>{{ $project->bestand }} </td>
                     <td>
                         <form method="POST" action="{{ route('projects.update', $project->id)}}">
+                         @csrf
+                         <select name="status">
+                            @foreach ($statusOptions as $option)
+                                <option value="{{ $option }}" {{ $project->status === $option ? 'selected' : '' }}>
+                                    {{ $option }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-primary">Speichern</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ route('projects.update', $project->id)}}">
                             @csrf
                             <input type="text" name="notiz" value="{{ $project->notiz }}">
                             <button type="submit" class="btn btn-primary">Speichern</button>
                         </form>
                         </td>
-                    <td>{{ $project->bearbeitungsdatum }}</td>
+                    <td>{{ $project->updated_at }}</td>
                 </tr>
             @endforeach
         </tbody>

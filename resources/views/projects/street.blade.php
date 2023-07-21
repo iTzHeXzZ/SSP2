@@ -22,7 +22,7 @@
                     <td><a class="locc" href="{{ route('projects.number', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl, 'strasse' => $project->strasse]) }}" style="text-decoration : none">{{ $project->strasse }} </a></td>
                     <td>{{ $project->wohneinheiten }}</td>
                     <td>{{ $project->bestand }}</td>
-                    <td>{{ $project->bearbeitungsdatum }}</td>
+                    <td>{{ $project->updated_at }}</td>
                 </tr>
             @endforeach
         </tbody>

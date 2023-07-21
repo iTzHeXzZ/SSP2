@@ -6,6 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    public $timestamps = false;
-    protected $fillable = ['id','ort','postleitzahl','strasse','hausnummer','wohneinheiten','bestand','notiz','bearbeitungsdatum'];
+    public $timestamps = true;
+    protected $fillable = ['id','ort','postleitzahl','strasse','hausnummer','wohneinheiten','bestand','notiz', 'status','created_at','updatet_at'];
 }

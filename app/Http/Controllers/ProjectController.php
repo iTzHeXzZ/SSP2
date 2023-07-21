@@ -58,7 +58,9 @@ class ProjectController extends Controller
         ->where('strasse', $strasse)
         ->get();
 
-        return view('projects.number', compact('projects','ort', 'postleitzahl','strasse'));
+        $statusOptions = ['Unbesucht', 'Kein Interesse', 'Überleger', 'Karte', 'Vertrag'];
+
+        return view('projects.number', compact('projects','ort', 'postleitzahl','strasse','statusOptions'));
     } 
 
     public function create(){
@@ -85,10 +87,19 @@ class ProjectController extends Controller
     public function update(Request $request, $id){
         $projects = Project::findorfail($id);
 
-        $projects->notiz = $request->input('notiz');
+        $inputValue1 = $request->input('status');
+        $inputValue2 = $request->input('notiz');
+        if ($inputValue1 != null) {
+            $projects->status = $request->input('status');
+            $projects->save();
+        }
+        if($inputValue2 != null){
+            $projects->notiz = $request->input('notiz');
+            $projects->save();
+        }
 
-        $projects->save();
 
         return redirect()->back()->with('success', 'Aktualisiert');
-}
+    }
+
 }
