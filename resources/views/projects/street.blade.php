@@ -7,10 +7,10 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Strasse</th>
-                <th>Wohneinheiten</th>
-                <th>Bestand</th>
-                <th>Bearbeitungsdatum</th>
+                <th data-sort="0">Strasse</th>
+                <th data-sort="1">Wohneinheiten</th>
+                <th data-sort="2">Bestand</th>
+                <th data-sort="3">Bearbeitungsdatum</th>
             </tr>
         </thead>
         <tbody>

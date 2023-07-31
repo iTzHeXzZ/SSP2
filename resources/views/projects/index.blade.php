@@ -7,9 +7,9 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Ort</th>
-                <th>Postleitzahl</th>
-                <th>Bearbeitungsdatum</th>
+                <th data-sort="0">Ort</th>
+                <th data-sort="1">Postleitzahl</th>
+                <th data-sort="2">Bearbeitungsdatum</th>
             </tr>
         </thead>
         <tbody>

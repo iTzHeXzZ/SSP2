@@ -3,10 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>VPP SSP</title>
 
     <!-- Fonts -->
@@ -15,6 +13,7 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -43,30 +42,35 @@
                     <ul class="navbar-nav ms-auto">
                         <!-- Authentication Links -->
                         @guest
-                            @if (Route::has('login'))
+{{--                             @if (Route::has('login'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
 
-                            @if (Route::has('register'))
+                           @if (Route::has('register'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
                                 </li>
-                            @endif
+                            @endif --}}
                         @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }}
-                                </a>
 
+                        @if (Auth::user()->hasrole('Admin'))
+                                    <li><a class="nav-link" href="{{ route('users.index') }}">Benutzerverwaltung</a></li>
+                                    <li><a class="nav-link" href="{{ route('roles.index') }}">Rollen</a></li>
+                                    <li><a class="nav-link" href="{{ route('assign.form')}}">Straßenzuordnung</a></li>
+                        @endif                          
+                                    <li class="nav-item dropdown">
+                                            <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                                {{ Auth::user()->name }}
+                                            </a>
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <a class="nav-link" href="{{ route('user.settings') }}">Profil</a>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
-
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                         @csrf
                                     </form>
@@ -84,3 +88,55 @@
     </div>
 </body>
 </html>
+<script>
+    $(document).ready(function () {
+        // Funktion zum Sortieren der Tabelle
+        const sortTable = function (column, descending = false) {
+            const $table = $('table');
+            const $rows = $table.find('tbody tr').toArray();
+
+            $rows.sort(function (a, b) {
+                const valA = parseFloat($(a).find('td:eq(' + column + ')').text().replace(',', ''));
+                const valB = parseFloat($(b).find('td:eq(' + column + ')').text().replace(',', ''));
+
+                if (!isNaN(valA) && !isNaN(valB)) {
+                    return valA - valB;
+                } else {
+                    return valA.toString().localeCompare(valB.toString());
+                }
+            });
+
+            if (descending) {
+                $rows.reverse();
+            }
+
+            $table.find('tbody').empty().append($rows);
+        };
+
+        // Standardmäßig erste Spalte sortieren
+        sortTable(0);
+
+        // Klickereignisse auf Tabellenüberschriften hinzufügen
+        $('th[data-sort]').on('click', function () {
+            const column = $(this).data('sort');
+            const descending = $(this).hasClass('desc');
+
+            sortTable(column, descending);
+
+            // CSS-Klasse 'desc' umkehren, um aufsteigende und absteigende Sortierung anzuzeigen
+            $('th[data-sort]').removeClass('desc');
+            if (descending) {
+                $(this).removeClass('desc');
+            } else {
+                $(this).addClass('desc');
+            }
+        });
+
+        // Pfeilsymbole für sortierte Spalte anzeigen
+        $('th[data-sort]').each(function () {
+            const descending = $(this).hasClass('desc');
+            $(this).append(descending ? '<span>&darr;</span>' : '<span>&uarr;</span>');
+        });
+    });
+</script>
+

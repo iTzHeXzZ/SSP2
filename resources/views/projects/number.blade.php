@@ -7,12 +7,12 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Hausnummer</th>
-                <th>Wohneinheiten</th>
-                <th>Bestand</th>
-                <th>Status</th>
-                <th>Notiz</th>
-                <th>Bearbeitungsdatum</th>
+                <th data-sort="0">Hausnummer</th>
+                <th data-sort="1">Wohneinheiten</th>
+                <th data-sort="2">Bestand</th>
+                <th data-sort="3">Status</th>
+                <th data-sort="4">Notiz</th>
+                <th data-sort="5">Bearbeitungsdatum</th>
             </tr>
         </thead>
         <tbody>

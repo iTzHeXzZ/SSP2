@@ -14,9 +14,7 @@
                         </div>
                     @endif
 
-                   <table>
-                    
-                   </table>
+                    {{ __('You are logged in!') }}
                 </div>
             </div>
         </div>

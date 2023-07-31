@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->string('Ort');
-            $table->string('Postleitzahl');
-            $table->integer('Wohneinheiten');
-            $table->date('Bearbeitungsdatum');
+            $table->string('ort');
+            $table->string('postleitzahl');
+            $table->string('strasse');
+            $table->string('hausnummer');
+            $table->integer('wohneinheiten');
+            $table->integer('bestand');
+            $table->string('status');
+            $table->string('notiz');
             $table->timestamps();
         });
     }
