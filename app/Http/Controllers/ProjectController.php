@@ -24,8 +24,8 @@ class ProjectController extends Controller
         }
         else{
         $projects = $user->projects;
-        }
-        $allProjects = Project::all();*/
+        }*/
+        $allProjects = Project::all();
 
         return view('projects.index', compact('projects', 'allProjects'));
     } 
