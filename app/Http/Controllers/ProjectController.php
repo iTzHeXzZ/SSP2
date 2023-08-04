@@ -18,19 +18,9 @@ class ProjectController extends Controller
         }
             
         $user = Auth::user();
-<<<<<<< HEAD
         
          $projects = Project::all();
         
-=======
-        $projects = Project::all();
-       /* if($user->hasRole('Admin')){
-         $projects = Project::all();
-        }
-        else{
-        $projects = $user->projects;
-        }*/
->>>>>>> 04a8e252d3d4517823a55c45dc8f819a1122cec7
         $allProjects = Project::all();
 
         return view('projects.index', compact('projects', 'allProjects'));
