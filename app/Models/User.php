@@ -48,4 +48,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Project::class);
     }
+
+    public function setEmailAttribute($value)
+    {
+    $this->attributes['email'] = Str::lower($value);
+    }
 }

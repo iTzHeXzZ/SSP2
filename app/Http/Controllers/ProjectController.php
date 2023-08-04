@@ -18,13 +18,9 @@ class ProjectController extends Controller
         }
             
         $user = Auth::user();
-
-        if($user->hasRole('Admin')){
+        
          $projects = Project::all();
-        }
-        else{
-        $projects = $user->projects;
-        }
+        
         $allProjects = Project::all();
 
         return view('projects.index', compact('projects', 'allProjects'));
@@ -97,15 +93,15 @@ class ProjectController extends Controller
 
         $inputValue1 = $request->input('status');
         $inputValue2 = $request->input('notiz');
-        if ($inputValue1 != null) {
+
+        if($inputValue1!==null){
             $projects->status = $request->input('status');
             $projects->save();
         }
-        if($inputValue2 != null){
+        if($inputValue2!==null){
             $projects->notiz = $request->input('notiz');
             $projects->save();
         }
-
 
         return redirect()->back()->with('success', 'Aktualisiert');
     }

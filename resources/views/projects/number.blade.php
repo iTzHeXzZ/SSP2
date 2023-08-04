@@ -2,7 +2,7 @@
 
 
 @section('content')
-<h2>{{$postleitzahl}},{{$ort}},{{ $strasse }} Hausnummer:</h2>
+<h2>{{$postleitzahl}},<a href="{{ route('projects.street', ['ort' => $ort, 'postleitzahl' => $postleitzahl]) }}" style="text-decoration : none">{{ $ort }}</a>,{{ $strasse }} Hausnummer:</h2>
 
     <table class="table">
         <thead>
@@ -46,4 +46,21 @@
             @endforeach
         </tbody>
     </table>
+@endsection
+
+@section('scripts')
+<script>
+// Speichere die aktuelle Scroll-Position, bevor du die Seite verlässt
+window.addEventListener('beforeunload', () => {
+  const scrollPosition = window.scrollY;
+  localStorage.setItem('scrollPosition', scrollPosition);
+});
+
+// Rufe die gespeicherte Scroll-Position ab und scrolle zur Position zurück
+const scrollPosition = localStorage.getItem('scrollPosition');
+if (scrollPosition !== null) {
+  window.scrollTo(0, scrollPosition);
+  localStorage.removeItem('scrollPosition');
+}
+</script>
 @endsection

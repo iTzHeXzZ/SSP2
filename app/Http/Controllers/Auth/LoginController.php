@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request; 
 
 class LoginController extends Controller
 {
@@ -20,6 +22,18 @@ class LoginController extends Controller
     */
 
     use AuthenticatesUsers;
+
+    protected function attemptLogin(Request $request) // Stelle sicher, dass der $request-Parameter den richtigen Typ hat
+    {
+        $credentials = $this->credentials($request);
+
+        // Wandele die E-Mail-Adresse in Kleinbuchstaben um
+        $credentials['email'] = strtolower($credentials['email']);
+
+        return $this->guard()->attempt(
+            $credentials, $request->filled('remember')
+        );
+    }
 
     /**
      * Where to redirect users after login.

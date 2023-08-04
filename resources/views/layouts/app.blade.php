@@ -65,7 +65,7 @@
                                                 {{ Auth::user()->name }}
                                             </a>
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="nav-link" href="{{ route('user.settings') }}">Profil</a>
+                                    <a class="dropdown-item" href="{{ route('user.settings') }}"><strong>Profil</strong></a>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
@@ -84,6 +84,7 @@
 
         <main class="py-4">
             @yield('content')
+            @yield('scripts')
         </main>
     </div>
 </body>

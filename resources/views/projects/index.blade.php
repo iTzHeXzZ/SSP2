@@ -14,7 +14,7 @@
         </thead>
         <tbody>
             @php
-                $uniqueNames = $projects->unique('postleitzahl');
+                $uniqueNames = $projects->unique('ort');
             @endphp
             @foreach ($uniqueNames as $project)
                 <tr>
