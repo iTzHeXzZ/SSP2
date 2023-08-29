@@ -62,20 +62,16 @@
                             }
 
                             @media (max-width: 768px) {
-                                form {
-                                    flex-direction: row; /* Formular-Inhalte in Reihe anordnen */
-                                    flex-wrap: wrap; /* Umbruch, wenn Inhalt breiter als Container */
-                                }
 
                                 textarea {
-                                    width: calc(100% - 10px); /* Breite um 10px verringern */
+                                    width: calc(100% + 40px); 
                                     margin-right: 10px; /* Rechter Abstand zu anderen Spalten */
                                     margin-bottom: 0; /* Unteren Abstand entfernen */
                                     min-height: 150px; /* Größere Mindesthöhe */
                                 }
 
                                 .form-group {
-                                    width: calc(100% - 10px); /* Breite um 10px verringern */
+                                    width: calc(100% + 40px); /* Breite um 10px verringern */
                                     margin-right: 10px; /* Rechter Abstand zu anderen Spalten */
                                     margin-bottom: 10px; /* Unteren Abstand hinzufügen */
                                 }
