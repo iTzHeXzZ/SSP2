@@ -61,10 +61,23 @@
                                 background-color: #0056b3;
                             }
 
-                                /* Media Query für mobile Ansicht */
-                                @media (max-width: 768px) {
+                            @media (max-width: 768px) {
+                                form {
+                                    flex-direction: row; /* Formular-Inhalte in Reihe anordnen */
+                                    flex-wrap: wrap; /* Umbruch, wenn Inhalt breiter als Container */
+                                }
+
                                 textarea {
-                                    width: 100%;
+                                    width: calc(100% - 10px); /* Breite um 10px verringern */
+                                    margin-right: 10px; /* Rechter Abstand zu anderen Spalten */
+                                    margin-bottom: 0; /* Unteren Abstand entfernen */
+                                    min-height: 150px; /* Größere Mindesthöhe */
+                                }
+
+                                .form-group {
+                                    width: calc(100% - 10px); /* Breite um 10px verringern */
+                                    margin-right: 10px; /* Rechter Abstand zu anderen Spalten */
+                                    margin-bottom: 10px; /* Unteren Abstand hinzufügen */
                                 }
                             }
                         </style>
