@@ -20,28 +20,33 @@
                     <td>{{ $project->hausnummer }}</td>
                     <td>
                         <style>
-                            /* Stil für das Formular */
+                            /* Stil für das Formular innerhalb der Zelle */
                             form {
                                 display: flex;
                                 flex-direction: column;
                                 align-items: flex-start;
-                                padding: 15px; /* Abstand zum Inhalt */
-                                background-color: #f5f5f5; /* Angepasste Hintergrundfarbe */
-                                border-radius: 4px;
-                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                             }
-                        
-                            /* Stil für das Select-Feld und das Textarea-Feld */
-                            select,
+                    
+                            /* Stil für das Select-Feld */
+                            select {
+                                padding: 8px;
+                                margin-bottom: 10px;
+                                border: 1px solid #ccc;
+                                border-radius: 4px;
+                                width: 100%;
+                            }
+                    
+                            /* Stil für das Textarea-Feld */
                             textarea {
                                 padding: 8px;
                                 margin-bottom: 10px;
                                 border: 1px solid #ccc;
                                 border-radius: 4px;
                                 width: 100%;
-                                background-color: white; /* Weißer Hintergrund für die Felder */
+                                resize: vertical;
+                                min-height: 100px;
                             }
-                        
+                    
                             /* Stil für den Speichern-Button */
                             .btn-primary {
                                 background-color: #007bff;
@@ -51,22 +56,20 @@
                                 border-radius: 4px;
                                 cursor: pointer;
                             }
-                        
+                    
                             .btn-primary:hover {
                                 background-color: #0056b3;
                             }
-                        
-                            /* Media Query für mobile Ansicht */
+
+                                /* Media Query für mobile Ansicht */
                             @media (max-width: 768px) {
                                 select,
                                 textarea {
-                                    width: 100%;
                                     padding: 10px;
-                                    font-size: 14px;
+                                    font-size: inherit;
                                 }
                             }
                         </style>
-                        
                         
                         <form method="POST" action="{{ route('projects.update', $project->id)}}">
                             @csrf
