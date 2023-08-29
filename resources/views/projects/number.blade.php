@@ -62,18 +62,21 @@
                             }
 
                             @media (max-width: 768px) {
+                                form {
+                                    flex-direction: column; /* Formular-Inhalte in Spalten anordnen */
+                                }
+
+                                select {
+                                    width: 100%; /* Feld auf volle Breite */
+                                }
 
                                 textarea {
-                                    width: calc(100% + 40px); 
-                                    margin-right: 10px; /* Rechter Abstand zu anderen Spalten */
-                                    margin-bottom: 0; /* Unteren Abstand entfernen */
-                                    min-height: 150px; /* Größere Mindesthöhe */
+                                    width: 100%; /* Feld auf volle Breite */
                                 }
 
                                 .form-group {
-                                    width: calc(100% + 40px); /* Breite um 10px verringern */
-                                    margin-right: 10px; /* Rechter Abstand zu anderen Spalten */
-                                    margin-bottom: 10px; /* Unteren Abstand hinzufügen */
+                                    overflow-x: auto; /* Horizontales Scrollen ermöglichen */
+                                    width: 100%; /* Breite auf 100% setzen */
                                 }
                             }
                         </style>
