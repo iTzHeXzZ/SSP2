@@ -67,7 +67,7 @@
                                 textarea {
                                     padding: 10px;
                                     font-size: inherit;
-                                    width: calc(100% + 20px); /* Breite um 20px erhöhen */
+                                    width: calc(100% + 50px); /* Breite um 20px erhöhen */
                                     margin-left: -10px; /* Negative Margin, um zur rechten Seite auszudehnen */
                                     margin-right: -10px;
                                 }
