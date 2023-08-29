@@ -66,6 +66,9 @@ Route::group(['middleware' => 'admin'], function () {
 
     Route::post('remove-street-from-project', [ProjectController::class, 'removeStreetFromProject'])->name('remove.street.from.project');
 
+    Route::get('/termine', [TerminController::class, 'index'])->name('termine.index');
+    Route::get('/termine/create', [TerminController::class, 'create'])->name('termine.create');
+    Route::post('/termine', [TerminController::class, 'store'])->name('termine.store');
 });
 
 

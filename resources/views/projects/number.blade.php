@@ -8,39 +8,76 @@
         <thead>
             <tr>
                 <th data-sort="0">Hausnummer</th>
-                <th data-sort="1">Wohneinheiten</th>
-                <th data-sort="2">Bestand</th>
-                <th data-sort="3">Status</th>
-                <th data-sort="4">Notiz</th>
-                <th data-sort="5">Bearbeitungsdatum</th>
+                <th data-sort="1">Status</th>
+                <th data-sort="2">Wohneinheiten</th>
+                <th data-sort="3">Bestand</th>
+                <th data-sort="4">Bearbeitungsdatum</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($projects as $project)
                 <tr>
                     <td>{{ $project->hausnummer }}</td>
-                    <td>{{ $project->wohneinheiten }}</td>
-                    <td>{{ $project->bestand }} </td>
                     <td>
-                        <form method="POST" action="{{ route('projects.update', $project->id)}}">
-                         @csrf
-                         <select name="status">
-                            @foreach ($statusOptions as $option)
-                                <option value="{{ $option }}" {{ $project->status === $option ? 'selected' : '' }}>
-                                    {{ $option }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="btn btn-primary">Speichern</button>
-                        </form>
-                    </td>
-                    <td>
+                        <style>
+                            /* Stil für das Formular innerhalb der Zelle */
+                            form {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: flex-start;
+                            }
+                    
+                            /* Stil für das Select-Feld */
+                            select {
+                                padding: 8px;
+                                margin-bottom: 10px;
+                                border: 1px solid #ccc;
+                                border-radius: 4px;
+                                width: 100%;
+                            }
+                    
+                            /* Stil für das Textarea-Feld */
+                            textarea {
+                                padding: 8px;
+                                margin-bottom: 10px;
+                                border: 1px solid #ccc;
+                                border-radius: 4px;
+                                width: 100%;
+                                resize: vertical;
+                                min-height: 100px;
+                            }
+                    
+                            /* Stil für den Speichern-Button */
+                            .btn-primary {
+                                background-color: #007bff;
+                                color: white;
+                                padding: 10px 15px;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                            }
+                    
+                            .btn-primary:hover {
+                                background-color: #0056b3;
+                            }
+                        </style>
+                        
                         <form method="POST" action="{{ route('projects.update', $project->id)}}">
                             @csrf
-                            <input type="text" name="notiz" value="{{ $project->notiz }}">
+                            <select name="status">
+                                @foreach ($statusOptions as $option)
+                                    <option value="{{ $option }}" {{ $project->status === $option ? 'selected' : '' }}>
+                                        {{ $option }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <textarea name="notiz">{{ $project->notiz }}</textarea>
                             <button type="submit" class="btn btn-primary">Speichern</button>
                         </form>
-                        </td>
+                    </td>
+                                       
+                    <td>{{ $project->wohneinheiten }}</td>
+                    <td>{{ $project->bestand }} </td>
                     <td>{{ $project->updated_at }}</td>
                 </tr>
             @endforeach

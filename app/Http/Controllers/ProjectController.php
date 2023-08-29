@@ -88,23 +88,20 @@ class ProjectController extends Controller
         return redirect()->route('projects.index');
     }
 
-    public function update(Request $request, $id){
-        $projects = Project::findorfail($id);
-
+    public function update(Request $request, $id) {
+        $project = Project::findOrFail($id);
+    
         $inputValue1 = $request->input('status');
         $inputValue2 = $request->input('notiz');
-
-        if($inputValue1!==null){
-            $projects->status = $request->input('status');
-            $projects->save();
-        }
-        if($inputValue2!==null){
-            $projects->notiz = $request->input('notiz');
-            $projects->save();
-        }
-
+    
+        $project->status = $inputValue1;
+        $project->notiz = $inputValue2;
+        $project->save();
+    
         return redirect()->back()->with('success', 'Aktualisiert');
     }
+    
+    
 
     public function showAssignForm()
     {
@@ -119,26 +116,23 @@ class ProjectController extends Controller
 
     public function assignProjectToUser(Request $request)
     {
-        // Validierung der Eingabe
         $request->validate([
             'project_id' => 'required',
             'user_id' => 'required',
             'street' => 'required',
         ]);
     
-        // Projekt und Benutzer finden
         $project = Project::findOrFail($request->project_id);
         $user = User::findOrFail($request->user_id);
     
-        // Straße für das Projekt finden und zuweisen
         $street = $project->streets()->where('strasse', $request->street)->first();
     
         if ($street) {
-            // Hausnummern für die Straße abrufen
             $hausnummern = Project::where('strasse', $request->street)->pluck('hausnummer')->toArray();
     
-            // Projekt dem Benutzer zuweisen
-            $user->projects()->attach($project, ['hausnummer' => implode(', ', $hausnummern)]);
+            foreach ($hausnummern as $hausnummer) {
+                $user->projects()->attach($project, ['hausnummer' => $hausnummer]);
+            }
         }
     
         return redirect()->route('assign.form')->with('success', 'Projekt und Straße erfolgreich zugewiesen.');
@@ -159,8 +153,6 @@ class ProjectController extends Controller
 
     public function getStreetsForLocationZipcode($ort, $postleitzahl)
     {
-        $ort = $request->input('ort');
-        $postleitzahl = $request->input('postleitzahl');
     
         $streets = Project::where('ort', $ort)
                         ->where('postleitzahl', $postleitzahl)
