@@ -22,8 +22,9 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="street">Straße auswählen:</label>
-                            <select name="street" id="street" class="form-control">
+                            <label for="street">Straßen auswählen:</label>
+                            <select name="streets[]" id="street" class="form-control" multiple>
+                                <!-- Hier werden die Straßenoptionen eingefügt -->
                             </select>
                         </div>
                         <div class="form-group">
@@ -51,11 +52,13 @@
                     @foreach ($allUsers as $user)
                         <li>
                             <strong>{{ $user->name }}</strong>:
-                            <ul>
+                            <button class="toggle-streets-btn" data-toggle-target=".user-streets-list-{{ $user->id }}">
+                                <i class="fas fa-chevron-down"></i> Anzeigen
+                            </button>
+                            <ul class="user-streets-list-{{ $user->id }}" style="display: none;">
                                 @php
-                                    $displayedStreets = []; // Array, um bereits angezeigte Straßen zu verfolgen
+                                    $displayedStreets = [];
                                 @endphp
-            
                                 @foreach ($user->projects as $project)
                                     @if (!in_array($project->strasse, $displayedStreets))
                                         <li>
@@ -68,7 +71,7 @@
                                             </form>
                                         </li>
                                         @php
-                                            $displayedStreets[] = $project->strasse; // Straße zur Liste hinzufügen
+                                            $displayedStreets[] = $project->strasse;
                                         @endphp
                                     @endif
                                 @endforeach
@@ -83,16 +86,21 @@
 @endsection
 
 @section('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Font Awesome-Icon-Set -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const locationZipcodeSelect = document.getElementById('location_zipcode');
-        const streetSelect = document.getElementById('street');
+    $(document).ready(function() {
+        const locationZipcodeSelect = $('#location_zipcode');
+        const streetSelect = $('#street');
     
-        locationZipcodeSelect.addEventListener('change', function() {
+        locationZipcodeSelect.change(function() {
             // Lösche alle vorherigen Optionen aus dem Straßen-Dropdown
-            streetSelect.innerHTML = '';
+            streetSelect.empty();
     
-            const selectedLocationZipcode = this.value;
+            const selectedLocationZipcode = $(this).val();
             const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
     
             fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
@@ -104,7 +112,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Objekt zur Gruppierung von Straßen nach Namen
                 const groupedStreets = {};
     
                 data.forEach(street => {
@@ -114,17 +121,37 @@
                     groupedStreets[street.strasse].push(street.hausnummer);
                 });
     
-                // Neue Straßenoptionen hinzufügen
-                Object.keys(groupedStreets).forEach(strasse => {
-                    const option = document.createElement('option');
-                    option.value = strasse;
-                    option.textContent = strasse;
-                    streetSelect.appendChild(option);
+                $.each(groupedStreets, function(strasse, hausnummern) {
+                    streetSelect.append($('<option>', {
+                        value: strasse,
+                        text: strasse
+                    }));
+                });
+    
+                streetSelect.multiselect({
+                    enableFiltering: true,
+                    maxHeight: 300,
                 });
             })
             .catch(error => console.error('Error:', error));
         });
+
+        // Toggle-Funktion für die Straßenliste
+        $('.toggle-streets-btn').click(function() {
+            const targetSelector = $(this).data('toggle-target');
+            $(targetSelector).toggle();
+            const icon = $(this).find('i');
+            if ($(targetSelector).is(':visible')) {
+                icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                $(this).text('Verbergen');
+            } else {
+                icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                $(this).text('Anzeigen');
+            }
+        });
     });
-    </script>
-    
+</script>
 @endsection
+
+
+
