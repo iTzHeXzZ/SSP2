@@ -52,70 +52,79 @@
                         <li>
                             <strong>{{ $user->name }}</strong>:
                             <ul>
+                                @php
+                                    $displayedStreets = []; // Array, um bereits angezeigte Straßen zu verfolgen
+                                @endphp
+            
                                 @foreach ($user->projects as $project)
-                                    <li>
-                                        {{ $project->ort }}, {{ $project->strasse }}
-                                        <form action="{{ route('remove.street.from.project') }}" method="post" style="display: inline-block;">
-                                            @csrf
-                                            <input type="hidden" name="user_id" value="{{ $user->id }}">
-                                            <input type="hidden" name="project_id" value="{{ $project->id }}">
-                                            <button type="submit" class="btn btn-danger btn-sm">Entfernen</button>
-                                        </form>
-                                    </li>
+                                    @if (!in_array($project->strasse, $displayedStreets))
+                                        <li>
+                                            {{ $project->ort }}, {{ $project->strasse }}
+                                            <form action="{{ route('remove.street.from.project') }}" method="post" style="display: inline-block;">
+                                                @csrf
+                                                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                                <input type="hidden" name="strasse" value="{{ $project->strasse }}">
+                                                <button type="submit" class="btn btn-danger btn-sm">Entfernen</button>
+                                            </form>
+                                        </li>
+                                        @php
+                                            $displayedStreets[] = $project->strasse; // Straße zur Liste hinzufügen
+                                        @endphp
+                                    @endif
                                 @endforeach
                             </ul>
                         </li>
                     @endforeach
                 </ul>
-            </div>
+            </div>            
         </div>
     </div>
-</div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const locationZipcodeSelect = document.getElementById('location_zipcode');
-    const streetSelect = document.getElementById('street');
-
-    locationZipcodeSelect.addEventListener('change', function() {
-        const selectedLocationZipcode = this.value;
-        const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
-        
-        fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
+    document.addEventListener('DOMContentLoaded', function() {
+        const locationZipcodeSelect = document.getElementById('location_zipcode');
+        const streetSelect = document.getElementById('street');
+    
+        locationZipcodeSelect.addEventListener('change', function() {
+            // Lösche alle vorherigen Optionen aus dem Straßen-Dropdown
             streetSelect.innerHTML = '';
-
-            // Objekt zur Gruppierung von Straßen nach Namen
-            const groupedStreets = {};
-
-            data.forEach(street => {
-                if (!groupedStreets[street.strasse]) {
-                    groupedStreets[street.strasse] = [];
-                }
-                groupedStreets[street.strasse].push(street.hausnummer);
-            });
-
-            // Neue Straßenoptionen hinzufügen
-            Object.keys(groupedStreets).forEach(strasse => {
-                const option = document.createElement('option');
-                option.value = strasse;
-                option.textContent = strasse;
-                streetSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error:', error));
+    
+            const selectedLocationZipcode = this.value;
+            const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
+    
+            fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Objekt zur Gruppierung von Straßen nach Namen
+                const groupedStreets = {};
+    
+                data.forEach(street => {
+                    if (!groupedStreets[street.strasse]) {
+                        groupedStreets[street.strasse] = [];
+                    }
+                    groupedStreets[street.strasse].push(street.hausnummer);
+                });
+    
+                // Neue Straßenoptionen hinzufügen
+                Object.keys(groupedStreets).forEach(strasse => {
+                    const option = document.createElement('option');
+                    option.value = strasse;
+                    option.textContent = strasse;
+                    streetSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        });
     });
-});
-</script>
+    </script>
+    
 @endsection
-

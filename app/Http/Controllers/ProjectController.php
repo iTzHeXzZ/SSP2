@@ -19,11 +19,13 @@ class ProjectController extends Controller
             
         $user = Auth::user();
         
-         $projects = Project::all();
-        
-        $allProjects = Project::all();
+        if ($user->hasRole('Admin')) {
+            $projects = Project::all();
+        } else {
+            $projects = $user->projects;
+        }
 
-        return view('projects.index', compact('projects', 'allProjects'));
+        return view('projects.index', compact('projects','user'));
     } 
 
     public function street($ort, $postleitzahl){
@@ -33,7 +35,7 @@ class ProjectController extends Controller
         $projects = Project::where('ort', $ort)
         ->where('postleitzahl', $postleitzahl)
         ->get();
-
+        $user = Auth::user();
         $gwohneinheiten = new Collection();
         $gbestand = new Collection();
 
@@ -49,7 +51,7 @@ class ProjectController extends Controller
             }
         }
 
-        return view('projects.street', compact('projects','ort', 'postleitzahl','gwohneinheiten', 'gbestand'));
+        return view('projects.street', compact('projects','ort', 'postleitzahl','gwohneinheiten', 'gbestand','user'));
 
     } 
 
@@ -122,21 +124,37 @@ class ProjectController extends Controller
             'street' => 'required',
         ]);
     
-        $project = Project::findOrFail($request->project_id);
+        $selectedValue = $request->input('project_id');
+        list($projectId) = explode('_', $selectedValue);
+        $project = Project::findOrFail($projectId);
         $user = User::findOrFail($request->user_id);
     
-        $street = $project->streets()->where('strasse', $request->street)->first();
+        if ($user->projects->contains($project) && $user->streets->contains('strasse', $request->street)) {
+            return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
+        }
     
-        if ($street) {
-            $hausnummern = Project::where('strasse', $request->street)->pluck('hausnummer')->toArray();
+        $street = Project::where('strasse', $request->street)->first();
     
-            foreach ($hausnummern as $hausnummer) {
-                $user->projects()->attach($project, ['hausnummer' => $hausnummer]);
+        if (!$street) {
+            return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
+        }
+    
+        $otherProjects = Project::where('strasse', $request->street)
+            ->where('id', '!=', $project->id)
+            ->get();
+    
+        //$user->projects()->attach($project);
+    
+        if ($otherProjects->isNotEmpty()) {
+            foreach ($otherProjects as $otherProject) {
+                $user->projects()->attach($otherProject);
             }
         }
     
         return redirect()->route('assign.form')->with('success', 'Projekt und Straße erfolgreich zugewiesen.');
     }
+    
+    
 
 
     public function removeStreetFromProject(Request $request)
