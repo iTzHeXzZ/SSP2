@@ -13,6 +13,7 @@
                         <div class="form-group">
                             <label for="location_zipcode">Projekt auswählen:</label>
                             <select name="project_id" id="location_zipcode" class="form-control">
+                                <option value="" disabled selected>Bitte wählen Sie ein Projekt</option>
                                 @foreach ($projectsByLocationAndZipcode as $group)
                                     @php
                                         $firstProject = $group->first();

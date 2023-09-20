@@ -130,9 +130,9 @@ class ProjectController extends Controller
         $user = User::findOrFail($request->user_id);
     
         foreach ($request->streets as $streetName) {
-            if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
-                return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
-            }
+            // if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
+            //     return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
+            // }
     
             $street = Project::where('strasse', $streetName)->first();
     
