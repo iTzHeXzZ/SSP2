@@ -90,8 +90,10 @@
                                     </option>
                                 @endforeach
                             </select>
+                            @if (!auth()->user()->hasRole('Viewer'))
                             <textarea name="notiz">{{ $project->notiz }}</textarea>
                             <button type="submit" class="btn btn-primary">Speichern</button>
+                            @endif
                         </form>
                     </td>
                                        

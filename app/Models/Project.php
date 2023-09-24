@@ -17,8 +17,31 @@ class Project extends Model
 
     public function strasse()
     {
-        // Annahme: Die Straßen sind in der Tabelle "projects" gespeichert,
-        // und es gibt eine Spalte namens "strasse" in der Tabelle "projects".
         return $this->hasMany(Project::class, 'strasse');
+    }
+
+    public function countUnbesucht()
+    {
+        return $this->where('status', 'Unbesucht')->count();
+    }
+
+    public function countOverleger()
+    {
+        return $this->where('status', 'Überleger')->count();
+    }
+
+    public function countVertrag()
+    {
+        return $this->where('status', 'Vertrag')->count();
+    }
+
+    public function countKarte()
+    {
+        return $this->where('status', 'Karte')->count();
+    }
+
+    public function countKeinInteresse()
+    {
+        return $this->where('status', 'Kein Interesse')->count();
     }
 }

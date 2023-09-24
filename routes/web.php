@@ -66,6 +66,12 @@ Route::group(['middleware' => 'admin'], function () {
 
     Route::post('remove-street-from-project', [ProjectController::class, 'removeStreetFromProject'])->name('remove.street.from.project');
 
+    Route::get('/status', 'App\Http\Controllers\StatusController@index')->name('status.index');
+
+    Route::post('/status', 'App\Http\Controllers\StatusController@store')->name('status.store');
+
+    Route::get('/status/{user_id}/{location}', 'App\Http\Controllers\StatusController@showLocation')->name('status.showLocation');
+
     Route::get('/termine', [TerminController::class, 'index'])->name('termine.index');
     Route::get('/termine/create', [TerminController::class, 'create'])->name('termine.create');
     Route::post('/termine', [TerminController::class, 'store'])->name('termine.store');

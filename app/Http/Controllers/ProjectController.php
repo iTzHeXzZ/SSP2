@@ -16,29 +16,51 @@ class ProjectController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-            
+    
         $user = Auth::user();
-        
-        if ($user->hasRole('Admin')) {
+    
+        // Alle Projekte abrufen, die dem Benutzer zugeordnet sind (abhängig von seiner Rolle)
+        if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
             $projects = Project::all();
         } else {
             $projects = $user->projects;
         }
-
-        return view('projects.index', compact('projects','user'));
-    } 
+    
+        // Gruppieren der Projekte nach Ort und Postleitzahl und Berechnungen für jeden Ort/Postleitzahl durchführen
+        $groupedProjects = $projects->groupBy(['ort', 'postleitzahl']);
+        $counts = [];
+    
+        foreach ($groupedProjects as $key => $group) {
+            $counts[$key]['countUnbesucht'] = $group->where('status', 'Unbesucht')->count();
+            $counts[$key]['countVertrag'] = $group->where('status', 'Vertrag')->count();
+            $counts[$key]['countOverleger'] = $group->where('status', 'Überleger')->count();
+            $counts[$key]['countKarte'] = $group->where('status', 'Karte')->count();
+            $counts[$key]['countKeinInteresse'] = $group->where('status', 'Kein Interesse')->count();
+        }
+    
+        return view('projects.index', compact('projects','counts','user'));
+    }
+    
+    
 
     public function street($ort, $postleitzahl){
         if (!Auth::check()) {
             return redirect()->route('login');
         }
+    
         $projects = Project::where('ort', $ort)
-        ->where('postleitzahl', $postleitzahl)
-        ->get();
+            ->where('postleitzahl', $postleitzahl)
+            ->get();
+    
         $user = Auth::user();
         $gwohneinheiten = new Collection();
         $gbestand = new Collection();
-
+    
+        $countOverleger = [];
+        $countUnbesucht = [];
+        $countVertrag = [];
+        $countKeinInteresse = [];
+    
         foreach ($projects as $project) {
             $existingproject = $gwohneinheiten->firstWhere('strasse', $project->strasse);
     
@@ -49,11 +71,49 @@ class ProjectController extends Controller
                 $gwohneinheiten->push($project);
                 $gbestand->push($project);
             }
+            $strasse = $project->strasse;
+    
+            if (!isset($countOverleger[$strasse])) {
+                $countOverleger[$strasse] = 0;
+            }
+
+            if (!isset($countKarte[$strasse])) {
+                $countKarte[$strasse] = 0;
+            }
+    
+            if (!isset($countUnbesucht[$strasse])) {
+                $countUnbesucht[$strasse] = 0;
+            }
+    
+            if (!isset($countVertrag[$strasse])) {
+                $countVertrag[$strasse] = 0;
+            }
+    
+            if (!isset($countKeinInteresse[$strasse])) {
+                $countKeinInteresse[$strasse] = 0;
+            }
+    
+            if ($project->status === 'Überleger') {
+                $countOverleger[$strasse]++;
+            } elseif ($project->status === 'Unbesucht') {
+                $countUnbesucht[$strasse]++;
+            } elseif ($project->status === 'Vertrag') {
+                $countVertrag[$strasse]++;
+            } elseif ($project->status === 'Kein Interesse') {
+                $countKeinInteresse[$strasse]++;
+            } elseif ($project->status === 'Karte') {
+                $countKarte[$strasse]++;
+            }
         }
-
-        return view('projects.street', compact('projects','ort', 'postleitzahl','gwohneinheiten', 'gbestand','user'));
-
-    } 
+    
+        return view('projects.street', compact(
+            'projects', 'ort', 'postleitzahl', 'user',
+            'gwohneinheiten', 'gbestand',
+            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse','countKarte'
+        ));
+    }
+    
+    
 
     public function number($ort, $postleitzahl, $strasse){
         if (!Auth::check()) {
