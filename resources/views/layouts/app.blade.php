@@ -6,6 +6,22 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>VPP SSP</title>
+    <style>
+        /* Fügen Sie hier Ihren CSS-Stil für die Überschriften hinzu */
+        th[data-sort] {
+            cursor: pointer;
+            color: #007bff; /* Ändern Sie die Farbe nach Ihren Wünschen */
+            text-decoration: underline;
+        }
+
+        th[data-sort].desc::after {
+            content: ' ↓'; /* Pfeilsymbol nach unten für absteigende Sortierung */
+        }
+
+        th[data-sort]:not(.desc)::after {
+            content: ' ↑'; /* Pfeilsymbol nach oben für aufsteigende Sortierung */
+        }
+    </style>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.bunny.net">
@@ -150,11 +166,6 @@
             }
         });
 
-        // Pfeilsymbole für sortierte Spalte anzeigen
-        $('th[data-sort]').each(function () {
-            const descending = $(this).hasClass('desc');
-            $(this).append(descending ? '<span>&darr;</span>' : '<span>&uarr;</span>');
-        });
     });
                 
 </script>

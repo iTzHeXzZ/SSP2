@@ -48,10 +48,6 @@ class ProjectController extends Controller
             return redirect()->route('login');
         }
     
-        $projects = Project::where('ort', $ort)
-            ->where('postleitzahl', $postleitzahl)
-            ->get();
-    
         $user = Auth::user();
         $gwohneinheiten = new Collection();
         $gbestand = new Collection();
@@ -60,6 +56,15 @@ class ProjectController extends Controller
         $countUnbesucht = [];
         $countVertrag = [];
         $countKeinInteresse = [];
+        $countKarte = [];
+
+        if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
+            $projects = Project::where('ort', $ort)
+            ->where('postleitzahl', $postleitzahl)
+            ->get();
+        } else {
+            $projects = $user->projects;
+        }
     
         foreach ($projects as $project) {
             $existingproject = $gwohneinheiten->firstWhere('strasse', $project->strasse);
@@ -190,9 +195,9 @@ class ProjectController extends Controller
         $user = User::findOrFail($request->user_id);
     
         foreach ($request->streets as $streetName) {
-            // if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
-            //     return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
-            // }
+             if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
+                return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
+             }
     
             $street = Project::where('strasse', $streetName)->first();
     
