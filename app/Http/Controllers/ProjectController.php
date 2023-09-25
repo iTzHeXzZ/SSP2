@@ -63,7 +63,7 @@ class ProjectController extends Controller
             ->where('postleitzahl', $postleitzahl)
             ->get();
         } else {
-            $projects = $user->projects;
+            $projects = $user->projects()->where('ort', $ort)->where('postleitzahl', $postleitzahl)->get();
         }
     
         foreach ($projects as $project) {
