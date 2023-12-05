@@ -193,32 +193,41 @@ class ProjectController extends Controller
         list($projectId) = explode('_', $selectedValue);
         $project = Project::findOrFail($projectId);
         $user = User::findOrFail($request->user_id);
+
+        $selectedOrt = $project->ort;
+        $selectedPostleitzahl = $project->postleitzahl;
     
         foreach ($request->streets as $streetName) {
-             if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
+            // Überprüfe, ob die Kombination aus Straße, Ort und Postleitzahl bereits existiert
+            $existingAssignment = $user->projects()
+                ->where('strasse', $streetName)
+                ->where('ort', $selectedOrt)
+                ->where('postleitzahl', $selectedPostleitzahl)
+                ->exists();
+        
+            if ($existingAssignment) {
                 return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
-             }
-    
-            $street = Project::where('strasse', $streetName)->first();
-    
+            }
+        
+            // Wenn die Kombination nicht existiert, füge den Benutzer zum Projekt hinzu
+            $street = Project::where('strasse', $streetName)
+                ->where('ort', $selectedOrt)
+                ->where('postleitzahl', $selectedPostleitzahl)
+                ->first();
+        
             if (!$street) {
                 return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
             }
-    
-            $otherProjects = Project::where('strasse', $streetName)
-                ->where('id', '!=', $project->id)
-                ->get();
-
-    
-            if ($otherProjects->isNotEmpty()) {
-                foreach ($otherProjects as $otherProject) {
-                    $user->projects()->attach($otherProject);
-                }
-            }
+        
+            // Füge den Benutzer zum Projekt hinzu
+            $user->projects()->attach($street);
         }
+        
+        
     
         return redirect()->route('assign.form')->with('success', 'Projekt und Straßen erfolgreich zugewiesen.');
     }
+    
     
     
     
