@@ -18,7 +18,9 @@
                                     @php
                                         $firstProject = $group->first();
                                     @endphp
-                                    <option value="{{ $firstProject->id }}_{{ $firstProject->ort }}_{{ $firstProject->postleitzahl }}">{{ $firstProject->ort }}, {{ $firstProject->postleitzahl }}</option>
+                                        <option value="{{ $firstProject->id }}_{{ $firstProject->ort }}_{{ $firstProject->postleitzahl }}" {{ old('project_id') == $firstProject->id ? 'selected' : '' }}>
+                                                        {{ $firstProject->ort }}, {{ $firstProject->postleitzahl }}
+                                        </option>
                                 @endforeach
                             </select>
                         </div>
@@ -36,6 +38,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        <input type="hidden" name="project_id" id="project_id" value="{{ old('project_id') }}">
                         <button type="submit" class="btn btn-primary">Projekt und Straße zuweisen</button>
                     </form>
                 </div>
@@ -93,64 +96,68 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css">
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Font Awesome-Icon-Set -->
 <script>
-    $(document).ready(function() {
-        const locationZipcodeSelect = $('#location_zipcode');
-        const streetSelect = $('#street');
-    
-        locationZipcodeSelect.change(function() {
-            // Lösche alle vorherigen Optionen aus dem Straßen-Dropdown
-            streetSelect.empty();
-    
-            const selectedLocationZipcode = $(this).val();
-            const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
-    
-            fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                const groupedStreets = {};
-    
-                data.forEach(street => {
-                    if (!groupedStreets[street.strasse]) {
-                        groupedStreets[street.strasse] = [];
-                    }
-                    groupedStreets[street.strasse].push(street.hausnummer);
-                });
-    
-                $.each(groupedStreets, function(strasse, hausnummern) {
-                    streetSelect.append($('<option>', {
-                        value: strasse,
-                        text: strasse
-                    }));
-                });
-    
-                streetSelect.multiselect({
-                    enableFiltering: true,
-                    maxHeight: 300,
-                });
-            })
-            .catch(error => console.error('Error:', error));
-        });
+   $(document).ready(function() {
+    const locationZipcodeSelect = $('#location_zipcode');
+    const streetSelect = $('#street');
+    const projectIdInput = $('#project_id'); // Hier die ID des Input-Felds für project_id
 
-        // Toggle-Funktion für die Straßenliste
-        $('.toggle-streets-btn').click(function() {
-            const targetSelector = $(this).data('toggle-target');
-            $(targetSelector).toggle();
-            const icon = $(this).find('i');
-            if ($(targetSelector).is(':visible')) {
-                icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
-                $(this).text('Verbergen');
-            } else {
-                icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
-                $(this).text('Anzeigen');
-            }
-        });
+    locationZipcodeSelect.change(function() {
+        // Lösche alle vorherigen Optionen aus dem Straßen-Dropdown
+        streetSelect.empty();
+
+        const selectedLocationZipcode = $(this).val();
+        const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
+        projectIdInput.val(projectId);
+        console.log('Projekt-ID:', projectId);
+
+        fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            const groupedStreets = {};
+
+            data.forEach(street => {
+                if (!groupedStreets[street.strasse]) {
+                    groupedStreets[street.strasse] = [];
+                }
+                groupedStreets[street.strasse].push(street.hausnummer);
+            });
+
+            $.each(groupedStreets, function(strasse, hausnummern) {
+                streetSelect.append($('<option>', {
+                    value: strasse,
+                    text: strasse
+                }));
+            });
+
+            streetSelect.multiselect({
+                enableFiltering: true,
+                maxHeight: 300,
+            });
+        })
+        .catch(error => console.error('Error:', error));
     });
+
+    // Toggle-Funktion für die Straßenliste
+    $('.toggle-streets-btn').click(function() {
+        const targetSelector = $(this).data('toggle-target');
+        $(targetSelector).toggle();
+        const icon = $(this).find('i');
+        if ($(targetSelector).is(':visible')) {
+            icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            $(this).text('Verbergen');
+        } else {
+            icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            $(this).text('Anzeigen');
+        }
+    });
+});
+
 </script>
 @endsection
 
