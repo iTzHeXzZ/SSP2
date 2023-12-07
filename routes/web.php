@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PdfController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -35,13 +36,21 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
 
-    Route::post('/projects/{id}', [ProjectController::class, 'update'])->name('projects.update');
+    #Route::post('/projects/{id}', [ProjectController::class, 'update'])->name('projects.update');
+    Route::post('/projects/update/{id}', [ProjectController::class, 'update'])->name('projects.update');
+
+
 
     #Route::get('/projects/street', [ProjectController::class, 'street'])->name('projects.street');
     Route::get('/projects/{ort}/{postleitzahl}/street', [ProjectController::class, 'street'])->name('projects.street');
 
     Route::get('/projects/{ort}/{postleitzahl}/{strasse}/number', [ProjectController::class, 'number'])->name('projects.number');
     #Route::get('/projects/number', [ProjectController::class, 'number'])->name('projects.number');
+
+    Route::get('/pdf/showForm', [PdfController::class, 'showForm'])->name('pdf.showForm');
+    Route::post('/pdf/fill', [PdfController::class, 'fillPdfForm'])->name('pdf.fill');
+    
+
 
 
 });

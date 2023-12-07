@@ -156,19 +156,22 @@ class ProjectController extends Controller
     }
 
     public function update(Request $request, $id) {
-        $project = Project::findOrFail($id);
+        try {
+            // Der bestehende Code für die Aktualisierung der Notiz bleibt unverändert
+            $project = Project::findOrFail($id);
     
-        $inputValue1 = $request->input('status');
-        $inputValue2 = $request->input('notiz');
+            $inputValue1 = $request->input('status');
+            $inputValue2 = $request->input('notiz');
     
-        $project->status = $inputValue1;
-        $project->notiz = $inputValue2;
-        $project->save();
+            $project->status = $inputValue1;
+            $project->notiz = $inputValue2;
+            $project->save();
     
-        return redirect()->back()->with('success', 'Aktualisiert');
+            return response()->json(['success' => true, 'message' => 'Aktualisiert']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Fehler beim Speichern: ' . $e->getMessage()]);
+        }
     }
-    
-    
 
     public function showAssignForm()
     {
