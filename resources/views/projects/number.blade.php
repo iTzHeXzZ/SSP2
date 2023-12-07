@@ -94,7 +94,7 @@
                                 <div style="display: flex; align-items: center;">
                                     <button type="submit" class="btn btn-primary" onclick="submitFormViaAjax(this.form)">Speichern</button>
                                     <a href="#" class="btn" onclick="selectAndSave('Karte', '{{ $ort }}', '{{ $project->hausnummer }}')" style="display: inline-block; margin-left: 5px; vertical-align: middle;">
-                                        <img src="{{ asset('images/visitenkarte.png') }}" alt="Visitenkarte Symbol" style="width: 35px; height: 30px;">
+                                        <img src="/Images/visitenkarte.png" alt="Visitenkarte Symbol" style="width: 35px; height: 30px;">
                                     </a>                                    
                                 </div>                                                                             
                             @endif
@@ -112,6 +112,7 @@
 @section('scripts')
 <script>
 function submitFormViaAjax(form) {
+    event.preventDefault();
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
     // Setzen des CSRF-Tokens für alle AJAX-Anfragen
@@ -123,10 +124,9 @@ function submitFormViaAjax(form) {
     // Extrahiere die Projekt-ID aus dem Formular-ID-Attribut
     const projectId = form.id.split('_')[1];
 
-    // Absenden des Formulars mit AJAX
+
     axios.post(`/projects/update/${projectId}`, formData)
         .then(response => {
-            // Erfolgreiche Antwort verarbeiten, falls nötig
             console.log(response.data);
         })
         .catch(error => {
@@ -134,7 +134,7 @@ function submitFormViaAjax(form) {
             console.error(error);
         })
         .finally(() => {
-            // Hier kannst du zusätzlichen Code ausführen, unabhängig vom Erfolg oder Fehler
+            restoreScrollPosition();
         });
 }
 
@@ -164,7 +164,7 @@ function selectAndSave(status, ort, hausnummer) {
                 // Hier kannst du bei Bedarf weitere Aktionen ausführen
             })
             .finally(() => {
-                // Hier kannst du zusätzlichen Code ausführen, unabhängig vom Erfolg oder Fehler
+                restoreScrollPosition();
             });
     } else {
         console.error('Formular nicht gefunden');
@@ -172,20 +172,31 @@ function selectAndSave(status, ort, hausnummer) {
 }
 
 
+function restoreScrollPosition() {
+    console.log('restoreScrollPosition called');
+    
+    // Speichere die aktuelle Scroll-Position, bevor du die Seite verlässt
+    const scrollPosition = window.scrollY;
+    console.log('Scroll Position vor dem Speichern:', scrollPosition);
+    
+    localStorage.setItem('scrollPosition', scrollPosition);
 
+    // Rufe die gespeicherte Scroll-Position ab und scrolle zur Position zurück
+    const storedScrollPosition = localStorage.getItem('scrollPosition');
+    console.log('Gespeicherte Scroll Position:', storedScrollPosition);
 
-// Speichere die aktuelle Scroll-Position, bevor du die Seite verlässt
-window.addEventListener('beforeunload', () => {
-  const scrollPosition = window.scrollY;
-  localStorage.setItem('scrollPosition', scrollPosition);
+    if (storedScrollPosition !== null) {
+        window.scrollTo(0, storedScrollPosition);
+        localStorage.removeItem('scrollPosition');
+    }
+}
+
+// Rufe die restoreScrollPosition-Funktion direkt nach dem Laden der Seite auf
+document.addEventListener('DOMContentLoaded', () => {
+    restoreScrollPosition();
 });
 
-// Rufe die gespeicherte Scroll-Position ab und scrolle zur Position zurück
-const scrollPosition = localStorage.getItem('scrollPosition');
-if (scrollPosition !== null) {
-  window.scrollTo(0, scrollPosition);
-  localStorage.removeItem('scrollPosition');
-}
+
 
 function handleVertragSelect(selectElement, ort, hausnummer) {
     var selectedValue = selectElement.value;
