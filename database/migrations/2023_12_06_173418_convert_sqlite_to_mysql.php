@@ -38,7 +38,7 @@ return new class extends Migration
             $table->integer('wohneinheiten');
             $table->integer('bestand');
             $table->string('status');
-            $table->string('notiz');
+            $table->string('notiz')->nullable();
             $table->timestamps();
         });
         Schema::create('password_reset_tokens', function (Blueprint $table) {
