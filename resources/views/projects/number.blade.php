@@ -94,7 +94,7 @@
                                 <div style="display: flex; align-items: center;">
                                     <button type="submit" class="btn btn-primary" onclick="submitFormViaAjax(this.form)">Speichern</button>
                                     <a href="#" class="btn" onclick="selectAndSave('Karte', '{{ $ort }}', '{{ $project->hausnummer }}')" style="display: inline-block; margin-left: 5px; vertical-align: middle;">
-                                        <img src="public/images/visitenkarte.png" alt="Visitenkarte Symbol" style="width: 35px; height: 30px;">
+                                        <img src="{{ asset('images/visitenkarte.png') }}" alt="Visitenkarte Symbol" style="width: 35px; height: 30px;">
                                     </a>                                    
                                 </div>                                                                             
                             @endif
