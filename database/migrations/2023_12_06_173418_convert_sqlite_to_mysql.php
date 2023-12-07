@@ -14,6 +14,8 @@ return new class extends Migration
      */
     public function up()
     {
+        $sqlitePath = database_path('database.sqlite');
+        config(['database.connections.sqlite.database' => $sqlitePath]);
 
         try {
             // Versuche, eine Verbindung zur Datenbank herzustellen
