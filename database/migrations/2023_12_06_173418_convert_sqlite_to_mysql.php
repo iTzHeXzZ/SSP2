@@ -208,6 +208,7 @@ return new class extends Migration
                 // Beispiel: Kopiere Daten von SQLite-Tabelle zu MySQL-Tabelle
                 $sqliteDataN = DB::connection('sqlite')->table('projects')->get();
                 foreach ($sqliteDataN as $record) {
+                    $record->created_at = now();
                     DB::connection('mysql')->table('projects')->insert((array) $record);
                 }
                 $sqliteDataN2= DB::connection('sqlite')->table('password_reset_tokens')->get();
