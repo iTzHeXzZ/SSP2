@@ -64,19 +64,6 @@ return new class extends Migration
             $table->text('detail');
             $table->timestamps();
         });
-        Schema::create('events', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger(column:'user_id');
-            $table->string(column:'start');
-            $table->string(column:'end');
-            $table->integer(column:'status')->default(value: 0)->nullable();
-            $table->integer(column:'is_all_day')->default(value: 0)->nullable();
-            $table->string(column:'title');
-            $table->text(column:'description');
-            $table->string(column:'event_id')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
 
         $tableNames = config('permission.table_names');
         $columnNames = config('permission.column_names');
@@ -215,11 +202,6 @@ return new class extends Migration
         Schema::table('project_user', function (Blueprint $table) {
             $table->string('hausnummer')->nullable();
         });
-        Schema::table('users', function (Blueprint $table) {
-            $table->text(column: "gcalendar_access_token")->nullable();
-            $table->text(column: "gcalendar_refresh_token")->nullable();
-            $table->text(column: "gcalendar_user_account_info")->nullable();
-        });
 
                 // Beispiel: Kopiere Daten von SQLite-Tabelle zu MySQL-Tabelle
                 $sqliteDataN = DB::connection('sqlite')->table('projects')->get();
@@ -241,10 +223,6 @@ return new class extends Migration
                 $sqliteDataN5= DB::connection('sqlite')->table('products')->get();
                 foreach ($sqliteDataN5 as $record) {
                     DB::connection('mysql')->table('products')->insert((array) $record);
-                }
-                $sqliteDataN6= DB::connection('sqlite')->table('events')->get();
-                foreach ($sqliteDataN6 as $record) {
-                    DB::connection('mysql')->table('events')->insert((array) $record);
                 }
                 $sqliteDataN7= DB::connection('sqlite')->table('users')->get();
                 foreach ($sqliteDataN7 as $record) {
