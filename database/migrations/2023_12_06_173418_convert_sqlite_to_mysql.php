@@ -38,7 +38,7 @@ return new class extends Migration
             $table->integer('wohneinheiten');
             $table->integer('bestand');
             $table->string('status');
-            $table->string('notiz')->nullable();
+            $table->string('notiz', 255)->nullable();
             $table->timestamps();
         });
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -212,6 +212,7 @@ return new class extends Migration
                     if ($record->updated_at == '1.1.2000') {
                         $record->updated_at = now();
                     }
+                    $record->notiz = substr($record->notiz, 0, 255);
                     DB::connection('mysql')->table('projects')->insert((array) $record);
                 }
                 $sqliteDataN2= DB::connection('sqlite')->table('password_reset_tokens')->get();
