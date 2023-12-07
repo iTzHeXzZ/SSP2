@@ -209,6 +209,9 @@ return new class extends Migration
                 $sqliteDataN = DB::connection('sqlite')->table('projects')->get();
                 foreach ($sqliteDataN as $record) {
                     $record->created_at = now();
+                    if ($record->updated_at == '1.1.2000') {
+                        $record->updated_at = now();
+                    }
                     DB::connection('mysql')->table('projects')->insert((array) $record);
                 }
                 $sqliteDataN2= DB::connection('sqlite')->table('password_reset_tokens')->get();
