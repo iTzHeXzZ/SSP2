@@ -75,7 +75,6 @@ return new class extends Migration
             $table->string(column:'event_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign(columns: 'user_id')->references(columns:'id')->on(table:'user');
         });
 
         $tableNames = config('permission.table_names');
