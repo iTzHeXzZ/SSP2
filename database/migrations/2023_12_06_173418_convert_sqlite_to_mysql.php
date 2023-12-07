@@ -212,8 +212,11 @@ return new class extends Migration
                     if ($record->updated_at == '1.1.2000') {
                         $record->updated_at = now();
                     }
-                    if ($record->datum_feld == '7.10.2023') {
-                        $record->datum_feld = now();
+                    if ($record->updated_at == '7.10.2023') {
+                        $record->updated_at = now();
+                    }
+                    if ($record->updated_at == '05.06.23') {
+                        $record->updated_at = now();
                     }
                     $record->notiz = substr($record->notiz, 0, 255);
                     DB::connection('mysql')->table('projects')->insert((array) $record);
