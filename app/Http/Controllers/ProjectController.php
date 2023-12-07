@@ -181,51 +181,51 @@ class ProjectController extends Controller
         return view('projects.assign_project', compact( 'users', 'allUsers', 'projectsByLocationAndZipcode'));
     }
 
-    public function assignProjectToUser(Request $request)
-    {
-        $request->validate([
-            'project_id' => 'required',
-            'user_id' => 'required',
-            'streets' => 'required|array',
-        ]);
-    
-        $selectedValue = $request->input('project_id');
-        list($projectId) = explode('_', $selectedValue);
-        $project = Project::findOrFail($projectId);
-        $user = User::findOrFail($request->user_id);
 
-        $selectedOrt = $project->ort;
-        $selectedPostleitzahl = $project->postleitzahl;
-    
-        foreach ($request->streets as $streetName) {
-            // Überprüfe, ob die Kombination aus Straße, Ort und Postleitzahl bereits existiert
-            $existingAssignment = $user->projects()
-                ->where('strasse', $streetName)
-                ->where('ort', $selectedOrt)
-                ->where('postleitzahl', $selectedPostleitzahl)
-                ->exists();
-        
-            if ($existingAssignment) {
-                return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
-            }
-        
-            // Wenn die Kombination nicht existiert, füge den Benutzer zum Projekt hinzu
-            $street = Project::where('strasse', $streetName)
-                ->where('ort', $selectedOrt)
-                ->where('postleitzahl', $selectedPostleitzahl)
-                ->first();
-        
-            if (!$street) {
-                return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
-            }
-        
-            // Füge den Benutzer zum Projekt hinzu
-            $user->projects()->attach($street);
-        }
-        
-        
-    
-        return redirect()->route('assign.form')->with('success', 'Projekt und Straßen erfolgreich zugewiesen.');
+        public function assignProjectToUser(Request $request)
+         {
+             $request->validate([
+                 'project_id' => 'required',
+                 'user_id' => 'required',
+                 'streets' => 'required|array',
+             ]);
+         
+             $selectedValue = $request->input('project_id');
+             list($projectId) = explode('_', $selectedValue);
+             $project = Project::findOrFail($projectId);
+             $user = User::findOrFail($request->user_id);
+     
+             $selectedOrt = $project->ort;
+             $selectedPostleitzahl = $project->postleitzahl;
+         
+             foreach ($request->streets as $streetName) {
+                 if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
+                     return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
+                 }
+         
+                 $street = Project::where('strasse', $streetName)
+                     ->where('ort', $selectedOrt) // Hinzugefügt: Filtere nach dem ausgewählten Ort
+                     ->where('postleitzahl', $selectedPostleitzahl) // Hinzugefügt: Filtere nach der ausgewählten Postleitzahl
+                     ->first();
+         
+                 if (!$street) {
+                     return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
+                 }
+         
+                 // Hinzugefügt: Filtere andere Projekte nach dem ausgewählten Ort und Postleitzahl
+                 $otherProjects = Project::where('strasse', $streetName)
+                     ->where('ort', $selectedOrt)
+                     ->where('postleitzahl', $selectedPostleitzahl)
+                     ->where('id', '!=', $projectId)
+                     ->get();
+         
+                 if ($otherProjects->isNotEmpty()) {
+                     foreach ($otherProjects as $otherProject) {
+                         $user->projects()->attach($otherProject);
+                     }
+                 }
+             }
+             return redirect()->route('assign.form')->with('success', 'Projekt und Straßen erfolgreich zugewiesen.');
     }
     
     
