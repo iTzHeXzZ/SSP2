@@ -264,10 +264,7 @@ return new class extends Migration
                 foreach ($sqliteDataN12 as $record) {
                     DB::connection('mysql')->table('role_has_permissions')->insert((array) $record);
                 }
-                $sqliteDataN13= DB::connection('sqlite')->table('users')->get();
-                foreach ($sqliteDataN13 as $record) {
-                    DB::connection('mysql')->table('users')->insert((array) $record);
-                }
+                
                 $sqliteDataN14= DB::connection('sqlite')->table('personal_access_tokens')->get();
                 foreach ($sqliteDataN14 as $record) {
                     DB::connection('mysql')->table('personal_access_tokens')->insert((array) $record);
