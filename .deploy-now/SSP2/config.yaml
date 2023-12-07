@@ -44,6 +44,7 @@ deploy:
       - php artisan optimize:clear
       - php artisan migrate --force -n
       - php artisan storage:link
+      - chmod -R 755 public
       - php artisan optimize
       - php artisan up
 
