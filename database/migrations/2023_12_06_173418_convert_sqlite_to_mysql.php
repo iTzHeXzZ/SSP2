@@ -269,16 +269,15 @@ return new class extends Migration
                 foreach ($sqliteDataN14 as $record) {
                     DB::connection('mysql')->table('personal_access_tokens')->insert((array) $record);
                 }
-                
+                $sqliteDataN15= DB::connection('sqlite')->table('project_user')->get();
+                foreach ($sqliteDataN15 as $record) {
+                    DB::connection('mysql')->table('project_user')->insert((array) $record);
+                }
                 $sqliteDataN16= DB::connection('sqlite')->table('streets')->get();
                 foreach ($sqliteDataN16 as $record) {
                     DB::connection('mysql')->table('streets')->insert((array) $record);
                 }
 
-                $sqliteDataN17= DB::connection('sqlite')->table('project_user')->get();
-                foreach ($sqliteDataN16 as $record) {
-                    DB::connection('mysql')->table('project_user')->insert((array) $record);
-                }
 
                 
                 
