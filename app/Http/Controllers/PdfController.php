@@ -135,10 +135,10 @@
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
-        
-        $ownerSignaturePath = $signatureDir . '/' . uniqid() . '_owner_signature.png';
-        $orderSignaturePath = $signatureDir . '/' . uniqid() . '_order_signature.png';
-        $advisorSignaturePath = $signatureDir . '/' . uniqid() . '_advisor_signature.png';        
+    
+        $ownerSignaturePath = $signatureDir . '/owner_signature.png';
+        $orderSignaturePath = $signatureDir . '/order_signature.png';
+        $advisorSignaturePath = $signatureDir . '/advisor_signature.png';
 
     
         base64ToImage($ownerSignatureBase64, $ownerSignaturePath);
@@ -262,10 +262,6 @@ FDF;
         $outputPdfPath = public_path(uniqid() . '.pdf');
         $pdf->Output($outputPdfPath, 'F');
         $outputname = "$vorname $nachname " . date('Y-m-d');
-        unlink($tempPdfPath);
-        unlink($orderSignaturePath);
-        unlink($ownerSignaturePath);
-        unlink($advisorSignaturePath);
 
         return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);
     }

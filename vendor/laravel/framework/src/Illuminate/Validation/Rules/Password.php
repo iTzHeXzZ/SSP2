@@ -38,13 +38,6 @@ class Password implements Rule, DataAwareRule, ValidatorAwareRule
     protected $min = 8;
 
     /**
-     * The maximum size of the password.
-     *
-     * @var int
-     */
-    protected $max;
-
-    /**
      * If the password requires at least one uppercase and one lowercase letter.
      *
      * @var bool
@@ -200,7 +193,7 @@ class Password implements Rule, DataAwareRule, ValidatorAwareRule
     }
 
     /**
-     * Set the minimum size of the password.
+     * Sets the minimum size of the password.
      *
      * @param  int  $size
      * @return $this
@@ -208,19 +201,6 @@ class Password implements Rule, DataAwareRule, ValidatorAwareRule
     public static function min($size)
     {
         return new static($size);
-    }
-
-    /**
-     * Set the maximum size of the password.
-     *
-     * @param  int  $size
-     * @return $this
-     */
-    public function max($size)
-    {
-        $this->max = $size;
-
-        return $this;
     }
 
     /**
@@ -318,10 +298,6 @@ class Password implements Rule, DataAwareRule, ValidatorAwareRule
         )->after(function ($validator) use ($attribute, $value) {
             if (! is_string($value)) {
                 return;
-            }
-
-            if ($this->max && mb_strlen($value) > $this->max) {
-                $validator->addFailure($attribute, 'max.string');
             }
 
             if ($this->mixedCase && ! preg_match('/(\p{Ll}+.*\p{Lu})|(\p{Lu}+.*\p{Ll})/u', $value)) {
