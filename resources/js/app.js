@@ -32,3 +32,25 @@ import { createApp } from 'vue';
  */
 
 app.mount('#app');
+
+import SignaturePad from 'signature_pad';
+
+document.addEventListener('DOMContentLoaded', function () {
+    var canvas = document.querySelector('canvas');
+    var signaturePad = new SignaturePad(canvas);
+
+    document.getElementById('clear').addEventListener('click', function () {
+        signaturePad.clear();
+    });
+
+    document.getElementById('save').addEventListener('click', function () {
+        if (signaturePad.isEmpty()) {
+            alert('Please provide a signature first.');
+        } else {
+            var signatureData = signaturePad.toDataURL();
+            console.log(signatureData);
+
+            // Hier kannst du die Signaturdaten an deinen Server senden oder weitere Aktionen durchführen.
+        }
+    });
+});

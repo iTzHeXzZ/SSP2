@@ -18,7 +18,7 @@
 </div>
 @endif
 
-<table class="table table-bordered">
+<table class="table table-hover">
  <tr>
    <th>No</th>
    <th>Name</th>
@@ -49,5 +49,6 @@
  @endforeach
 </table>
 
-{!! $data->render() !!}
+{!! $data->links() !!}
+
 @endsection

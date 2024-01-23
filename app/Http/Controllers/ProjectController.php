@@ -202,9 +202,9 @@ class ProjectController extends Controller
              $selectedPostleitzahl = $project->postleitzahl;
          
              foreach ($request->streets as $streetName) {
-                 if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
-                     return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
-                 }
+                //  if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
+                //      return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
+                //  }
          
                  $street = Project::where('strasse', $streetName)
                      ->where('ort', $selectedOrt) // Hinzugefügt: Filtere nach dem ausgewählten Ort
@@ -239,26 +239,39 @@ class ProjectController extends Controller
     public function removeStreetFromProject(Request $request)
     {
         $user = User::find($request->user_id);
+    
         if (!$user) {
             return back()->with('error', 'Benutzer nicht gefunden.');
         }
     
-        // Hier nehmen wir an, dass $request->strasse der Name der Straße ist.
-        
-        // Finden Sie alle Projekte mit dieser Straße.
-        $projects = Project::where('strasse', $request->strasse)->get();
+        $selectedStreets = $request->streets;
     
-        if ($projects->isEmpty()) {
-            return back()->with('error', 'Projekte mit dieser Straße konnten nicht gefunden werden.');
+        if (empty($selectedStreets)) {
+            return back()->with('error', 'Keine Straßen ausgewählt.');
         }
     
-        // Entfernen Sie die Beziehungen zwischen Benutzer und allen gefundenen Projekten (Straßen).
-        foreach ($projects as $project) {
-            $user->projects()->detach($project->id);
+        foreach ($selectedStreets as $selectedStreet) {
+            list($selectedStrasse, $selectedOrt) = explode(', ', $selectedStreet);
+    
+            $projects = Project::where('strasse', $selectedStrasse)
+                               ->where('ort', $selectedOrt)
+                               ->get();
+    
+            if ($projects->isEmpty()) {
+                return back()->with('error', 'Projekte mit dieser Straße und diesem Ort konnten nicht gefunden werden.');
+            }
+    
+            foreach ($projects as $project) {
+                $user->projects()->detach($project->id);
+            }
         }
     
-        return back()->with('success', 'Straße erfolgreich aus den Projekten entfernt.');
+        return back()->with('success', 'Ausgewählte Straßen erfolgreich aus den Projekten entfernt.');
     }
+    
+    
+    
+    
     
     
     
@@ -273,4 +286,22 @@ class ProjectController extends Controller
     
         return response()->json($streets);
     }
+
+
+    public function getStreetsForUser($userId)
+    {
+        $user = User::findOrFail($userId);
+        $projects = $user->projects;
+    
+        $streetsAndOrte = $projects->map(function ($project) {
+            return [
+                'strasse' => $project->strasse,
+                'ort' => $project->ort,
+            ];
+        });
+    
+        return response()->json(['streetsAndOrte' => $streetsAndOrte]);
+    }
+    
+    
 }
