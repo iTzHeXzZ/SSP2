@@ -20,6 +20,7 @@
         "nesbot/carbon": "^2.71",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.5",
+        "setasign/fpdi-fpdf": "^2.3",
         "smalot/pdfparser": "^2.8",
         "spatie/laravel-permission": "^5.10",
         "tecnickcom/tcpdf": "^6.6"
