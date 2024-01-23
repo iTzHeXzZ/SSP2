@@ -48,7 +48,7 @@ jobs:
         with:
           php_version: '8.2'
           version: '2'
-          args: --optimize-autoloader --no-dev
+          args: --optimize-autoloader --no-dev -vvv
 
       - name: Build PHP assets
 # uncomment the following lines if you want to add environment variables for this step
