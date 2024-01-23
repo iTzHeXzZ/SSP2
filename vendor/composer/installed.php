@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '0b73bf55da5ea03e0afd6fec416767c5374b107a',
+        'reference' => '93c6c9ba70f3205d6f5fab0dd68612c50424ce9b',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -436,7 +436,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '0b73bf55da5ea03e0afd6fec416767c5374b107a',
+            'reference' => '93c6c9ba70f3205d6f5fab0dd68612c50424ce9b',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -883,8 +883,8 @@
         'psr/log-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '3.0.0',
-                1 => '1.0|2.0|3.0',
+                0 => '1.0|2.0|3.0',
+                1 => '3.0.0',
             ),
         ),
         'psr/simple-cache' => array(
@@ -1334,15 +1334,6 @@
             'reference' => '6caa57379c4aec19c0a12a38b59b26487dcfe4b5',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/polyfill-php80',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'symfony/polyfill-php83' => array(
-            'pretty_version' => 'v1.28.0',
-            'version' => '1.28.0.0',
-            'reference' => 'b0f46ebbeeeda3e9d2faebdfbf4b4eae9b59fa11',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../symfony/polyfill-php83',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
