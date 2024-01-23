@@ -1,0 +1,4 @@
+.pagination li span, .pagination li a {
+    font-size: 14px; /* Ändere die Schriftgröße nach Bedarf */
+    line-height: 1.42857143;
+}
