@@ -323,7 +323,7 @@ if (! function_exists('csrf_field')) {
      */
     function csrf_field()
     {
-        return new HtmlString('<input type="hidden" name="_token" value="'.csrf_token().'" autocomplete="off">');
+        return new HtmlString('<input type="hidden" name="_token" value="'.csrf_token().'">');
     }
 }
 
@@ -727,13 +727,10 @@ if (! function_exists('rescue')) {
     /**
      * Catch a potential exception and return a default value.
      *
-     * @template TRescueValue
-     * @template TRescueFallback
-     *
-     * @param  callable(): TRescueValue  $callback
-     * @param  (callable(\Throwable): TRescueFallback)|TRescueFallback  $rescue
+     * @param  callable  $callback
+     * @param  mixed  $rescue
      * @param  bool|callable  $report
-     * @return TRescueValue|TRescueFallback
+     * @return mixed
      */
     function rescue(callable $callback, $rescue = null, $report = true)
     {

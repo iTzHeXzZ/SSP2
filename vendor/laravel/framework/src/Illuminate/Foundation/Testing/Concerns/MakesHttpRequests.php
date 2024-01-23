@@ -310,16 +310,6 @@ trait MakesHttpRequests
     }
 
     /**
-     * Set the Precognition header to "true".
-     *
-     * @return $this
-     */
-    public function withPrecognition()
-    {
-        return $this->withHeader('Precognition', 'true');
-    }
-
-    /**
      * Visit the given URI with a GET request.
      *
      * @param  string  $uri
@@ -684,7 +674,7 @@ trait MakesHttpRequests
     /**
      * Follow a redirect chain until a non-redirect is received.
      *
-     * @param  \Illuminate\Http\Response|\Illuminate\Testing\TestResponse  $response
+     * @param  \Illuminate\Http\Response  $response
      * @return \Illuminate\Http\Response|\Illuminate\Testing\TestResponse
      */
     protected function followRedirects($response)

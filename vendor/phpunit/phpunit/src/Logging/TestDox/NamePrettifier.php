@@ -45,7 +45,6 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Metadata\Parser\Registry as MetadataRegistry;
 use PHPUnit\Metadata\TestDox;
 use PHPUnit\Util\Color;
-use ReflectionEnum;
 use ReflectionMethod;
 use ReflectionObject;
 use SebastianBergmann\Exporter\Exporter;
@@ -242,13 +241,7 @@ final class NamePrettifier
                 $reflector = new ReflectionObject($value);
 
                 if ($reflector->isEnum()) {
-                    $enumReflector = new ReflectionEnum($value);
-
-                    if ($enumReflector->isBacked()) {
-                        $value = $value->value;
-                    } else {
-                        $value = $value->name;
-                    }
+                    $value = $value->value;
                 } elseif ($reflector->hasMethod('__toString')) {
                     $value = (string) $value;
                 } else {
@@ -258,10 +251,6 @@ final class NamePrettifier
 
             if (!is_scalar($value)) {
                 $value = gettype($value);
-
-                if ($value === 'NULL') {
-                    $value = 'null';
-                }
             }
 
             if (is_bool($value) || is_int($value) || is_float($value)) {
@@ -280,10 +269,7 @@ final class NamePrettifier
         }
 
         if ($colorize) {
-            $providedData = array_map(
-                static fn ($value) => Color::colorize('fg-cyan', Color::visualizeWhitespace((string) $value, true)),
-                $providedData,
-            );
+            $providedData = array_map(static fn ($value) => Color::colorize('fg-cyan', Color::visualizeWhitespace((string) $value, true)), $providedData);
         }
 
         return $providedData;

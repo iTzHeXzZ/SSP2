@@ -31,8 +31,6 @@ use Throwable;
 final class PharLoader
 {
     /**
-     * @psalm-param non-empty-string $directory
-     *
      * @psalm-return list<string>
      */
     public function loadPharExtensionsInDirectory(string $directory): array

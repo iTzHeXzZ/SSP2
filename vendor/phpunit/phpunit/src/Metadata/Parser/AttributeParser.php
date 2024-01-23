@@ -38,7 +38,6 @@ use PHPUnit\Framework\Attributes\ExcludeGlobalVariableFromBackup;
 use PHPUnit\Framework\Attributes\ExcludeStaticPropertyFromBackup;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreClassForCodeCoverage;
-use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\IgnoreFunctionForCodeCoverage;
 use PHPUnit\Framework\Attributes\IgnoreMethodForCodeCoverage;
 use PHPUnit\Framework\Attributes\Large;
@@ -65,7 +64,6 @@ use PHPUnit\Framework\Attributes\TestWithJson;
 use PHPUnit\Framework\Attributes\Ticket;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\UsesFunction;
-use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Metadata\Metadata;
 use PHPUnit\Metadata\MetadataCollection;
 use PHPUnit\Metadata\Version\ConstraintRequirement;
@@ -168,13 +166,6 @@ final class AttributeParser implements Parser
                     assert($attributeInstance instanceof IgnoreClassForCodeCoverage);
 
                     $result[] = Metadata::ignoreClassForCodeCoverage($attributeInstance->className());
-
-                    break;
-
-                case IgnoreDeprecations::class:
-                    assert($attributeInstance instanceof IgnoreDeprecations);
-
-                    $result[] = Metadata::ignoreDeprecationsOnClass();
 
                     break;
 
@@ -490,13 +481,6 @@ final class AttributeParser implements Parser
 
                     break;
 
-                case IgnoreDeprecations::class:
-                    assert($attributeInstance instanceof IgnoreDeprecations);
-
-                    $result[] = Metadata::ignoreDeprecationsOnMethod();
-
-                    break;
-
                 case PostCondition::class:
                     $result[] = Metadata::postCondition();
 
@@ -629,13 +613,6 @@ final class AttributeParser implements Parser
                     assert($attributeInstance instanceof Ticket);
 
                     $result[] = Metadata::groupOnMethod($attributeInstance->text());
-
-                    break;
-
-                case WithoutErrorHandler::class:
-                    assert($attributeInstance instanceof WithoutErrorHandler);
-
-                    $result[] = Metadata::withoutErrorHandler();
 
                     break;
             }

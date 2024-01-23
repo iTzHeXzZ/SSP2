@@ -46,47 +46,47 @@
         </div>
     </div>
 </div>
-<div class="row justify-content-center">
+<div class="row mt-4">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">Zugewiesene Projekte und Straßen</div>
 
-<div class="card-body">
-    <ul>
-        @foreach ($allUsers as $user)
-            <li>
-                <strong>{{ $user->name }}</strong>:
-                <button class="toggle-streets-btn" data-toggle="modal" data-target="#assignStreetsModal" data-user-id="{{ $user->id }}">
-                    <i class="fas fa-chevron-down"></i> Anzeigen
-                </button>
-            </li>
-        @endforeach
-    </ul>
-</div>
-      
+            <div class="card-body">
+                <ul>
+                    @foreach ($allUsers as $user)
+                        <li>
+                            <strong>{{ $user->name }}</strong>:
+                            <button class="toggle-streets-btn" data-toggle-target=".user-streets-list-{{ $user->id }}">
+                                <i class="fas fa-chevron-down"></i> Anzeigen
+                            </button>
+                            <ul class="user-streets-list-{{ $user->id }}" style="display: none;">
+                                @php
+                                    $displayedStreets = [];
+                                @endphp
+                                @foreach ($user->projects as $project)
+                                    @if (!in_array($project->strasse, $displayedStreets))
+                                        <li>
+                                            {{ $project->ort }}, {{ $project->strasse }}
+                                            <form action="{{ route('remove.street.from.project') }}" method="post" style="display: inline-block;">
+                                                @csrf
+                                                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                                <input type="hidden" name="strasse" value="{{ $project->strasse }}">
+                                                <button type="submit" class="btn btn-danger btn-sm">Entfernen</button>
+                                            </form>
+                                        </li>
+                                        @php
+                                            $displayedStreets[] = $project->strasse;
+                                        @endphp
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>            
         </div>
     </div>
 </div>
-<!-- Modal -->
-<div class="modal fade" id="assignStreetsModal" tabindex="-1" role="dialog" aria-labelledby="assignStreetsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="assignStreetsModalLabel">Straßen löschen</h5>
-                {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button> --}}
-            </div>
-            <div class="modal-body">
-            </div>
-            {{-- <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
-            </div> --}}
-        </div>
-    </div>
-</div>
-
-
 @endsection
 
 @section('scripts')
@@ -94,14 +94,15 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Font Awesome-Icon-Set -->
 <script>
    $(document).ready(function() {
     const locationZipcodeSelect = $('#location_zipcode');
     const streetSelect = $('#street');
-    const projectIdInput = $('#project_id');
+    const projectIdInput = $('#project_id'); // Hier die ID des Input-Felds für project_id
 
-    locationZipcodeSelect.on('change', function() {
-
+    locationZipcodeSelect.change(function() {
+        // Lösche alle vorherigen Optionen aus dem Straßen-Dropdown
         streetSelect.empty();
 
         const selectedLocationZipcode = $(this).val();
@@ -138,62 +139,23 @@
                 enableFiltering: true,
                 maxHeight: 300,
             });
-            streetSelect.multiselect('rebuild');
         })
         .catch(error => console.error('Error:', error));
     });
 
+    // Toggle-Funktion für die Straßenliste
     $('.toggle-streets-btn').click(function() {
-    const userId = $(this).data('user-id');
-
-    fetch(`/get-streets-for-user/${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            const modalBody = $('#assignStreetsModal .modal-body');
-            const projectName = data.projectName;
-
-            // Orte eindeutig machen
-            const uniqueOrte = Array.from(new Set(data.streetsAndOrte.map(item => item.ort)));
-
-            modalBody.html(`
-                <form action="{{ route('remove.street.from.project') }}" method="post" style="display: inline-block;">
-                    @csrf
-                    <input type="hidden" name="user_id" value="${userId}">
-                    <input type="hidden" name="project_id" value="${projectName}">
-                    
-                    ${uniqueOrte.map(ort => {
-                        const uniqueStreetsForOrt = Array.from(new Set(
-                            data.streetsAndOrte
-                                .filter(item => item.ort === ort)
-                                .map(item => `${item.strasse}, ${item.ort}`)
-                        ));
-
-                        return `
-                            <ul class="user-streets-list-${userId}" style="list-style-type: none;">
-                                <li>
-                                    <h5>${ort}</h5>
-                                </li>
-                                ${uniqueStreetsForOrt.map(streetAndOrt => `
-                                    <li>
-                                        <label>
-                                            <input type="checkbox" name="streets[]" value="${streetAndOrt}" class="street-checkbox">
-                                            <strong>${streetAndOrt}</strong>
-                                        </label>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        `;
-                    }).join('')}
-
-                    <button type="submit" class="btn btn-danger btn-sm">Ausgewählte Straßen entfernen</button>
-                </form>
-            `);
-
-            $('#assignStreetsModal').modal('show');
-        })
-        .catch(error => console.error('Error:', error));
-});
-
+        const targetSelector = $(this).data('toggle-target');
+        $(targetSelector).toggle();
+        const icon = $(this).find('i');
+        if ($(targetSelector).is(':visible')) {
+            icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            $(this).text('Verbergen');
+        } else {
+            icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            $(this).text('Anzeigen');
+        }
+    });
 });
 
 </script>

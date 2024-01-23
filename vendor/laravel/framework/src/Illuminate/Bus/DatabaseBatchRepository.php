@@ -313,16 +313,6 @@ class DatabaseBatchRepository implements PrunableBatchRepository
     }
 
     /**
-     * Rollback the last database transaction for the connection.
-     *
-     * @return void
-     */
-    public function rollBack()
-    {
-        $this->connection->rollBack();
-    }
-
-    /**
      * Serialize the given value.
      *
      * @param  mixed  $value
@@ -352,7 +342,7 @@ class DatabaseBatchRepository implements PrunableBatchRepository
 
         try {
             return unserialize($serialized);
-        } catch (ModelNotFoundException) {
+        } catch (ModelNotFoundException $e) {
             return [];
         }
     }

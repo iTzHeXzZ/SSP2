@@ -2,8 +2,6 @@
 
 namespace Illuminate\Notifications\Channels;
 
-use Illuminate\Config\Repository as ConfigRepository;
-use Illuminate\Container\Container;
 use Illuminate\Contracts\Mail\Factory as MailFactory;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -97,51 +95,14 @@ class MailChannel
             return $message->view;
         }
 
+        if (property_exists($message, 'theme') && ! is_null($message->theme)) {
+            $this->markdown->theme($message->theme);
+        }
+
         return [
-            'html' => $this->buildMarkdownHtml($message),
-            'text' => $this->buildMarkdownText($message),
+            'html' => $this->markdown->render($message->markdown, $message->data()),
+            'text' => $this->markdown->renderText($message->markdown, $message->data()),
         ];
-    }
-
-    /**
-     * Build the HTML view for a Markdown message.
-     *
-     * @param  \Illuminate\Notifications\Messages\MailMessage  $message
-     * @return \Closure
-     */
-    protected function buildMarkdownHtml($message)
-    {
-        return fn ($data) => $this->markdownRenderer($message)->render(
-            $message->markdown, array_merge($data, $message->data()),
-        );
-    }
-
-    /**
-     * Build the text view for a Markdown message.
-     *
-     * @param  \Illuminate\Notifications\Messages\MailMessage  $message
-     * @return \Closure
-     */
-    protected function buildMarkdownText($message)
-    {
-        return fn ($data) => $this->markdownRenderer($message)->renderText(
-            $message->markdown, array_merge($data, $message->data()),
-        );
-    }
-
-    /**
-     * Get the Markdown implementation.
-     *
-     * @param  \Illuminate\Notifications\Messages\MailMessage  $message
-     * @return \Illuminate\Mail\Markdown
-     */
-    protected function markdownRenderer($message)
-    {
-        $config = Container::getInstance()->get(ConfigRepository::class);
-
-        $theme = $message->theme ?? $config->get('mail.markdown.theme', 'default');
-
-        return $this->markdown->theme($theme);
     }
 
     /**

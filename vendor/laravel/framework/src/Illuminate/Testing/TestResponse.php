@@ -15,7 +15,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Illuminate\Support\Traits\Conditionable;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Support\Traits\Tappable;
 use Illuminate\Support\ViewErrorBag;
@@ -33,7 +32,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class TestResponse implements ArrayAccess
 {
-    use Concerns\AssertsStatusCodes, Conditionable, Tappable, Macroable {
+    use Concerns\AssertsStatusCodes, Tappable, Macroable {
         __call as macroCall;
     }
 
@@ -91,29 +90,6 @@ class TestResponse implements ArrayAccess
         PHPUnit::assertTrue(
             $this->isSuccessful(),
             $this->statusMessageWithDetails('>=200, <300', $this->getStatusCode())
-        );
-
-        return $this;
-    }
-
-    /**
-     * Assert that the Precognition request was successful.
-     *
-     * @return $this
-     */
-    public function assertSuccessfulPrecognition()
-    {
-        $this->assertNoContent();
-
-        PHPUnit::assertTrue(
-            $this->headers->has('Precognition-Success'),
-            'Header [Precognition-Success] not present on response.'
-        );
-
-        PHPUnit::assertSame(
-            'true',
-            $this->headers->get('Precognition-Success'),
-            'The Precognition-Success header was found, but the value is not `true`.'
         );
 
         return $this;
@@ -217,7 +193,11 @@ class TestResponse implements ArrayAccess
             $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
         );
 
-        $this->assertLocation($uri);
+        $request = Request::create($this->headers->get('Location'));
+
+        PHPUnit::assertEquals(
+            app('url')->to($uri), $request->fullUrl()
+        );
 
         return $this;
     }
@@ -498,8 +478,7 @@ class TestResponse implements ArrayAccess
                     $cookie->isSecure(),
                     $cookie->isHttpOnly(),
                     $cookie->isRaw(),
-                    $cookie->getSameSite(),
-                    $cookie->isPartitioned()
+                    $cookie->getSameSite()
                 );
             }
         }
@@ -683,20 +662,6 @@ class TestResponse implements ArrayAccess
     public function assertJsonPath($path, $expect)
     {
         $this->decodeResponseJson()->assertPath($path, $expect);
-
-        return $this;
-    }
-
-    /**
-     * Assert that the given path in the response contains all of the expected values without looking at the order.
-     *
-     * @param  string  $path
-     * @param  array  $expect
-     * @return $this
-     */
-    public function assertJsonPathCanonicalizing($path, array $expect)
-    {
-        $this->decodeResponseJson()->assertPathCanonicalizing($path, $expect);
 
         return $this;
     }
@@ -1664,7 +1629,7 @@ class TestResponse implements ArrayAccess
     protected function appendErrorsToException($errors, $exception, $json = false)
     {
         $errors = $json
-            ? json_encode($errors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            ? json_encode($errors, JSON_PRETTY_PRINT)
             : implode(PHP_EOL, Arr::flatten($errors));
 
         // JSON error messages may already contain the errors, so we shouldn't duplicate them...

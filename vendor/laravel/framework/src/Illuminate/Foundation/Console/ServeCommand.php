@@ -201,13 +201,6 @@ class ServeCommand extends Command
      */
     protected function getHostAndPort()
     {
-        if (preg_match('/(\[.*\]):?([0-9]+)?/', $this->input->getOption('host'), $matches) !== false) {
-            return [
-                $matches[1] ?? $this->input->getOption('host'),
-                $matches[2] ?? null,
-            ];
-        }
-
         $hostParts = explode(':', $this->input->getOption('host'));
 
         return [
@@ -287,13 +280,8 @@ class ServeCommand extends Command
             } elseif (str($line)->contains(['Closed without sending a request'])) {
                 // ...
             } elseif (! empty($line)) {
-                $position = strpos($line, '] ');
-
-                if ($position !== false) {
-                    $line = substr($line, $position + 1);
-                }
-
-                $this->components->warn($line);
+                $warning = explode('] ', $line);
+                $this->components->warn(count($warning) > 1 ? $warning[1] : $warning[0]);
             }
         });
     }
@@ -309,8 +297,6 @@ class ServeCommand extends Command
         $regex = env('PHP_CLI_SERVER_WORKERS', 1) > 1
             ? '/^\[\d+]\s\[([a-zA-Z0-9: ]+)\]/'
             : '/^\[([^\]]+)\]/';
-
-        $line = str_replace('  ', ' ', $line);
 
         preg_match($regex, $line, $matches);
 

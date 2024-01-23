@@ -7,7 +7,6 @@ use DateTimeInterface;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
-use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Queue\Events\JobQueued;
 use Illuminate\Support\Arr;
 use Illuminate\Support\InteractsWithTime;
@@ -306,15 +305,15 @@ abstract class Queue
             $this->container->bound('db.transactions')) {
             return $this->container->make('db.transactions')->addCallback(
                 function () use ($payload, $queue, $delay, $callback, $job) {
-                    return tap($callback($payload, $queue, $delay), function ($jobId) use ($job, $payload) {
-                        $this->raiseJobQueuedEvent($jobId, $job, $payload);
+                    return tap($callback($payload, $queue, $delay), function ($jobId) use ($job) {
+                        $this->raiseJobQueuedEvent($jobId, $job);
                     });
                 }
             );
         }
 
-        return tap($callback($payload, $queue, $delay), function ($jobId) use ($job, $payload) {
-            $this->raiseJobQueuedEvent($jobId, $job, $payload);
+        return tap($callback($payload, $queue, $delay), function ($jobId) use ($job) {
+            $this->raiseJobQueuedEvent($jobId, $job);
         });
     }
 
@@ -326,10 +325,6 @@ abstract class Queue
      */
     protected function shouldDispatchAfterCommit($job)
     {
-        if (is_object($job) && $job instanceof ShouldQueueAfterCommit) {
-            return true;
-        }
-
         if (! $job instanceof Closure && is_object($job) && isset($job->afterCommit)) {
             return $job->afterCommit;
         }
@@ -346,13 +341,12 @@ abstract class Queue
      *
      * @param  string|int|null  $jobId
      * @param  \Closure|string|object  $job
-     * @param  string  $payload
      * @return void
      */
-    protected function raiseJobQueuedEvent($jobId, $job, $payload)
+    protected function raiseJobQueuedEvent($jobId, $job)
     {
         if ($this->container->bound('events')) {
-            $this->container['events']->dispatch(new JobQueued($this->connectionName, $jobId, $job, $payload));
+            $this->container['events']->dispatch(new JobQueued($this->connectionName, $jobId, $job));
         }
     }
 

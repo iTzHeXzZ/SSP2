@@ -97,10 +97,8 @@ use function str_ends_with;
 use function str_replace;
 use function token_get_all;
 use function trim;
-use SebastianBergmann\CodeCoverage\FileCouldNotBeWrittenException;
 use SebastianBergmann\CodeCoverage\Node\File as FileNode;
 use SebastianBergmann\CodeCoverage\Util\Percentage;
-use SebastianBergmann\Template\Exception;
 use SebastianBergmann\Template\Template;
 
 /**
@@ -199,15 +197,7 @@ final class File extends Renderer
             ]
         );
 
-        try {
-            $template->renderTo($file . '.html');
-        } catch (Exception $e) {
-            throw new FileCouldNotBeWrittenException(
-                $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
+        $template->renderTo($file . '.html');
 
         if ($this->hasBranchCoverage) {
             $template->setVar(
@@ -219,15 +209,7 @@ final class File extends Renderer
                 ]
             );
 
-            try {
-                $template->renderTo($file . '_branch.html');
-            } catch (Exception $e) {
-                throw new FileCouldNotBeWrittenException(
-                    $e->getMessage(),
-                    $e->getCode(),
-                    $e
-                );
-            }
+            $template->renderTo($file . '_branch.html');
 
             $template->setVar(
                 [
@@ -238,15 +220,7 @@ final class File extends Renderer
                 ]
             );
 
-            try {
-                $template->renderTo($file . '_path.html');
-            } catch (Exception $e) {
-                throw new FileCouldNotBeWrittenException(
-                    $e->getMessage(),
-                    $e->getCode(),
-                    $e
-                );
-            }
+            $template->renderTo($file . '_path.html');
         }
     }
 

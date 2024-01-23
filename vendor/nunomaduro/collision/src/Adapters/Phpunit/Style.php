@@ -6,7 +6,6 @@ namespace NunoMaduro\Collision\Adapters\Phpunit;
 
 use Closure;
 use NunoMaduro\Collision\Adapters\Phpunit\Printers\DefaultPrinter;
-use NunoMaduro\Collision\Adapters\Phpunit\Support\ResultReflection;
 use NunoMaduro\Collision\Exceptions\ShouldNotHappen;
 use NunoMaduro\Collision\Exceptions\TestException;
 use NunoMaduro\Collision\Exceptions\TestOutcome;
@@ -23,13 +22,12 @@ use ReflectionClass;
 use ReflectionFunction;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
-use Termwind\Terminal;
-use Whoops\Exception\Frame;
-use Whoops\Exception\Inspector;
-
 use function Termwind\render;
 use function Termwind\renderUsing;
+use Termwind\Terminal;
 use function Termwind\terminal;
+use Whoops\Exception\Frame;
+use Whoops\Exception\Inspector;
 
 /**
  * @internal
@@ -242,7 +240,7 @@ final class Style
             }
         }
 
-        $pending = ResultReflection::numberOfTests($result) - $result->numberOfTestsRun();
+        $pending = $result->numberOfTests() - $result->numberOfTestsRun();
         if ($pending > 0) {
             $tests[] = "\e[2m$pending pending\e[22m";
         }

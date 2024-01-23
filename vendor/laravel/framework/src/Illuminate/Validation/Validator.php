@@ -187,7 +187,6 @@ class Validator implements ValidatorContract
     protected $fileRules = [
         'Between',
         'Dimensions',
-        'Extensions',
         'File',
         'Image',
         'Max',
@@ -214,10 +213,6 @@ class Validator implements ValidatorContract
         'MissingWith',
         'MissingWithAll',
         'Present',
-        'PresentIf',
-        'PresentUnless',
-        'PresentWith',
-        'PresentWithAll',
         'Required',
         'RequiredIf',
         'RequiredIfAccepted',
@@ -257,10 +252,6 @@ class Validator implements ValidatorContract
         'RequiredWithAll',
         'RequiredWithout',
         'RequiredWithoutAll',
-        'PresentIf',
-        'PresentUnless',
-        'PresentWith',
-        'PresentWithAll',
         'Prohibited',
         'ProhibitedIf',
         'ProhibitedUnless',
@@ -291,13 +282,6 @@ class Validator implements ValidatorContract
     protected $numericRules = ['Numeric', 'Integer', 'Decimal'];
 
     /**
-     * The default numeric related validation rules.
-     *
-     * @var string[]
-     */
-    protected $defaultNumericRules = ['Numeric', 'Integer', 'Decimal'];
-
-    /**
      * The current placeholder for dots in rule keys.
      *
      * @var string
@@ -310,13 +294,6 @@ class Validator implements ValidatorContract
      * @var string
      */
     protected $exception = ValidationException::class;
-
-    /**
-     * The custom callback to determine if an exponent is within allowed range.
-     *
-     * @var callable|null
-     */
-    protected $ensureExponentWithinAllowedRangeUsing;
 
     /**
      * Create a new Validator instance.
@@ -453,18 +430,14 @@ class Validator implements ValidatorContract
                 $this->validateAttribute($attribute, $rule);
 
                 if ($this->shouldBeExcluded($attribute)) {
+                    $this->removeAttribute($attribute);
+
                     break;
                 }
 
                 if ($this->shouldStopValidating($attribute)) {
                     break;
                 }
-            }
-        }
-
-        foreach ($this->rules as $attribute => $rules) {
-            if ($this->shouldBeExcluded($attribute)) {
-                $this->removeAttribute($attribute);
             }
         }
 
@@ -647,8 +620,6 @@ class Validator implements ValidatorContract
         }
 
         $method = "validate{$rule}";
-
-        $this->numericRules = $this->defaultNumericRules;
 
         if ($validatable && ! $this->$method($attribute, $value, $parameters, $this)) {
             $this->addFailure($attribute, $rule, $parameters);
@@ -1118,7 +1089,7 @@ class Validator implements ValidatorContract
      * @param  string  $attribute
      * @return mixed
      */
-    public function getValue($attribute)
+    protected function getValue($attribute)
     {
         return Arr::get($this->data, $attribute);
     }
@@ -1500,16 +1471,6 @@ class Validator implements ValidatorContract
     }
 
     /**
-     * Get the exception to throw upon failed validation.
-     *
-     * @return string
-     */
-    public function getException()
-    {
-        return $this->exception;
-    }
-
-    /**
      * Set the exception to throw upon failed validation.
      *
      * @param  string  $exception
@@ -1526,19 +1487,6 @@ class Validator implements ValidatorContract
         }
 
         $this->exception = $exception;
-
-        return $this;
-    }
-
-    /**
-     * Ensure exponents are within range using the given callback.
-     *
-     * @param  callable(int $scale, string $attribute, mixed $value)  $callback
-     * @return $this
-     */
-    public function ensureExponentWithinAllowedRangeUsing($callback)
-    {
-        $this->ensureExponentWithinAllowedRangeUsing = $callback;
 
         return $this;
     }

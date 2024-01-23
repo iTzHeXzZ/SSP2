@@ -46,9 +46,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/projects/{ort}/{postleitzahl}/{strasse}/number', [ProjectController::class, 'number'])->name('projects.number');
     #Route::get('/projects/number', [ProjectController::class, 'number'])->name('projects.number');
-    Route::get('/pdf/productswl', [PdfController::class, 'showProduct'])->name('pdf.showProduct');
+
     Route::get('/pdf/showForm', [PdfController::class, 'showForm'])->name('pdf.showForm');
-    Route::post('/pdf/fill', [PdfController::class, 'fillPdf'])->name('pdf.fill');
+    Route::post('/pdf/fill', [PdfController::class, 'fillPdfForm'])->name('pdf.fill');
     
 
 
@@ -72,8 +72,6 @@ Route::group(['middleware' => 'admin'], function () {
     Route::get('/get-streets/{projectId}', [ProjectController::class, 'getStreets'])->name('get.streets');
 
     Route::get('/get-streets-for-location-zipcode/{ort}/{postleitzahl}', [ProjectController::class, 'getStreetsForLocationZipcode'])->name('get.streets.for.location.zipcode');
-
-    Route::get('/get-streets-for-user/{userId}', [ProjectController::class, 'getStreetsForUser'])->name('get.streets.for.user');
 
     Route::post('remove-street-from-project', [ProjectController::class, 'removeStreetFromProject'])->name('remove.street.from.project');
 
