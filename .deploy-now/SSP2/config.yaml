@@ -18,6 +18,7 @@ deploy:
       - find $(pwd) -type d -not -name "logs" -exec chmod 775 {} \;
       - chmod -R o+w storage bootstrap/cache
       - php artisan optimize:clear
+      - sudo apt-get install php8.2
       - composer update
       - php artisan migrate --force -n
       - php artisan storage:link
