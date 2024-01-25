@@ -4090,7 +4090,6 @@
                 "shasum": ""
             },
             "require": {
-                "ext-gd": "*",
                 "ext-zlib": "*"
             },
             "type": "library",
