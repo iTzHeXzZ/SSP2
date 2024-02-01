@@ -131,7 +131,7 @@
             }
         }
     
-        $signatureDir = storage_path('app/public/signatures');
+        $signatureDir = '/homepages/40/d4297876594/htdocs/storage/';
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
