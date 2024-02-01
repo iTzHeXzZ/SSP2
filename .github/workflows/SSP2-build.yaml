@@ -39,16 +39,18 @@ jobs:
           output-directory: ${{ env.DEPLOYMENT_FOLDER }}
           intermediate-data-file: ${{ env.DEPLOYMENT_FOLDER }}/.template-renderer-data
 
-      - name: Setup composer
-        uses: php-actions/composer@v6
-# uncomment the following lines if you want to add environment variables for this step
-        env:
-         MY_ENV_VAR: value-for-my-env-var
-         MY_SECRET_ENV_VAR: ${{ secrets.MY_SECRET }} # here you can find information how to create secrets: https://docs.github.com/en/actions/security-guides/encrypted-secrets
+      - name: Setup PHP with PECL extension and install composer
+        uses: shivammathur/setup-php@v2
         with:
-          php_version: '8.1'
-          version: '2'
-          args: --optimize-autoloader --no-dev -vvv
+          php-version: '8.2'
+          tools: composer
+
+      - name: Run composer install
+# uncomment the following lines if you want to add environment variables for this step
+#        env:
+#          MY_ENV_VAR: value-for-my-env-var
+#          MY_SECRET_ENV_VAR: ${{ secrets.MY_SECRET }} # here you can find information how to create secrets: https://docs.github.com/en/actions/security-guides/encrypted-secrets      
+        run: composer install --optimize-autoloader --no-dev
 
       - name: Build PHP assets
 # uncomment the following lines if you want to add environment variables for this step
