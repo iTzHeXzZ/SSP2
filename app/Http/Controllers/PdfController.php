@@ -131,7 +131,7 @@
             }
         }
     
-        $signatureDir = public_path('signatures');
+        $signatureDir = storage_path('app/public/signatures');
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
@@ -222,14 +222,14 @@ FDF;
         $content = $fdf_header . $fdf_content . $fdf_footer;
 
 
-        $pdfPath = public_path('gnvlangenfeld.pdf');
+        $pdfPath = storage_path('app/public/gnvlangenfeld.pdf');
         $outputTextPath = public_path(uniqid() . '_text_content.txt');
         // Temporäre FDF-Datei im public-Ordner erstellen
         $FDFfile = public_path(uniqid() . '.fdf');
         file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
 
         // Temporäre PDF-Datei im public-Ordner erstellen
-        $tempPdfPath = public_path(uniqid() . '.pdf');
+        $tempPdfPath = storage_path(uniqid() . '.pdf');
 
         // PDF-Formular ausfüllen
         $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
@@ -259,7 +259,7 @@ FDF;
                 $pdf->Image($ownerSignaturePath, 30, 240, 60, 20);
             }
         }
-        $outputPdfPath = public_path(uniqid() . '.pdf');
+        $outputPdfPath = storage_path(uniqid() . '.pdf');
         $pdf->Output($outputPdfPath, 'F');
         $outputname = "$vorname $nachname " . date('Y-m-d');
         unlink($tempPdfPath);
