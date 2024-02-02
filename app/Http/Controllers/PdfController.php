@@ -228,6 +228,7 @@ FDF;
         file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
 
         // Temporäre PDF-Datei im public-Ordner erstellen
+        
         $tempPdfPath = storage_path(uniqid() . '.pdf');
         // PDF-Formular ausfüllen
         $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
@@ -236,7 +237,7 @@ FDF;
         unlink($FDFfile);
 
         $pdf = new Fpdi();
-        $pdf->setSourceFile($tempPdfPath);
+       // $pdf->setSourceFile($tempPdfPath);
         rotateImage($orderSignaturePath, 0);
         rotateImage($advisorSignaturePath, 0);
         rotateImage($ownerSignaturePath, 0);
