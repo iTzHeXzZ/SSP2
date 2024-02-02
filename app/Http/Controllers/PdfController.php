@@ -131,7 +131,7 @@
             }
         }
     
-        $signatureDir = storage_path('app/public/signatures');
+        $signatureDir = storage_path('/signatures');
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
