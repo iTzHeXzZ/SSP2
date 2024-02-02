@@ -221,7 +221,7 @@ FDF;
         $content = $fdf_header . $fdf_content . $fdf_footer;
 
 
-        $pdfPath = path('app/public/gnvlangenfeld.pdf');
+        $pdfPath = public_path('gnvlangenfeld.pdf');
         $outputTextPath = public_path(uniqid() . '_text_content.txt');
         // Temporäre FDF-Datei im public-Ordner erstellen
         $FDFfile = storage_path(uniqid() . '.fdf');
