@@ -131,7 +131,7 @@
             }
         }
     
-        $signatureDir = public_path('/signatures');
+        $signatureDir = storage_path('app/public/signatures');
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
@@ -222,10 +222,10 @@ FDF;
         $content = $fdf_header . $fdf_content . $fdf_footer;
 
 
-        $pdfPath = storage_path('app/public/gnvlangenfeld.pdf');
+        $pdfPath = path('app/public/gnvlangenfeld.pdf');
         $outputTextPath = public_path(uniqid() . '_text_content.txt');
         // Temporäre FDF-Datei im public-Ordner erstellen
-        $FDFfile = public_path(uniqid() . '.fdf');
+        $FDFfile = storage_path(uniqid() . '.fdf');
         file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
 
         // Temporäre PDF-Datei im public-Ordner erstellen
