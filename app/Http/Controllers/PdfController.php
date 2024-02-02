@@ -229,7 +229,7 @@ FDF;
 
         // Temporäre PDF-Datei im public-Ordner erstellen
         $tempPdfPath = storage_path(uniqid() . '.pdf');
-
+        dd($pdfPath,$tempPdfPath);
         // PDF-Formular ausfüllen
         $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
         exec($command);
