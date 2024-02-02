@@ -241,8 +241,6 @@ FDF;
         rotateImage($orderSignaturePath, 0);
         rotateImage($advisorSignaturePath, 0);
         rotateImage($ownerSignaturePath, 0);
-        
-        dd($pdfPath,$tempPdfPath);
 
                 
 
