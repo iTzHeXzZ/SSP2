@@ -139,7 +139,7 @@
         $ownerSignaturePath = $signatureDir . '/' . uniqid() . '_owner_signature.png';
         $orderSignaturePath = $signatureDir . '/' . uniqid() . '_order_signature.png';
         $advisorSignaturePath = $signatureDir . '/' . uniqid() . '_advisor_signature.png';        
-
+        dd($ownerSignaturePath);
     
         base64ToImage($ownerSignatureBase64, $ownerSignaturePath);
         base64ToImage($orderSignatureBase64, $orderSignaturePath);
