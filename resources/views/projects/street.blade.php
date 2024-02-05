@@ -8,7 +8,7 @@
             <tr>
                 <th data-sort="0">Strasse</th>
                 <th data-sort="1">Wohneinheiten</th>
-                {{-- <th data-sort="2">Bestand</th> --}}
+                <th data-sort="2">Bestand</th>
                 <th data-sort="3">Unbesuchte</th>
                 <th data-sort="4">Vertrag</th>
                 <th data-sort="5">Überleger</th>
@@ -27,7 +27,7 @@
                     <tr>
                         <td><a class="locc" href="{{ route('projects.number', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl, 'strasse' => $project->strasse]) }}" style="text-decoration: none">{{ $project->strasse }}</a></td>
                         <td>{{ $project->wohneinheiten }}</td>
-                        {{-- <td>{{ $project->bestand }}</td> --}}
+                        <td>{{ $project->bestand }}</td>
                         <td>{{ $countUnbesucht[$project->strasse] }}</td>
                         <td>{{ $countVertrag[$project->strasse] }}</td>
                         <td>{{ $countOverleger[$project->strasse] }}</td>
