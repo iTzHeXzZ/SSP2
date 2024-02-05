@@ -122,50 +122,69 @@
 </body>
 </html>
 <script>
-    $(document).ready(function () {
-        // Funktion zum Sortieren der Tabelle
-        const sortTable = function (column, descending = false) {
-            const $table = $('table');
-            const $rows = $table.find('tbody tr').toArray();
+$(document).ready(function () {
+    // Funktion zum Sortieren der Tabelle
+    const sortTable = function (column, descending = false) {
+        const $table = $('table');
+        const $rows = $table.find('tbody tr').toArray();
 
-            $rows.sort(function (a, b) {
-                const valA = parseFloat($(a).find('td:eq(' + column + ')').text().replace(',', ''));
-                const valB = parseFloat($(b).find('td:eq(' + column + ')').text().replace(',', ''));
+        $rows.sort(function (a, b) {
+            const valA = getValue($(a).find('td:eq(' + column + ')'));
+            const valB = getValue($(b).find('td:eq(' + column + ')'));
 
-                if (!isNaN(valA) && !isNaN(valB)) {
-                    return valA - valB;
-                } else {
-                    return valA.toString().localeCompare(valB.toString());
-                }
-            });
-
-            if (descending) {
-                $rows.reverse();
-            }
-
-            $table.find('tbody').empty().append($rows);
-        };
-
-        // Standardmäßig erste Spalte sortieren
-        sortTable(0);
-
-        // Klickereignisse auf Tabellenüberschriften hinzufügen
-        $('th[data-sort]').on('click', function () {
-            const column = $(this).data('sort');
-            const descending = $(this).hasClass('desc');
-
-            sortTable(column, descending);
-
-            // CSS-Klasse 'desc' umkehren, um aufsteigende und absteigende Sortierung anzuzeigen
-            $('th[data-sort]').removeClass('desc');
-            if (descending) {
-                $(this).removeClass('desc');
+            if (!isNaN(valA) && !isNaN(valB)) {
+                return valA - valB;
             } else {
-                $(this).addClass('desc');
+                return valA.toString().localeCompare(valB.toString());
             }
         });
 
+        if (descending) {
+            $rows.reverse();
+        }
+
+        $table.find('tbody').empty().append($rows);
+    };
+
+    // Funktion zum Extrahieren des Werts aus einer Zelle (unterstützt Hyperlinks und Zahlen)
+    const getValue = function ($cell) {
+        const text = $cell.text().trim();
+
+        // Versuchen, den Text als Zahl zu interpretieren
+        const numericValue = parseFloat(text.replace(',', ''));
+        if (!isNaN(numericValue)) {
+            return numericValue;
+        }
+
+        // Wenn der Text keine gültige Zahl ist, Hyperlink-Text verwenden
+        const $link = $cell.find('a');
+        if ($link.length > 0) {
+            return $link.text();
+        }
+
+        // Wenn weder Zahl noch Hyperlink-Text, den ursprünglichen Text zurückgeben
+        return text;
+    };
+
+    // Standardmäßig erste Spalte sortieren
+    sortTable(0);
+
+    // Klickereignisse auf Tabellenüberschriften hinzufügen
+    $('th[data-sort]').on('click', function () {
+        const column = $(this).data('sort');
+        const descending = $(this).hasClass('desc');
+
+        sortTable(column, descending);
+
+        // CSS-Klasse 'desc' umkehren, um aufsteigende und absteigende Sortierung anzuzeigen
+        $('th[data-sort]').removeClass('desc');
+        if (descending) {
+            $(this).removeClass('desc');
+        } else {
+            $(this).addClass('desc');
+        }
     });
-                
+});
+        
 </script>
 
