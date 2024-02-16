@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
@@ -25,4 +26,16 @@ class HomeController extends Controller
     {
         return view('home');
     }
+
+    public function download($file)
+    {
+        $path = storage_path('app/' . $file);
+
+        if (Storage::exists($file)) {
+            return response()->download($path);
+        } else {
+            abort(404, 'File not found');
+        }
+    }
+    
 }

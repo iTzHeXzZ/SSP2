@@ -5,6 +5,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\HomeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -31,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects', 'ProjectController@index')->name('projects');
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/download/{file}', [HomeController::class, 'download'])->name('download');
+
 
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
 
