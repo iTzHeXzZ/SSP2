@@ -29,7 +29,7 @@ class HomeController extends Controller
 
     public function download($file)
     {
-        $path = storage_path('app/' . $file);
+        $path = public_path('pdf/' . $file);
 
         if (Storage::exists($file)) {
             return response()->download($path);
