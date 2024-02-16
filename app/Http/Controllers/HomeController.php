@@ -30,9 +30,9 @@ class HomeController extends Controller
     public function download($file)
     {
         $path = public_path('pdf/' . $file);
-
+        dd($path);
         if (Storage::exists($file)) {
-            dd($path);
+            
             return response()->download($path);
         } else {
             abort(404, 'File not found');
