@@ -237,7 +237,7 @@ FDF;
         unlink($FDFfile);
 
         $pdf = new Fpdi();
-       // $pdf->setSourceFile($tempPdfPath);
+        $pdf->setSourceFile($tempPdfPath);
         rotateImage($orderSignaturePath, 0);
         rotateImage($advisorSignaturePath, 0);
         rotateImage($ownerSignaturePath, 0);

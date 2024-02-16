@@ -83,6 +83,12 @@
                                     GEE ab 4 WE
                                 </a>
                             </div>
+                            <div class="link-item">
+                                <a href="{{ route('download', 'flyer.pdf') }}" target="_blank">
+                                    <span class="link-icon">&#128229;</span>
+                                    Preisflyer
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
