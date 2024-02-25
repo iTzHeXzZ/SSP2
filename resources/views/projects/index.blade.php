@@ -21,48 +21,29 @@
         <tbody>
             @php
             $uniqueNames = $projects->unique('ort');
-            $perPage = 5; // Anzahl der Projekte pro Seite
-            $currentPage = request()->get('page', 1); // Hole die aktuelle Seite aus der URL, Standard ist Seite 1
+            $perPage = 10; 
+            $currentPage = request()->get('page', 1); 
             $slicedProjects = array_slice($uniqueNames->all(), ($currentPage - 1) * $perPage, $perPage);
             $uniqueProjectsPaginated = new \Illuminate\Pagination\LengthAwarePaginator($slicedProjects, count($uniqueNames), $perPage, $currentPage, ['path' => request()->url()]);
             @endphp
 
-
             @foreach ($uniqueProjectsPaginated as $project)
                 @php
-                    $countUnbesucht = $projects->where('ort', $project->ort)
-                        ->where('postleitzahl', $project->postleitzahl)
-                        ->where('status', 'Unbesucht')->count();
-                    
-                    $countVertrag = $projects->where('ort', $project->ort)
-                        ->where('postleitzahl', $project->postleitzahl)
-                        ->where('status', 'Vertrag')->count();
-                    
-                    $countOverleger = $projects->where('ort', $project->ort)
-                        ->where('postleitzahl', $project->postleitzahl)
-                        ->where('status', 'Überleger')->count();
-                    
-                    $countKarte = $projects->where('ort', $project->ort)
-                        ->where('postleitzahl', $project->postleitzahl)
-                        ->where('status', 'Karte')->count();
-                    
-                    $countKeinInteresse = $projects->where('ort', $project->ort)
-                        ->where('postleitzahl', $project->postleitzahl)
-                        ->where('status', 'Kein Interesse')->count();
-                    
-                    $totalWohneinheiten = $projects->where('ort', $project->ort)
-                        ->where('postleitzahl', $project->postleitzahl)
-                        ->sum('wohneinheiten');
-                    
-                    $percentage = 0;
-                    if ($totalWohneinheiten > 0) {
-                        $percentage = ($countVertrag / $totalWohneinheiten) * 100;
-                    }
-
-                    $lastUpdated = $projects
+                    $filteredProjects = $projects
                         ->where('ort', $project->ort)
-                        ->where('postleitzahl', $project->postleitzahl)
-                        ->max('updated_at');
+                        ->where('postleitzahl', $project->postleitzahl);
+
+                    $countUnbesucht = $filteredProjects->where('status', 'Unbesucht')->count();
+                    $countVertrag = $filteredProjects->where('status', 'Vertrag')->count();
+                    $countOverleger = $filteredProjects->where('status', 'Überleger')->count();
+                    $countKarte = $filteredProjects->where('status', 'Karte')->count();
+                    $countKeinInteresse = $filteredProjects->where('status', 'Kein Interesse')->count();
+                    
+                    $totalWohneinheiten = $filteredProjects->sum('wohneinheiten');
+
+                    $percentage = ($totalWohneinheiten > 0) ? ($countVertrag / $totalWohneinheiten) * 100 : 0;
+
+                    $lastUpdated = $filteredProjects->max('updated_at');
                 @endphp
                 <tr>
                     <td><a class="locc" href="{{ route('projects.street', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" style="text-decoration : none">{{ $project->ort }}</a></td>
