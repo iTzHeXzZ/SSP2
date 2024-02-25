@@ -21,8 +21,14 @@
         <tbody>
             @php
             $uniqueNames = $projects->unique('ort');
+            $perPage = 5; // Anzahl der Projekte pro Seite
+            $currentPage = request()->get('page', 1); // Hole die aktuelle Seite aus der URL, Standard ist Seite 1
+            $slicedProjects = array_slice($uniqueNames->all(), ($currentPage - 1) * $perPage, $perPage);
+            $uniqueProjectsPaginated = new \Illuminate\Pagination\LengthAwarePaginator($slicedProjects, count($uniqueNames), $perPage, $currentPage, ['path' => request()->url()]);
             @endphp
-            @foreach ($uniqueNames as $project)
+
+
+            @foreach ($uniqueProjectsPaginated as $project)
                 @php
                     $countUnbesucht = $projects->where('ort', $project->ort)
                         ->where('postleitzahl', $project->postleitzahl)
@@ -73,4 +79,5 @@
             @endforeach
         </tbody>
     </table>
+    {{ $uniqueProjectsPaginated->links() }}
 @endsection
