@@ -48,6 +48,7 @@ deploy:
       - chmod -R 755 public
       - php artisan optimize
       - php artisan up
+      - pdftk --version
 
 # uncomment the following lines to configure cron jobs
 #runtime:
