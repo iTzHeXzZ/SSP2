@@ -95,109 +95,129 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css">
 <script>
-   $(document).ready(function() {
-    const locationZipcodeSelect = $('#location_zipcode');
-    const streetSelect = $('#street');
-    const projectIdInput = $('#project_id');
+    $(document).ready(function () {
+        const locationZipcodeSelect = $('#location_zipcode');
+        const streetSelect = $('#street');
+        const projectIdInput = $('#project_id');
 
-    locationZipcodeSelect.on('change', function() {
+        locationZipcodeSelect.on('change', function () {
+            streetSelect.empty();
 
-        streetSelect.empty();
+            const selectedLocationZipcode = $(this).val();
+            const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
+            projectIdInput.val(projectId);
+            console.log('Projekt-ID:', projectId);
 
-        const selectedLocationZipcode = $(this).val();
-        const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
-        projectIdInput.val(projectId);
-        console.log('Projekt-ID:', projectId);
+            fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const groupedStreets = {};
 
-        fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            const groupedStreets = {};
+                    data.forEach(street => {
+                        if (!groupedStreets[street.strasse]) {
+                            groupedStreets[street.strasse] = [];
+                        }
+                        groupedStreets[street.strasse].push(street.hausnummer);
+                    });
 
-            data.forEach(street => {
-                if (!groupedStreets[street.strasse]) {
-                    groupedStreets[street.strasse] = [];
-                }
-                groupedStreets[street.strasse].push(street.hausnummer);
-            });
+                    const sortedStreets = Object.keys(groupedStreets).sort((a, b) => a.localeCompare(b));
 
-            $.each(groupedStreets, function(strasse, hausnummern) {
-                streetSelect.append($('<option>', {
-                    value: strasse,
-                    text: strasse
-                }));
-            });
+                    sortedStreets.forEach(strasse => {
+                        streetSelect.append($('<option>', {
+                            value: strasse,
+                            text: strasse
+                        }));
+                    });
 
-            streetSelect.multiselect({
-                enableFiltering: true,
-                maxHeight: 300,
-            });
-            streetSelect.multiselect('rebuild');
-        })
-        .catch(error => console.error('Error:', error));
+                    initializeMultiselect(); 
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        function initializeMultiselect(isModal = false, targetSelector = '#street') {
+    const targetSelect = $(targetSelector);
+
+    console.log('Initializing Multiselect on:', isModal ? 'Modal' : 'Main Page');
+
+    targetSelect.multiselect('destroy');
+    targetSelect.multiselect({
+        enableFiltering: true,
+        maxHeight: 300,
+        includeSelectAllOption: true,
+        onSelectAll: function () {
+            targetSelect.multiselect('updateButtonText');
+        },
+        onChange: function (option, checked) {
+            if (option.val() === 'alle') {
+                targetSelect.multiselect('selectAll', checked);
+            }
+        }
     });
+}
 
-    $('.toggle-streets-btn').click(function() {
-    const userId = $(this).data('user-id');
 
-    fetch(`/get-streets-for-user/${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            const modalBody = $('#assignStreetsModal .modal-body');
-            const projectName = data.projectName;
+        $('.toggle-streets-btn').click(function () {
+            const userId = $(this).data('user-id');
 
-            // Orte eindeutig machen
-            const uniqueOrte = Array.from(new Set(data.streetsAndOrte.map(item => item.ort)));
+            fetch(`/get-streets-for-user/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const modalBody = $('#assignStreetsModal .modal-body');
+                    const projectName = data.projectName;
 
-            modalBody.html(`
-                <form action="{{ route('remove.street.from.project') }}" method="post" style="display: inline-block;">
-                    @csrf
-                    <input type="hidden" name="user_id" value="${userId}">
-                    <input type="hidden" name="project_id" value="${projectName}">
-                    
-                    ${uniqueOrte.map(ort => {
-                        const uniqueStreetsForOrt = Array.from(new Set(
-                            data.streetsAndOrte
-                                .filter(item => item.ort === ort)
-                                .map(item => `${item.strasse}, ${item.ort}`)
-                        ));
+                    const uniqueOrte = Array.from(new Set(data.streetsAndOrte.map(item => item.ort)));
 
-                        return `
-                            <ul class="user-streets-list-${userId}" style="list-style-type: none;">
-                                <li>
-                                    <h5>${ort}</h5>
-                                </li>
-                                ${uniqueStreetsForOrt.map(streetAndOrt => `
-                                    <li>
-                                        <label>
-                                            <input type="checkbox" name="streets[]" value="${streetAndOrt}" class="street-checkbox">
-                                            <strong>${streetAndOrt}</strong>
-                                        </label>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        `;
-                    }).join('')}
+                    modalBody.html(`
+                        <form action="{{ route('remove.street.from.project') }}" method="post" style="display: inline-block;">
+                            @csrf
+                            <input type="hidden" name="user_id" value="${userId}">
+                            <input type="hidden" name="project_id" value="${projectName}">
+                            
+                            ${uniqueOrte.map(ort => {
+                                const uniqueStreetsForOrt = Array.from(new Set(
+                                    data.streetsAndOrte
+                                        .filter(item => item.ort === ort)
+                                        .map(item => `${item.strasse}, ${item.ort}`)
+                                ));
 
-                    <button type="submit" class="btn btn-danger btn-sm">Ausgewählte Straßen entfernen</button>
-                </form>
-            `);
+                                return `
+                                    <ul class="user-streets-list-${userId}" style="list-style-type: none;">
+                                        <li>
+                                            <h5>${ort}</h5>
+                                        </li>
+                                        ${uniqueStreetsForOrt.map(streetAndOrt => `
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" name="streets[]" value="${streetAndOrt}" class="street-checkbox">
+                                                    <strong>${streetAndOrt}</strong>
+                                                </label>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                `;
+                            }).join('')}
 
-            $('#assignStreetsModal').modal('show');
-        })
-        .catch(error => console.error('Error:', error));
-});
+                            <button type="submit" class="btn btn-danger btn-sm">Ausgewählte Straßen entfernen</button>
+                        </form>
+                    `);
 
-});
-
+                    initializeMultiselect(true, '#assignStreetsModal #street'); 
+                    $('#assignStreetsModal').modal('show');
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
 </script>
 @endsection
+
+
+
 
 
 

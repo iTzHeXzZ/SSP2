@@ -22,7 +22,6 @@ deploy:
       - composer update
       - php artisan migrate --force -n
       - php artisan storage:link
-      - pdftk --version
       - php artisan optimize
       - php artisan up
 

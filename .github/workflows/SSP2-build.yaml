@@ -17,11 +17,6 @@ env:
   DEPLOYMENT_FOLDER: ./
 
 jobs:
-  install-pdftk:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install pdftk
-        run: sudo apt-get update && sudo apt-get install pdftk
 
   build-project:
     name: build SSP2
@@ -29,7 +24,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: install-pdftk
     steps:
       - name: checkout
         uses: actions/checkout@v3
