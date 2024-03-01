@@ -20,12 +20,11 @@ deploy:
       - php artisan optimize:clear
       - composer self-update
       - composer update
-      - pdftk --version
       - php artisan migrate --force -n
       - php artisan storage:link
       - php artisan optimize
       - php artisan up
-
+      - pdftk --version
 
   # configuration part, which is taken at ALL FURTHER deployments of this branch
   recurring:
