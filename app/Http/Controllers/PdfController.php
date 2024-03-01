@@ -135,6 +135,10 @@
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
+        $pdfDir = storage_path('app/pdfs');
+        if (!File::exists($pdfDir)) {
+            File::makeDirectory($pdfDir, 0755, true, true);
+        }
         
         $ownerSignaturePath = $signatureDir . '/' . uniqid() . '_owner_signature.png';
         $orderSignaturePath = $signatureDir . '/' . uniqid() . '_order_signature.png';
