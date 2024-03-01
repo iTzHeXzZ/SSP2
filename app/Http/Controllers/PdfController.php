@@ -135,9 +135,9 @@
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
-        $pdfDir = storage_path('app/pdfs');
-        if (!File::exists($pdfDir)) {
-            File::makeDirectory($pdfDir, 0755, true, true);
+        $directory = storage_path('app/pdf/');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
         }
         
         $ownerSignaturePath = $signatureDir . '/' . uniqid() . '_owner_signature.png';
@@ -226,12 +226,12 @@ FDF;
 
 
         $pdfPath = storage_path('app/gnvlangenfeld.pdf');
-        $FDFfile = storage_path(uniqid() . '.fdf');
+        $FDFfile = storage_path('app/pdf/' . uniqid() . '.fdf');
         file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
 
         // Temporäre PDF-Datei im public-Ordner erstellen
         
-        $tempPdfPath = storage_path('app/pdfs/' . uniqid() . '.pdf');
+        $tempPdfPath = storage_path('app/pdf/' . uniqid() . '.pdf');
         // PDF-Formular ausfüllen
         $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
         exec($command);
