@@ -226,7 +226,7 @@ FDF;
 
 
         $pdfPath = storage_path('app/gnvlangenfeld.pdf');
-        $FDFfile = storage_path('app/pdf/' . uniqid() . '.fdf');
+        $FDFfile = $directory . '/' . uniqid() . '.fdf';
         file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
 
         // Temporäre PDF-Datei im public-Ordner erstellen
