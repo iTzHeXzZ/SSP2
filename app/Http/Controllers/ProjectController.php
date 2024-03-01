@@ -43,7 +43,8 @@ class ProjectController extends Controller
     
     
 
-    public function street($ort, $postleitzahl){
+    public function street($ort, $postleitzahl)
+    {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
@@ -52,16 +53,17 @@ class ProjectController extends Controller
         $gwohneinheiten = new Collection();
         $gbestand = new Collection();
     
+        // Initialize counters as arrays
         $countOverleger = [];
         $countUnbesucht = [];
         $countVertrag = [];
         $countKeinInteresse = [];
         $countKarte = [];
-
+    
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
             $projects = Project::where('ort', $ort)
-            ->where('postleitzahl', $postleitzahl)
-            ->get();
+                ->where('postleitzahl', $postleitzahl)
+                ->get();
         } else {
             $projects = $user->projects()->where('ort', $ort)->where('postleitzahl', $postleitzahl)->get();
         }
@@ -76,28 +78,17 @@ class ProjectController extends Controller
                 $gwohneinheiten->push($project);
                 $gbestand->push($project);
             }
+    
             $strasse = $project->strasse;
     
-            if (!isset($countOverleger[$strasse])) {
-                $countOverleger[$strasse] = 0;
-            }
-
-            if (!isset($countKarte[$strasse])) {
-                $countKarte[$strasse] = 0;
-            }
+            // Initialize counters if not set
+            $countOverleger[$strasse] ??= 0;
+            $countUnbesucht[$strasse] ??= 0;
+            $countVertrag[$strasse] ??= 0;
+            $countKeinInteresse[$strasse] ??= 0;
+            $countKarte[$strasse] ??= 0;
     
-            if (!isset($countUnbesucht[$strasse])) {
-                $countUnbesucht[$strasse] = 0;
-            }
-    
-            if (!isset($countVertrag[$strasse])) {
-                $countVertrag[$strasse] = 0;
-            }
-    
-            if (!isset($countKeinInteresse[$strasse])) {
-                $countKeinInteresse[$strasse] = 0;
-            }
-    
+            // Update counters based on project status
             if ($project->status === 'Überleger') {
                 $countOverleger[$strasse]++;
             } elseif ($project->status === 'Unbesucht') {
@@ -114,9 +105,10 @@ class ProjectController extends Controller
         return view('projects.street', compact(
             'projects', 'ort', 'postleitzahl', 'user',
             'gwohneinheiten', 'gbestand',
-            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse','countKarte'
+            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse', 'countKarte'
         ));
     }
+    
     
     
 

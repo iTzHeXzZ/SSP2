@@ -19,10 +19,7 @@
             </tr>
         </thead>
         <tbody>
-            @php
-                $uniqueNames = $projects->unique('strasse');
-            @endphp
-            @foreach ($uniqueNames as $project)
+            @foreach ($gwohneinheiten as $project)
                 @if (auth()->user()->hasRole(['Admin', 'Viewer']) || auth()->user()->projects->contains($project))
                     <tr>
                         <td><a class="locc" href="{{ route('projects.number', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl, 'strasse' => $project->strasse]) }}" style="text-decoration: none">{{ $project->strasse }}</a></td>
@@ -58,6 +55,3 @@
         </tbody>
     </table>
 @endsection
-
-
-
