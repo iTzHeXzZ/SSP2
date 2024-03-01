@@ -236,7 +236,6 @@ FDF;
         $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
         exec($command);
                 
-        unlink($FDFfile);
 
         $pdf = new Fpdi();
         $pdf->setSourceFile($tempPdfPath);
@@ -264,6 +263,8 @@ FDF;
         $pdf->Output($outputPdfPath, 'F');
         $outputname = "$vorname $nachname " . date('Y-m-d');
         unlink($tempPdfPath);
+        unlink($FDFfile);
+        unlink($FDFfile);
         unlink($orderSignaturePath);
         unlink($ownerSignaturePath);
         unlink($advisorSignaturePath);
