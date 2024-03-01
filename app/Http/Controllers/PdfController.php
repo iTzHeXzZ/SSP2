@@ -227,7 +227,7 @@ FDF;
 
         // Temporäre PDF-Datei im public-Ordner erstellen
         
-        $tempPdfPath = storage_path('app/' . uniqid() . '.pdf');
+        $tempPdfPath = storage_path('app/pdfs/' . uniqid() . '.pdf');
         // PDF-Formular ausfüllen
         $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
         exec($command);
@@ -236,6 +236,7 @@ FDF;
 
         $pdf = new Fpdi();
         $pdf->setSourceFile($tempPdfPath);
+        dd($tempPdfPath);
         rotateImage($orderSignaturePath, 0);
         rotateImage($advisorSignaturePath, 0);
         rotateImage($ownerSignaturePath, 0);
