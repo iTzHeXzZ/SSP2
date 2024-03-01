@@ -135,7 +135,7 @@
         if (!File::exists($signatureDir)) {
             File::makeDirectory($signatureDir, 0755, true, true);
         }
-        $directory = storage_path('app/pdf/');
+        $directory = storage_path('app/pdf');
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true);
         }
@@ -231,7 +231,7 @@ FDF;
 
         // Temporäre PDF-Datei im public-Ordner erstellen
         
-        $tempPdfPath = storage_path('app/pdf/' . uniqid() . '.pdf');
+        $tempPdfPath =  $directory . '/' . uniqid() . '.pdf';
         // PDF-Formular ausfüllen
         $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
         exec($command);
@@ -240,7 +240,6 @@ FDF;
 
         $pdf = new Fpdi();
         $pdf->setSourceFile($tempPdfPath);
-        dd($tempPdfPath);
         rotateImage($orderSignaturePath, 0);
         rotateImage($advisorSignaturePath, 0);
         rotateImage($ownerSignaturePath, 0);
