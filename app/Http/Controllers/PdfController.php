@@ -7,7 +7,6 @@
     use Illuminate\Support\Facades\File;
     use setasign\Fpdi\Fpdi;
     
-    
     class PdfController extends Controller
     {
         public function fillPdf(Request $request)
@@ -228,8 +227,6 @@ FDF;
         $pdfPath = storage_path('app/gnvlangenfeld.pdf');
         $FDFfile = $directory . '/' . uniqid() . '.fdf';
         file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
-
-        // Temporäre PDF-Datei im public-Ordner erstellen
         
         $tempPdfPath =  $directory . '/' . uniqid() . '.pdf';
         // PDF-Formular ausfüllen
@@ -263,7 +260,6 @@ FDF;
         $pdf->Output($outputPdfPath, 'F');
         $outputname = "$vorname $nachname " . date('Y-m-d');
         unlink($tempPdfPath);
-        unlink($FDFfile);
         unlink($FDFfile);
         unlink($orderSignaturePath);
         unlink($ownerSignaturePath);

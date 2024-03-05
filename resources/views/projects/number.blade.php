@@ -19,6 +19,26 @@
                     <td>{{ $project->hausnummer }}</td>
                     <td>
                         <style>
+                            .feedback-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    color: #fff;
+    font-size: 16px;
+    border-radius: 5px;
+    z-index: 999;
+}
+
+.feedback-message.success {
+    background-color: #28a745; /* Grüner Hintergrund für Erfolgsmeldung */
+}
+
+.feedback-message.error {
+    background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
+}
+
                             /* Stil für das Formular innerhalb der Zelle */
                             form {
                                 display: flex;
@@ -128,14 +148,28 @@ function submitFormViaAjax(form) {
     axios.post(`/projects/update/${projectId}`, formData)
         .then(response => {
             console.log(response.data);
+            showFeedbackMessage('Speichern erfolgreich!', 'success');
         })
         .catch(error => {
             // Fehler verarbeiten, falls nötig
             console.error(error);
+            showFeedbackMessage('Fehler beim Speichern!', 'error');
         })
         .finally(() => {
             restoreScrollPosition();
         });
+}
+
+function showFeedbackMessage(message, type) {
+    const feedbackContainer = document.createElement('div');
+    feedbackContainer.className = `feedback-message ${type}`;
+    feedbackContainer.textContent = message;
+
+    document.body.appendChild(feedbackContainer);
+
+    setTimeout(() => {
+        feedbackContainer.remove();
+    }, 2000);
 }
 
 function selectAndSave(status, ort, hausnummer) {
@@ -155,13 +189,13 @@ function selectAndSave(status, ort, hausnummer) {
                 // Erfolgreiche Antwort verarbeiten, falls nötig
                 console.log(response.data);
 
-                // Hier kannst du bei Bedarf weitere Aktionen ausführen
+                showFeedbackMessage('Speichern erfolgreich!', 'success');
             })
             .catch(error => {
                 // Fehler verarbeiten, falls nötig
                 console.error(error);
 
-                // Hier kannst du bei Bedarf weitere Aktionen ausführen
+                showFeedbackMessage('Fehler beim Speichern!', 'error');
             })
             .finally(() => {
                 restoreScrollPosition();
