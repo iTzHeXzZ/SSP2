@@ -47,7 +47,7 @@ deploy:
       - php artisan migrate --force -n
       - php artisan storage:link
       - chmod -R 755 public
-      - sudo apt-get install pdftk -y
+      - apt-get install pdftk -y
       - php artisan optimize
       - php artisan up
 
