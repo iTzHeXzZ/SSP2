@@ -30,7 +30,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
 
     Route::get('/projects', 'ProjectController@index')->name('projects');
-
+    Route::get('/pdf/test-pdftk', [PdfController::class, 'testPdftk'])->name('pdf.testPdftk');
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('/download/{file}', [HomeController::class, 'download'])->name('download');
 

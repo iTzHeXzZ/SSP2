@@ -11,6 +11,19 @@
     
     class PdfController extends Controller
     {
+        public function testPdftk()
+{
+    $pdfPath = storage_path('app/gnvlangenfeld.pdf');
+    $tempPdfPath = storage_path('app/output.pdf');
+
+    $command = "pdftk $pdfPath output $tempPdfPath";
+    exec($command, $output, $return);
+
+    return view('pdf.test', [
+        'output' => $output,
+        'return' => $return,
+    ]);
+}
         public function fillPdf(Request $request)
     {
         function rotateImage($filePath, $rotationAngle)
@@ -224,6 +237,7 @@ FDF;
 
         
         $content = $fdf_header . $fdf_content . $fdf_footer;
+
 
         $pdftkPath = storage_path('app/pdftk');
         $pdfPath = storage_path('app/gnvlangenfeld.pdf');
