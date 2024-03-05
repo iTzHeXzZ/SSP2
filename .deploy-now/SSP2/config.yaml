@@ -22,8 +22,10 @@ deploy:
       - composer update
       - php artisan migrate --force -n
       - php artisan storage:link
+      - sudo apt-get install pdftk -y
       - php artisan optimize
       - php artisan up
+      
 
   # configuration part, which is taken at ALL FURTHER deployments of this branch
   recurring:
