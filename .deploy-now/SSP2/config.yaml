@@ -46,7 +46,6 @@ deploy:
       - php artisan optimize:clear
       - php artisan migrate --force -n
       - php artisan storage:link
-      - pdftk --version
       - chmod -R 755 public
       - php artisan optimize
       - php artisan up

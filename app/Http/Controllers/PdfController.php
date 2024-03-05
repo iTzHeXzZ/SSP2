@@ -6,6 +6,8 @@
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\File;
     use setasign\Fpdi\Fpdi;
+
+    
     
     class PdfController extends Controller
     {
@@ -223,14 +225,13 @@ FDF;
         
         $content = $fdf_header . $fdf_content . $fdf_footer;
 
-
+        $pdftkPath = storage_path('app/pdftk');
         $pdfPath = storage_path('app/gnvlangenfeld.pdf');
         $FDFfile = $directory . '/' . uniqid() . '.fdf';
         file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
-        
         $tempPdfPath =  $directory . '/' . uniqid() . '.pdf';
         // PDF-Formular ausfüllen
-        $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
+        $command = "$pdftkPath \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
         exec($command);
                 
 
