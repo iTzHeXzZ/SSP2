@@ -67,6 +67,10 @@ jobs:
           deployment-id: ${{ matrix.deployment-id }}
           action: retrieve-info
 
+        - name: Install pdftk
+          run: sudo apt-get install pdftk
+
+
       - name: Render templates
         uses: ionos-deploy-now/template-renderer-action@v2
         id: template
