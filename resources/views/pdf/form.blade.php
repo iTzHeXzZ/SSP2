@@ -99,10 +99,14 @@
             <input type="text" name="fields[Firma_Gemeinschaft]" id="Firma_Gemeinschaft" >
 
             <label for="Vorname">Vorname:</label>
-            <input type="text" name="fields[Vorname]" id="Vorname" required>
+            <input type="text" name="fields[Vorname]" id="Vorname" onblur="combineAndPrefill()"required>
 
             <label for="Nachname">Nachname:</label>
-            <input type="text" name="fields[Nachname]" id="Nachname" required>
+            <input type="text" name="fields[Nachname]" id="Nachname" onblur="combineAndPrefill()" required>
+
+            <label for="gb">Geburtsdatum:</label>
+            <input type="date" name="gb" id="gb" required >
+
         </fieldset>
 
         <fieldset>
@@ -130,6 +134,18 @@
 
             <label for="EMailAdresse">E-Mail-Adresse:</label>
             <input type="text" name="fields[EMailAdresse]" id="EMailAdresse" >
+        </fieldset>
+
+        <fieldset>
+            <legend>Kontoinformationen</legend>
+            <label for="bank">Bank:</label>
+            <input type="text" name="bank" id="bank" >
+
+            <label for="iban">IBAN:</label>
+            <input type="text" name="iban" id="iban" value="DE" >
+
+            <label for="kontoinhaber">Kontoinhaber:</label>
+            <input type="text" name="kontoinhaber" id="kontoinhaber" value="" >
         </fieldset>
 
         <fieldset>
@@ -209,7 +225,15 @@
 
     <fieldset>
         <h3>Gibt es zusätzliche Wohneinheiten?</h3>
-        <label for="anzahlWohneinheiten">Anzahl der Wohneinheiten:</label>
+        <label for="anzahlwe">Anzahl der Wohneinheiten:</label>
+        <input type="text" name="anzahlwe" id="anzahlwe" >
+        <label for="anzahlgk">Anzahl der Geschäftseinheiten:</label>
+        <input type="text" name="anzahlgk" id="anzahlgk" >
+    </fieldset>
+
+    <fieldset>
+        <h3>Gibt es zusätzliche Gebäude?</h3>
+        <label for="anzahlWohneinheiten">Anzahl der Gebäude:</label>
         <select id="anzahlWohneinheiten" name="anzahlWohneinheiten" onchange="createAdditionalFields()">
             <option value="0">0</option>
             <option value="1">1</option>
@@ -217,7 +241,6 @@
             <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>
-            <option value="6">6</option>
         </select>
     </fieldset>
 
@@ -252,7 +275,7 @@
                 <div class="bg-purple bg-gradient p-1 text-white">
                     <div class="error-placeholder">
                         <div class="form-check">
-                            <input value="gf15024m" id="gf15024m" class="form-check-input" name="gfpaket" type="radio"> <label for="gf150">Tarif wählen</label>
+                            <input value="gf15024m" id="gf15024m" class="form-check-input" name="gfpaket" type="radio" checked> <label for="gf150">Tarif wählen</label>
                         </div>
                     </div>
                 </div>
@@ -397,6 +420,13 @@
                 <div class="col">
                     <div class="mb-3 error-placeholder">
                         <div class="form-check">
+                            <input value="none" id="none" class="form-check-input" name="fritzBox" type="radio" checked> <label for="none">Keine Auswahl</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3 error-placeholder">
+                        <div class="form-check">
                             <input value="gfboxonetime" id="gfboxonetime" class="form-check-input" name="fritzBox" type="radio"> <label for="gfboxonetime">Fritz!Box 5530 Kauf: 209,00€</label>
                         </div>
                     </div>
@@ -512,6 +542,16 @@
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
+        function combineAndPrefill() {
+            // Hole die Werte aus Feld A und Feld B
+            var valueA = document.getElementById('Vorname').value;
+            var valueB = document.getElementById('Nachname').value;
+
+            // Kombiniere die Werte und setze das Ergebnis in Feld C
+            document.getElementById('kontoinhaber').value = valueA + " " + valueB;
+        }
+
+
             var checkbox = document.getElementById('standardCheckbox');
             var zusatzFelderContainer = document.getElementById('zusatzFelder');
 
@@ -561,7 +601,7 @@
                     for (var i = 0; i < dropdown.value; i++) {
                         var fieldset = document.createElement('fieldset');
                         var legend = document.createElement('legend');
-                        legend.innerText = 'Zusätzliche Wohneinheit ' + (i + 1);
+                        legend.innerText = 'Zusätzliches Gebäude ' + (i + 1);
                         fieldset.appendChild(legend);
 
                         
@@ -642,6 +682,10 @@
         formData['fields.Telefon_mobil'] = document.getElementById('Telefon_mobil').value;
         formData['fields.EMailAdresse'] = document.getElementById('EMailAdresse').value;
         formData['fields.kundennummer'] = document.getElementById('kundennummer').value;
+        formData['iban'] = document.getElementById('iban').value;
+        formData['bank'] = document.getElementById('bank').value;
+        formData['kontoinhaber'] = document.getElementById('kontoinhaber').value;
+        formData['gb'] = document.getElementById('gb').value;
         
         var additionalFieldsContainer = document.getElementById('additionalFieldsContainer');
         var additionalFieldInputs = additionalFieldsContainer.querySelectorAll('input[type="text"]');
@@ -668,6 +712,10 @@
         document.getElementById('Hausnummer').value = formData['fields.Hausnummer'] || '';
         document.getElementById('PLZ').value = formData['fields.PLZ'] || '';
         document.getElementById('Ort').value = formData['fields.Ort'] || '';
+        document.getElementById('iban').value = formData['iban'] || '';
+        document.getElementById('bank').value = formData['bank'] || '';
+        document.getElementById('gb').value = formData['gb'] || '';
+        document.getElementById('kontoinhaber').value = formData['kontoinhaber'] || '';
         document.getElementById('Telefon_Festnetz').value = formData['fields.Telefon_Festnetz'] || '';
         document.getElementById('Telefon_mobil').value = formData['fields.Telefon_mobil'] || '';
         document.getElementById('EMailAdresse').value = formData['fields.EMailAdresse'] || '';
@@ -708,8 +756,8 @@
         window.close(); 
     },
     error: function(error) {
-        alert('E-Mail wurde erfolgreich gesendet.');
-        window.close();
+        alert('E-Mail wurde erfolgreich gesendet!.');
+        window.location.reload(); 
     }
     });
     var form = document.getElementById('formOnPage2');

@@ -30,12 +30,19 @@ class HomeController extends Controller
     public function download($file)
     {
         $path = storage_path('app/' . $file);
-
+    
         if (Storage::exists($file)) {
-            return response()->download($path);
+            $response = response()->download($path);
+    
+            if (str_starts_with($file, 'temporary_')) {
+                $response->deleteFileAfterSend(true);
+            }
+    
+            return $response;
         } else {
             abort(404, 'File not found');
         }
     }
+    
     
 }

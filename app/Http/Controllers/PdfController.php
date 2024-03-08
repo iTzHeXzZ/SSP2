@@ -13,36 +13,8 @@
     
     class PdfController extends Controller
     {
-        public function testPdftk()
-{
-    $pdfPath = storage_path('app/gnvlangenfeld.pdf');
-    $tempPdfPath = storage_path('app/output.pdf');
-
-    $command = "pdftk $pdfPath output $tempPdfPath";
-    exec($command, $output, $return);
-
-    return view('pdf.test', [
-        'output' => $output,
-        'return' => $return,
-    ]);
-}
         public function fillPdf(Request $request)
     {
-        function rotateImage($filePath, $rotationAngle)
-        {
-            $source = imagecreatefrompng($filePath) or die('Error opening file ' . $filePath);
-            imagealphablending($source, false);
-            imagesavealpha($source, true);
-        
-            $rotation = imagerotate($source, $rotationAngle, imageColorAllocateAlpha($source, 0, 0, 0, 127));
-            imagealphablending($rotation, false);
-            imagesavealpha($rotation, true);
-        
-            imagepng($rotation, $filePath);
-        
-            imagedestroy($source);
-            imagedestroy($rotation);
-        }
 
         $username           = Auth::user()->name;
         $anredeFrau         = $request->input('fields_Anrede_Frau') === 'X' ? 'X' : '';
@@ -53,6 +25,7 @@
         $firmaGemeinschaft  = $request->input('fields_Firma_Gemeinschaft');
         $vorname            = $request->input('fields_Vorname');
         $nachname           = $request->input('fields_Nachname');
+        $gebu               = $request->input('gb');
         $strasse            = $request->input('fields_Strasse');
         $hausnummer         = $request->input('fields_Hausnummer');
         $plz                = $request->input('fields_PLZ');
@@ -61,6 +34,11 @@
         $telefonMobil       = $request->input('fields_Telefon_mobil');
         $emailAdresse       = $request->input('fields_EMailAdresse');
         $kundennummer       = $request->input('fields_kundennummer');
+        $abwcustom          = $request->input('kontoinhaber');
+        $iban               = $request->input('iban');
+        $bank               = $request->input('bank');
+        $we                 = $request->input('anzahlwe');
+        $gk                 = $request->input('anzahlgk');
         $ortDatum           = 'Langenfeld ,' . date('d.m.Y');
         $waipustick         = $request->input('waipustick');
         $cabletv            = $request->input('cabletv');
@@ -107,7 +85,9 @@
         }
         $adresse = $strasse . ' ' . $hausnummer . ', ' . $plz . ' ' . $ort;
         $customer = $vorname . ' ,' . $nachname;
-
+        $combplzort = $plz . ' ' . $ort;
+        $combstrha = $strasse . ' ' . $hausnummer;
+        $combtel = $telefonMobil . '  ' . $telefonFestnetz;
 
 
         $selectedOption = $request->input('gfpaket'); 
@@ -169,103 +149,18 @@
         base64ToImage($orderSignatureBase64, $orderSignaturePath);
         base64ToImage($advisorSignatureBase64, $advisorSignaturePath);
 
-        
 
-
-//         $fdf_header = <<<FDF
-//         %FDF-1.2
-//         1 0 obj
-//         <<
-//         /FDF << /Fields [
-//         FDF;
-        
-//         // FDF footer section
-//         $fdf_footer = <<<FDF
-// ] >> >>
-// 2 0 obj
-// <<
-// /Length 4744
-// /Filter [/ASCII85Decode /FlateDecode]
-// >>
-// stream
-// ... (hier kommt der FDF-Content hin)
-// FDF;
-//         // FDF content section
-//         $fdf_content  = "<</T($checkboxValue)/V/Ja/AS/Ja>>";
-//         $fdf_content .= "<</T($checkboxDevice)/V/Ja/AS/Ja>>";
-//         $fdf_content .= "<</T(Frau)/V(" . mb_convert_encoding($anredeFrau1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Mann)/V(" . mb_convert_encoding($anredeHerr1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Divers)/V(" . mb_convert_encoding($anredeDivers1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Eheleute)/V(" . mb_convert_encoding($eheleute1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Titel)/V(" . mb_convert_encoding($titel1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Firma Gemeinschaft)/V(" . mb_convert_encoding($firmaGemeinschaft1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Vorname)/V(" . mb_convert_encoding($vorname, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Nachname)/V(" . mb_convert_encoding($nachname, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Strasse)/V(" . mb_convert_encoding($strasse, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Hausnummer)/V(" . mb_convert_encoding($hausnummer, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(PLZ)/V(" . mb_convert_encoding($plz, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Ort)/V(" . mb_convert_encoding($ort, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Telefon Festnetz)/V(" . mb_convert_encoding($telefonFestnetz, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Telefon mobil)/V(" . mb_convert_encoding($telefonMobil, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(EMailAdresse)/V(" . mb_convert_encoding($emailAdresse, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(vorName)/V(" . mb_convert_encoding($vorname1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(nachName)/V(" . mb_convert_encoding($nachname1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Strassen)/V(" . mb_convert_encoding($strasse1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(hausNummer)/V(" . mb_convert_encoding($hausnummer1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(plz)/V(" . mb_convert_encoding($plz1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(ort)/V(" . mb_convert_encoding($ort1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Telefon Festnetz1)/V(" . mb_convert_encoding($telefonFestnetz1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Telefon mobil1)/V(" . mb_convert_encoding($telefonMobil1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(email)/V(" . mb_convert_encoding($emailAdresse1, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Kundennummer)/V(" . mb_convert_encoding($kundennummer, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Ort  Datum)/V(" . mb_convert_encoding($ortDatum, 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(Adresse)/V(" . mb_convert_encoding("$strasse $hausnummer, $plz $ort", 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(customer)/V(" . mb_convert_encoding("$vorname,$nachname ", 'ISO-8859-1', 'UTF-8') . ")>>";
-//         $fdf_content .= "<</T(cbwaipustick)/V" . (($waipustick === 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(cbcabletv)/V" . (($cabletv === 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(cbwaipucomfort)/V" . (($waipucomfort === 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(cbwaipuplus)/V" . (($waipuplus === 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(cb1flat)/V" . (($firstflat === 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(cb2flat)/V" . (($secondflat=== 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(cbstaticip)/V" . (($staticip === 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(cbpostde)/V" . (($postde === 'on') ? '/Ja' : '/Off') . ">>";
-//         $fdf_content .= "<</T(user)/V(" . utf8_decode($username) . ")>>";
-//         $additionalFieldsContent = '';
-//         if ($additionalFields && is_array($additionalFields)) {
-//             foreach ($additionalFields as $fieldName => $fieldValue) {
-//                 $escapedFieldName = mb_convert_encoding($fieldName, 'ISO-8859-1', 'UTF-8');
-//                 $escapedFieldValue = mb_convert_encoding($fieldValue, 'ISO-8859-1', 'UTF-8');
-//                 $additionalFieldsContent .= "<</T($escapedFieldName)/V($escapedFieldValue)>>";
-//             }
-//         }
-//         $fdf_content .= $additionalFieldsContent;
-        
-                
-
-        
-//         $content = $fdf_header . $fdf_content . $fdf_footer;
-
-
-        $pdfPath = storage_path('app/gnvlangenfeld.pdf');
-        // $FDFfile = $directory . '/' . uniqid() . '.fdf';
-        // file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
-        // $tempPdfPath =  $directory . '/' . uniqid() . '.pdf';
-        // // PDF-Formular ausfüllen
-        // $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
-        // exec($command);
-                
-
+        $pdfPath = storage_path('gnvlangenfeld.pdf');
         $pdf = new Fpdi();
         $pdf->setSourceFile($pdfPath);
         
-        rotateImage($orderSignaturePath, 0);
-        rotateImage($advisorSignaturePath, 0);
-        rotateImage($ownerSignaturePath, 0);
         
         for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($pdfPath); $pageNumber++) {
             $template = $pdf->importPage($pageNumber);
             $pdf->AddPage();
             $pdf->useTemplate($template);
+            $maxWidth = 30;
+            $fontSize = 12; 
         
             $pdf->SetFont('Arial', '', 12);
             $pdf->SetTextColor(0, 0, 0);
@@ -280,8 +175,15 @@
                 $pdf->Write(0, utf8_decode($nachname));
                 $pdf->SetXY(45, 61.8);
                 $pdf->Write(0, utf8_decode($adresse));
-                $pdf->SetXY(170 , 50.5);
+                $textWidth = $pdf->GetStringWidth($kundennummer);
+                while ($textWidth > $maxWidth && $fontSize > 2) {
+                    $fontSize--;
+                    $pdf->SetFont('Arial', '', $fontSize);
+                    $textWidth = $pdf->GetStringWidth($kundennummer);
+                }
+                $pdf->SetXY(168 , 50.5);
                 $pdf->Write(0, utf8_decode($kundennummer));
+                $pdf->SetFont('Arial', '', 12);
                 $pdf->SetXY(135 , 73);
                 $pdf->Write(0, utf8_decode($emailAdresse));
                 $pdf->SetXY(50, 70);
@@ -396,6 +298,18 @@
                 $pdf->Write(0,  $telefonFestnetz1);
                 $pdf->SetXY(110, 79.4);
                 $pdf->Write(0, $telefonMobil1);
+                $pdf->SetXY(135, 117);
+                $pdf->Write(0, utf8_decode($ort1));
+                $pdf->SetXY(110, 117);
+                $pdf->Write(0, utf8_decode($plz1));
+                $pdf->SetXY(22, 117);
+                $pdf->Write(0, utf8_decode($strasse1));
+                $pdf->SetXY(80 , 117);
+                $pdf->Write(0, utf8_decode($hausnummer1));
+                $pdf->SetXY(22, 125);
+                $pdf->Write(0, utf8_decode($we));
+                $pdf->SetXY(110 , 125);
+                $pdf->Write(0, utf8_decode($gk));
 
                 $baseCoordinates = [
                     'Strasse' => ['x' => 22, 'y' => 117],
@@ -412,10 +326,10 @@
                 $maxUnits = 6;
                 
                 for ($i = 1; $i <= $maxUnits; $i++) {
-                    $adjustment = ($i - 1) * $yIncrement;
+                    $adjustment = ($i) * $yIncrement;
                 
                     foreach ($baseCoordinates as $field => $coords) {
-                        $currentX = $coords['x'] + ($xIncrement * ($i - 1));
+                        $currentX = $coords['x'] + ($xIncrement * ($i));
                         $currentY = $coords['y'] + $adjustment;
                 
                         $fieldName = $field . '_' . $i;
@@ -436,6 +350,34 @@
                 $pdf->SetXY(32, 243);
                 $pdf->Write(0, utf8_decode($ortDatum));
             }
+
+            if ($pageNumber == 4) {
+
+                $pdf->Image($orderSignaturePath, 10, 260, 60, 20);
+                $pdf->Image($orderSignaturePath, 135, 260, 60, 20);
+                $pdf->SetXY(100 , 82);
+                $pdf->Write(0, utf8_decode($kundennummer));
+                $pdf->SetXY(90, 172);
+                $pdf->Write(0, utf8_decode($customer));
+                $pdf->SetXY(90, 180.3);
+                $pdf->Write(0, utf8_decode($combstrha));
+                $pdf->SetXY(90, 188.6);
+                $pdf->Write(0, utf8_decode($gebu));
+                $pdf->SetXY(90, 196.9);
+                $pdf->Write(0, utf8_decode($combplzort));
+                $pdf->SetXY(90, 205.4);
+                $pdf->Write(0, utf8_decode($abwcustom));
+                $pdf->SetXY(90, 218);
+                $pdf->Write(0, utf8_decode($combtel));
+                $pdf->SetXY(90, 226.3);
+                $pdf->Write(0, utf8_decode($iban));
+                $pdf->SetXY(90, 234.6);
+                $pdf->Write(0, utf8_decode($bank));
+                $pdf->SetXY(32, 252);
+                $pdf->Write(0, utf8_decode($ortDatum));
+                
+
+            }
         }
         $outputPdfPath = storage_path('app/' . uniqid() . '.pdf');
         $pdf->Output($outputPdfPath, 'F');
@@ -448,18 +390,21 @@
         unlink($ownerSignaturePath);
         unlink($advisorSignaturePath);
 
-        try {
-            Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+
+
+         try {
+             Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
                 $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                        ->subject('Neuer Auftrag von: ' . $username)
-                        ->attach($outputPdfPath, [
-                            'as' => $customer . '.pdf',
+                     ->subject('Neuer Auftrag von: ' . $username)
+                         ->attach($outputPdfPath, [
+                             'as' => $customer . '.pdf',
                             'mime' => 'application/pdf',
-                        ]);
-            });
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()], 500);
-        }
+                         ]);
+             });
+         } catch (\Exception $e) {
+             return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()], 500);
+         }
+
         
         return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);
         
