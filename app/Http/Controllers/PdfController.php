@@ -362,6 +362,7 @@
                 }
 
 
+
             } elseif ($pageNumber == 2) {
                 $pdf->SetXY(21 , 55);
                 $pdf->Write(0, utf8_decode($anredeFrau1));                
@@ -394,22 +395,37 @@
                 $pdf->SetXY(110, 79.4);
                 $pdf->Write(0, $telefonMobil1);
 
-                // $fieldCoordinates = [
-                //     'feld1' => ['x' => 50, 'y' => 100],
-                //     'feld2' => ['x' => 50, 'y' => 120],
-                // ];
+                $baseCoordinates = [
+                    'Strasse' => ['x' => 22, 'y' => 117],
+                    'Hausnummer' => ['x' => 80, 'y' => 117],
+                    'PLZ' => ['x' => 110, 'y' => 117],
+                    'Ort' => ['x' => 135, 'y' => 117],
+                    'anzahlwe' => ['x' => 22, 'y' => 125],
+                    'anzahlgk' => ['x' => 110, 'y' => 125],
+                ];
+                                
+                $xIncrement = 0;
+                $yIncrement = 27.5;
                 
-                // if ($additionalFields && is_array($additionalFields)) {
-                //     foreach ($additionalFields as $fieldName => $fieldValue) {
-                //         // Überprüfen, ob für dieses Feld Koordinaten definiert sind
-                //         if (array_key_exists($fieldName, $fieldCoordinates)) {
-                //             $coords = $fieldCoordinates[$fieldName];
-                //             $pdf->SetXY($coords['x'], $coords['y']);
-                //             $pdf->Write(0, $fieldValue);
-                //         }
-                //     }
-                // }
-
+                $maxUnits = 6;
+                
+                for ($i = 1; $i <= $maxUnits; $i++) {
+                    $adjustment = ($i - 1) * $yIncrement;
+                
+                    foreach ($baseCoordinates as $field => $coords) {
+                        $currentX = $coords['x'] + ($xIncrement * ($i - 1));
+                        $currentY = $coords['y'] + $adjustment;
+                
+                        $fieldName = $field . '_' . $i;
+                        $fieldValue = $request->input("fields.$fieldName");
+                
+                        if ($fieldValue !== null) {
+                            $pdf->SetXY($currentX, $currentY);
+                            $pdf->Write(0, utf8_decode($fieldValue));
+                        }
+                    }
+                }
+                
 
             } elseif ($pageNumber == 3) {
                 

@@ -535,11 +535,9 @@
             var canvas1 = document.getElementById('signatureCanvasOwner');
             var signaturePad1 = new SignaturePad(canvas1);
 
-            // Initialisierung des zweiten Signature Pads
             var canvas2 = document.getElementById('signatureCanvasOrder');
             var signaturePad2 = new SignaturePad(canvas2);
 
-            // Initialisierung des dritten Signature Pads
             var canvas3 = document.getElementById('signatureCanvasAdvisor');
             var signaturePad3 = new SignaturePad(canvas3);
 
@@ -690,7 +688,7 @@
     function submitForm() {
 
     var canvasOwner = document.getElementById('signatureCanvasOwner');
-    var dataURLOwner = canvasOwner.toDataURL(); // Daten in Base64-Format umwandeln
+    var dataURLOwner = canvasOwner.toDataURL(); 
     document.getElementById('owner_signature').value = dataURLOwner;
     var canvasOrder = document.getElementById('signatureCanvasOrder');
     var dataURLOrder = canvasOrder.toDataURL();
