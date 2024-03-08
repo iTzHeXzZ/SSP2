@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Hallo!</h1>
-    <p>Ein neuer Auftrag wurde erstellt. Sie finden die PDF-Dokument im Anhang.</p>
+    <p>Ein neuer Auftrag wurde erstellt. Sie finden das PDF-Dokument im Anhang.</p>
     <p>Danke, <br>{{ $name }}</p>
 </body>
 </html>

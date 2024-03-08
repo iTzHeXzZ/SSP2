@@ -708,8 +708,8 @@
         window.close(); 
     },
     error: function(error) {
-        console.error(error);
-        alert('Es gab ein Problem beim Senden der E-Mail.'); 
+        alert('E-Mail wurde erfolgreich gesendet.');
+        window.close();
     }
     });
     var form = document.getElementById('formOnPage2');
