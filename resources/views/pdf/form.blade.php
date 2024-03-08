@@ -704,11 +704,13 @@
         url: '{{ route('pdf.fill') }}',
         data: $('#signatureForm').serialize(),
         success: function(response) {
-            console.log(response);
-        },
-        error: function(error) {
-            console.error(error);
-        }
+        alert('E-Mail wurde erfolgreich gesendet.');
+        window.close(); 
+    },
+    error: function(error) {
+        console.error(error);
+        alert('Es gab ein Problem beim Senden der E-Mail.'); 
+    }
     });
     var form = document.getElementById('formOnPage2');
     var standardCheckbox = document.getElementById('standardCheckbox');

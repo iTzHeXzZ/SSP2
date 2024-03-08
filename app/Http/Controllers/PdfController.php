@@ -6,6 +6,8 @@
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\File;
     use setasign\Fpdi\Fpdi;
+    use Illuminate\Support\Facades\Mail;
+    use Illuminate\Mail\Message;
 
     
     
@@ -445,6 +447,15 @@
         unlink($orderSignaturePath);
         unlink($ownerSignaturePath);
         unlink($advisorSignaturePath);
+
+        Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+            $message->to('micha-undso@web.de')
+                    ->subject('Neuer Auftrag von: ' . $username)
+                    ->attach($outputPdfPath, [
+                        'as' => $customer . '.pdf',
+                        'mime' => 'application/pdf',
+                    ]);
+        });
         
         return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);
         
