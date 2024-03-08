@@ -105,6 +105,9 @@
         }
         $adresse = $strasse . ' ' . $hausnummer . ', ' . $plz . ' ' . $ort;
         $customer = $vorname . ' ,' . $nachname;
+
+
+
         $selectedOption = $request->input('gfpaket'); 
         $checkboxValue = '';
         $checkboxDevice= '';
@@ -167,78 +170,78 @@
         
 
 
-        $fdf_header = <<<FDF
-        %FDF-1.2
-        1 0 obj
-        <<
-        /FDF << /Fields [
-        FDF;
+//         $fdf_header = <<<FDF
+//         %FDF-1.2
+//         1 0 obj
+//         <<
+//         /FDF << /Fields [
+//         FDF;
         
-        // FDF footer section
-        $fdf_footer = <<<FDF
-] >> >>
-2 0 obj
-<<
-/Length 4744
-/Filter [/ASCII85Decode /FlateDecode]
->>
-stream
-... (hier kommt der FDF-Content hin)
-FDF;
-        // FDF content section
-        $fdf_content  = "<</T($checkboxValue)/V/Ja/AS/Ja>>";
-        $fdf_content .= "<</T($checkboxDevice)/V/Ja/AS/Ja>>";
-        $fdf_content .= "<</T(Frau)/V(" . mb_convert_encoding($anredeFrau1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Mann)/V(" . mb_convert_encoding($anredeHerr1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Divers)/V(" . mb_convert_encoding($anredeDivers1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Eheleute)/V(" . mb_convert_encoding($eheleute1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Titel)/V(" . mb_convert_encoding($titel1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Firma Gemeinschaft)/V(" . mb_convert_encoding($firmaGemeinschaft1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Vorname)/V(" . mb_convert_encoding($vorname, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Nachname)/V(" . mb_convert_encoding($nachname, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Strasse)/V(" . mb_convert_encoding($strasse, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Hausnummer)/V(" . mb_convert_encoding($hausnummer, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(PLZ)/V(" . mb_convert_encoding($plz, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Ort)/V(" . mb_convert_encoding($ort, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Telefon Festnetz)/V(" . mb_convert_encoding($telefonFestnetz, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Telefon mobil)/V(" . mb_convert_encoding($telefonMobil, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(EMailAdresse)/V(" . mb_convert_encoding($emailAdresse, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(vorName)/V(" . mb_convert_encoding($vorname1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(nachName)/V(" . mb_convert_encoding($nachname1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Strassen)/V(" . mb_convert_encoding($strasse1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(hausNummer)/V(" . mb_convert_encoding($hausnummer1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(plz)/V(" . mb_convert_encoding($plz1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(ort)/V(" . mb_convert_encoding($ort1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Telefon Festnetz1)/V(" . mb_convert_encoding($telefonFestnetz1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Telefon mobil1)/V(" . mb_convert_encoding($telefonMobil1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(email)/V(" . mb_convert_encoding($emailAdresse1, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Kundennummer)/V(" . mb_convert_encoding($kundennummer, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Ort  Datum)/V(" . mb_convert_encoding($ortDatum, 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(Adresse)/V(" . mb_convert_encoding("$strasse $hausnummer, $plz $ort", 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(customer)/V(" . mb_convert_encoding("$vorname,$nachname ", 'ISO-8859-1', 'UTF-8') . ")>>";
-        $fdf_content .= "<</T(cbwaipustick)/V" . (($waipustick === 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(cbcabletv)/V" . (($cabletv === 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(cbwaipucomfort)/V" . (($waipucomfort === 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(cbwaipuplus)/V" . (($waipuplus === 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(cb1flat)/V" . (($firstflat === 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(cb2flat)/V" . (($secondflat=== 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(cbstaticip)/V" . (($staticip === 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(cbpostde)/V" . (($postde === 'on') ? '/Ja' : '/Off') . ">>";
-        $fdf_content .= "<</T(user)/V(" . utf8_decode($username) . ")>>";
-        $additionalFieldsContent = '';
-        if ($additionalFields && is_array($additionalFields)) {
-            foreach ($additionalFields as $fieldName => $fieldValue) {
-                $escapedFieldName = mb_convert_encoding($fieldName, 'ISO-8859-1', 'UTF-8');
-                $escapedFieldValue = mb_convert_encoding($fieldValue, 'ISO-8859-1', 'UTF-8');
-                $additionalFieldsContent .= "<</T($escapedFieldName)/V($escapedFieldValue)>>";
-            }
-        }
-        $fdf_content .= $additionalFieldsContent;
+//         // FDF footer section
+//         $fdf_footer = <<<FDF
+// ] >> >>
+// 2 0 obj
+// <<
+// /Length 4744
+// /Filter [/ASCII85Decode /FlateDecode]
+// >>
+// stream
+// ... (hier kommt der FDF-Content hin)
+// FDF;
+//         // FDF content section
+//         $fdf_content  = "<</T($checkboxValue)/V/Ja/AS/Ja>>";
+//         $fdf_content .= "<</T($checkboxDevice)/V/Ja/AS/Ja>>";
+//         $fdf_content .= "<</T(Frau)/V(" . mb_convert_encoding($anredeFrau1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Mann)/V(" . mb_convert_encoding($anredeHerr1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Divers)/V(" . mb_convert_encoding($anredeDivers1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Eheleute)/V(" . mb_convert_encoding($eheleute1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Titel)/V(" . mb_convert_encoding($titel1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Firma Gemeinschaft)/V(" . mb_convert_encoding($firmaGemeinschaft1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Vorname)/V(" . mb_convert_encoding($vorname, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Nachname)/V(" . mb_convert_encoding($nachname, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Strasse)/V(" . mb_convert_encoding($strasse, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Hausnummer)/V(" . mb_convert_encoding($hausnummer, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(PLZ)/V(" . mb_convert_encoding($plz, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Ort)/V(" . mb_convert_encoding($ort, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Telefon Festnetz)/V(" . mb_convert_encoding($telefonFestnetz, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Telefon mobil)/V(" . mb_convert_encoding($telefonMobil, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(EMailAdresse)/V(" . mb_convert_encoding($emailAdresse, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(vorName)/V(" . mb_convert_encoding($vorname1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(nachName)/V(" . mb_convert_encoding($nachname1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Strassen)/V(" . mb_convert_encoding($strasse1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(hausNummer)/V(" . mb_convert_encoding($hausnummer1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(plz)/V(" . mb_convert_encoding($plz1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(ort)/V(" . mb_convert_encoding($ort1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Telefon Festnetz1)/V(" . mb_convert_encoding($telefonFestnetz1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Telefon mobil1)/V(" . mb_convert_encoding($telefonMobil1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(email)/V(" . mb_convert_encoding($emailAdresse1, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Kundennummer)/V(" . mb_convert_encoding($kundennummer, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Ort  Datum)/V(" . mb_convert_encoding($ortDatum, 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(Adresse)/V(" . mb_convert_encoding("$strasse $hausnummer, $plz $ort", 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(customer)/V(" . mb_convert_encoding("$vorname,$nachname ", 'ISO-8859-1', 'UTF-8') . ")>>";
+//         $fdf_content .= "<</T(cbwaipustick)/V" . (($waipustick === 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(cbcabletv)/V" . (($cabletv === 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(cbwaipucomfort)/V" . (($waipucomfort === 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(cbwaipuplus)/V" . (($waipuplus === 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(cb1flat)/V" . (($firstflat === 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(cb2flat)/V" . (($secondflat=== 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(cbstaticip)/V" . (($staticip === 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(cbpostde)/V" . (($postde === 'on') ? '/Ja' : '/Off') . ">>";
+//         $fdf_content .= "<</T(user)/V(" . utf8_decode($username) . ")>>";
+//         $additionalFieldsContent = '';
+//         if ($additionalFields && is_array($additionalFields)) {
+//             foreach ($additionalFields as $fieldName => $fieldValue) {
+//                 $escapedFieldName = mb_convert_encoding($fieldName, 'ISO-8859-1', 'UTF-8');
+//                 $escapedFieldValue = mb_convert_encoding($fieldValue, 'ISO-8859-1', 'UTF-8');
+//                 $additionalFieldsContent .= "<</T($escapedFieldName)/V($escapedFieldValue)>>";
+//             }
+//         }
+//         $fdf_content .= $additionalFieldsContent;
         
                 
 
         
-        $content = $fdf_header . $fdf_content . $fdf_footer;
+//         $content = $fdf_header . $fdf_content . $fdf_footer;
 
 
         $pdfPath = storage_path('app/gnvlangenfeld.pdf');
@@ -253,23 +256,19 @@ FDF;
         $pdf = new Fpdi();
         $pdf->setSourceFile($pdfPath);
         
-        // Die Image-Rotation scheint hier nicht direkt relevant zu sein, es sei denn, Sie haben eine Funktion definiert, die diese Bilder dreht
         rotateImage($orderSignaturePath, 0);
         rotateImage($advisorSignaturePath, 0);
         rotateImage($ownerSignaturePath, 0);
         
-        // Durchlaufe alle Seiten der vorhandenen PDF und füge sie zur neuen PDF hinzu
         for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($pdfPath); $pageNumber++) {
             $template = $pdf->importPage($pageNumber);
             $pdf->AddPage();
             $pdf->useTemplate($template);
         
-            // Setzen der Schriftart und Größe für den Text
             $pdf->SetFont('Arial', '', 12);
             $pdf->SetTextColor(0, 0, 0);
         
             if ($pageNumber == 1) {
-                // Füge Bilder hinzu
                 $pdf->Image($orderSignaturePath, 10, 260, 60, 20);
                 $pdf->Image($advisorSignaturePath, 135, 260, 60, 20);
                 
@@ -295,6 +294,74 @@ FDF;
                 $pdf->Write(0, utf8_decode($username));
                 $pdf->SetXY(120, 250.5);
                 $pdf->Write(0, utf8_decode($customer));
+                $pdf->SetXY(24, 200);
+                $pdf->Write(0, 'X');
+
+                $checkboxCoordinates = [
+                    'waipustick' => ['x' => 24, 'y' => 188],
+                    'cabletv' => ['x' => 24, 'y' => 128],
+                    'waipucomfort' => ['x' => 24, 'y' => 134],
+                    'waipuplus' => ['x' => 24, 'y' => 140],
+                    'firstflat' => ['x' => 24, 'y' => 146],
+                    'secondflat' => ['x' => 24, 'y' => 152],
+                    'staticip' => ['x' => 24, 'y' => 158],
+                    'postde' => ['x' => 24, 'y' => 164],
+                    'cbbasic' => ['x' => 24, 'y' => 92],
+                    'cbbasi12' => ['x' => 24, 'y' => 98],
+                    'cbclassic' => ['x' => 24, 'y' => 104],
+                    'cbperformance' => ['x' => 24, 'y' => 110],
+                    'cbexpert' => ['x' => 24, 'y' => 116],
+                    'cbgfboxonetime' => ['x' => 24, 'y' => 176],
+                    'cbgfboxrent' => ['x' => 24, 'y' => 182],
+                ];
+                
+
+                $selectedOption = $request->input('gfpaket'); 
+                $selecteddevice = $request->input('fritzBox'); 
+                
+                $selectedOptionKey = ''; 
+                $selectedDeviceKey = ''; 
+                switch ($selectedOption) {
+                    case 'gf15024m':
+                        $selectedOptionKey = 'cbbasic';
+                        break;
+                    case 'gf15012m':
+                        $selectedOptionKey = 'cbbasi12';
+                        break;
+                    case 'gf300':
+                        $selectedOptionKey = 'cbclassic';
+                        break;
+                    case 'gf600':
+                        $selectedOptionKey = 'cbperformance';
+                        break;
+                    case 'gf1000':
+                        $selectedOptionKey = 'cbexpert';
+                        break;         
+                }
+                switch ($selecteddevice) {
+                    case 'gfboxonetime':
+                        $selectedDeviceKey = 'cbgfboxonetime';
+                        break;
+                    case 'gfboxrent':
+                        $selectedDeviceKey = 'cbgfboxrent';
+                        break;
+                }
+                
+                foreach ($checkboxCoordinates as $key => $coords) {
+                    $isChecked = false;
+                    if (isset($$key) && $$key === 'on') {
+                        $isChecked = true;
+                    }
+                    if ($key === $selectedOptionKey || $key === $selectedDeviceKey) {
+                        $isChecked = true;
+                    }
+                    if ($isChecked) {
+                        $pdf->SetXY($coords['x'], $coords['y']);
+                        $pdf->Write(0, "X");
+                    }
+                }
+
+
             } elseif ($pageNumber == 2) {
                 $pdf->SetXY(21 , 55);
                 $pdf->Write(0, utf8_decode($anredeFrau1));                
@@ -326,9 +393,27 @@ FDF;
                 $pdf->Write(0,  $telefonFestnetz1);
                 $pdf->SetXY(110, 79.4);
                 $pdf->Write(0, $telefonMobil1);
+
+                // $fieldCoordinates = [
+                //     'feld1' => ['x' => 50, 'y' => 100],
+                //     'feld2' => ['x' => 50, 'y' => 120],
+                // ];
+                
+                // if ($additionalFields && is_array($additionalFields)) {
+                //     foreach ($additionalFields as $fieldName => $fieldValue) {
+                //         // Überprüfen, ob für dieses Feld Koordinaten definiert sind
+                //         if (array_key_exists($fieldName, $fieldCoordinates)) {
+                //             $coords = $fieldCoordinates[$fieldName];
+                //             $pdf->SetXY($coords['x'], $coords['y']);
+                //             $pdf->Write(0, $fieldValue);
+                //         }
+                //     }
+                // }
+
+
             } elseif ($pageNumber == 3) {
-                // Füge Bilder hinzu
-                $pdf->Image($ownerSignaturePath, 30, 240, 60, 20);
+                
+                $pdf->Image($ownerSignaturePath, 30, 242, 60, 20);
                 
                 $pdf->SetXY(32, 243);
                 $pdf->Write(0, utf8_decode($ortDatum));
