@@ -103,6 +103,8 @@
             $telefonMobil1       =  $request->input('fields.Telefon_mobil1');
             $emailAdresse1       =  $request->input('fields.EMailAdresse1');
         }
+        $adresse = $strasse . ' ' . $hausnummer . ', ' . $plz . ' ' . $ort;
+        $customer = $vorname . ' ,' . $nachname;
         $selectedOption = $request->input('gfpaket'); 
         $checkboxValue = '';
         $checkboxDevice= '';
@@ -239,48 +241,112 @@ FDF;
         $content = $fdf_header . $fdf_content . $fdf_footer;
 
 
-        $pdftkPath = storage_path('app/pdftk');
         $pdfPath = storage_path('app/gnvlangenfeld.pdf');
-        $FDFfile = $directory . '/' . uniqid() . '.fdf';
-        file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
-        $tempPdfPath =  $directory . '/' . uniqid() . '.pdf';
-        // PDF-Formular ausfüllen
-        $command = "$pdftkPath \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
-        exec($command);
+        // $FDFfile = $directory . '/' . uniqid() . '.fdf';
+        // file_put_contents($FDFfile, "%FDF-1.2\n1 0 obj\n<<\n/FDF << /Fields [$fdf_content] >> >>\nendobj\ntrailer\n<</Root 1 0 R>>\n%%EOF");
+        // $tempPdfPath =  $directory . '/' . uniqid() . '.pdf';
+        // // PDF-Formular ausfüllen
+        // $command = "pdftk \"$pdfPath\" fill_form \"$FDFfile\" output \"$tempPdfPath\" flatten ";
+        // exec($command);
                 
 
         $pdf = new Fpdi();
-        $pdf->setSourceFile($tempPdfPath);
+        $pdf->setSourceFile($pdfPath);
+        
+        // Die Image-Rotation scheint hier nicht direkt relevant zu sein, es sei denn, Sie haben eine Funktion definiert, die diese Bilder dreht
         rotateImage($orderSignaturePath, 0);
         rotateImage($advisorSignaturePath, 0);
         rotateImage($ownerSignaturePath, 0);
-
-                
-
+        
         // Durchlaufe alle Seiten der vorhandenen PDF und füge sie zur neuen PDF hinzu
-        for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($tempPdfPath); $pageNumber++) {
+        for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($pdfPath); $pageNumber++) {
             $template = $pdf->importPage($pageNumber);
             $pdf->AddPage();
             $pdf->useTemplate($template);
-
+        
+            // Setzen der Schriftart und Größe für den Text
+            $pdf->SetFont('Arial', '', 12);
+            $pdf->SetTextColor(0, 0, 0);
+        
             if ($pageNumber == 1) {
+                // Füge Bilder hinzu
                 $pdf->Image($orderSignaturePath, 10, 260, 60, 20);
-                $pdf->Image($advisorSignaturePath, 135, 260, 60, 20);                
-
+                $pdf->Image($advisorSignaturePath, 135, 260, 60, 20);
+                
+                $pdf->SetXY(89.5 , 50.5);
+                $pdf->Write(0, utf8_decode($vorname));
+                $pdf->SetXY(27, 50.5);
+                $pdf->Write(0, utf8_decode($nachname));
+                $pdf->SetXY(45, 61.8);
+                $pdf->Write(0, utf8_decode($adresse));
+                $pdf->SetXY(170 , 50.5);
+                $pdf->Write(0, utf8_decode($kundennummer));
+                $pdf->SetXY(135 , 73);
+                $pdf->Write(0, utf8_decode($emailAdresse));
+                $pdf->SetXY(50, 70);
+                $pdf->Write(0,  $telefonFestnetz);
+                $pdf->SetXY(50, 75);
+                $pdf->Write(0, $telefonMobil);
+                $pdf->SetXY(32, 263);
+                $pdf->Write(0, utf8_decode($ortDatum));
+                $pdf->SetXY(49, 219);
+                $pdf->Write(0, utf8_decode($customer));
+                $pdf->SetXY(95, 230);
+                $pdf->Write(0, utf8_decode($username));
+                $pdf->SetXY(120, 250.5);
+                $pdf->Write(0, utf8_decode($customer));
+            } elseif ($pageNumber == 2) {
+                $pdf->SetXY(21 , 55);
+                $pdf->Write(0, utf8_decode($anredeFrau1));                
+                $pdf->SetXY(34 , 55);
+                $pdf->Write(0, utf8_decode($anredeHerr1));               
+                $pdf->SetXY(45 , 55);
+                $pdf->Write(0, utf8_decode($anredeDivers1));                
+                $pdf->SetXY(57 , 55);
+                $pdf->Write(0, utf8_decode($eheleute1));                
+                $pdf->SetXY(80 , 55);
+                $pdf->Write(0, utf8_decode($titel1));
+                $pdf->SetXY(110 , 55);
+                $pdf->Write(0, utf8_decode($firmaGemeinschaft1));
+                $pdf->SetXY(22 , 63);
+                $pdf->Write(0, utf8_decode($vorname1));
+                $pdf->SetXY(22, 71.2);
+                $pdf->Write(0, utf8_decode($nachname1));
+                $pdf->SetXY(135, 71.2);
+                $pdf->Write(0, utf8_decode($ort1));
+                $pdf->SetXY(110, 71.2);
+                $pdf->Write(0, utf8_decode($plz1));
+                $pdf->SetXY(110, 63);
+                $pdf->Write(0, utf8_decode($strasse1));
+                $pdf->SetXY(170 , 63);
+                $pdf->Write(0, utf8_decode($hausnummer1));
+                $pdf->SetXY(22 , 87.6);
+                $pdf->Write(0, utf8_decode($emailAdresse1));
+                $pdf->SetXY(22, 79.4);
+                $pdf->Write(0,  $telefonFestnetz1);
+                $pdf->SetXY(110, 79.4);
+                $pdf->Write(0, $telefonMobil1);
             } elseif ($pageNumber == 3) {
+                // Füge Bilder hinzu
                 $pdf->Image($ownerSignaturePath, 30, 240, 60, 20);
+                
+                $pdf->SetXY(32, 243);
+                $pdf->Write(0, utf8_decode($ortDatum));
             }
         }
         $outputPdfPath = storage_path('app/' . uniqid() . '.pdf');
         $pdf->Output($outputPdfPath, 'F');
+        
         $outputname = "$vorname $nachname " . date('Y-m-d');
-        unlink($tempPdfPath);
-        unlink($FDFfile);
+        // Aufräumen
+        // unlink($tempPdfPath); // Wenn nötig
+        // unlink($FDFfile); // Wenn nötig
         unlink($orderSignaturePath);
         unlink($ownerSignaturePath);
         unlink($advisorSignaturePath);
-
+        
         return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);
+        
     }
         
 
