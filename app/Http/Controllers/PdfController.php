@@ -48,8 +48,13 @@
         $secondflat         = $request->input('secondflat');
         $staticip           = $request->input('staticip');
         $postde             = $request->input('postde');
-        $additionalFields = $request->input('fields');
-        $checkboxStatus = $request->input('fields.StandardCheckboxStatus');
+        $additionalFields   = $request->input('fields');
+        $anbieter           = $request->input('anbieter');
+        $tel1               = $request->input('tel1');
+        $tel2               = $request->input('tel2');
+        $selectedstrom      = $request->input('strom');
+        $selectedgas        = $request->input('gas');
+        $checkboxStatus     = $request->input('fields.StandardCheckboxStatus');
         if ($checkboxStatus == '1') {
             $anredeFrau1         =  $anredeFrau; 
             $anredeHerr1         =  $anredeHerr;
@@ -88,6 +93,12 @@
         $combplzort = $plz . ' ' . $ort;
         $combstrha = $strasse . ' ' . $hausnummer;
         $combtel = $telefonMobil . '  ' . $telefonFestnetz;
+        $fillPage = false;
+
+        if (($selectedstrom === 'strom12' || $selectedstrom === 'strom24') || 
+            ($selectedgas === 'gas12' || $selectedgas === 'gas24')) {
+            $fillPage = true;
+        }
 
 
         $selectedOption = $request->input('gfpaket'); 
@@ -156,6 +167,11 @@
         
         
         for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($pdfPath); $pageNumber++) {
+
+            if ($pageNumber == 6 && !($fillPage)) {
+                continue;
+            }
+
             $template = $pdf->importPage($pageNumber);
             $pdf->AddPage();
             $pdf->useTemplate($template);
@@ -221,10 +237,12 @@
                 
 
                 $selectedOption = $request->input('gfpaket'); 
-                $selecteddevice = $request->input('fritzBox'); 
+                $selecteddevice = $request->input('fritzBox');
+                
                 
                 $selectedOptionKey = ''; 
-                $selectedDeviceKey = ''; 
+                $selectedDeviceKey = '';
+
                 switch ($selectedOption) {
                     case 'gf15024m':
                         $selectedOptionKey = 'cbbasic';
@@ -250,6 +268,7 @@
                         $selectedDeviceKey = 'cbgfboxrent';
                         break;
                 }
+
                 
                 foreach ($checkboxCoordinates as $key => $coords) {
                     $isChecked = false;
@@ -378,6 +397,113 @@
                 
 
             }
+            if ($pageNumber == 5) {
+                $pdf->SetXY(150 , 48.5);
+                $pdf->Write(0, utf8_decode($vorname));
+                $pdf->SetXY(36, 48.5);
+                $pdf->Write(0, utf8_decode($nachname));
+                $pdf->SetXY(80, 59.5);
+                $pdf->Write(0, utf8_decode($ort));
+                $pdf->SetXY(31, 59.5);
+                $pdf->Write(0, utf8_decode($plz));
+                $pdf->SetXY(34, 54);
+                $pdf->Write(0, utf8_decode($strasse));
+                $pdf->SetXY(150 , 54);
+                $pdf->Write(0, utf8_decode($hausnummer));
+                $pdf->SetXY(170 , 28);
+                $pdf->Write(0, utf8_decode($anbieter));
+                $pdf->SetXY(97 , 72);
+                $pdf->Write(0, utf8_decode($tel1));
+                $pdf->SetXY(97 , 78);
+                $pdf->Write(0, utf8_decode($tel2));
+                $pdf->SetXY(34, 127);
+                $pdf->Write(0, utf8_decode($ortDatum));
+                $pdf->SetXY(14, 23);
+                $pdf->Write(0, 'X');
+                $pdf->SetXY(14, 41);
+                $pdf->Write(0, 'X');
+
+                $pdf->Image($orderSignaturePath, 132, 105, 60, 20);
+            }
+            if ($pageNumber == 6) {
+                $pdf->Image($orderSignaturePath, 10, 260, 60, 20);
+                $pdf->Image($advisorSignaturePath, 135, 260, 60, 20);
+
+
+                $checkboxCoordinates = [
+                    'strom24' => ['x' => 24, 'y' => 92],
+                    'strom12' => ['x' => 24, 'y' => 98],
+                    'gas24' => ['x' => 24, 'y' => 104],
+                    'gas12' => ['x' => 24, 'y' => 110],
+                ];
+
+                $selectedstromKey  = ''; 
+                $selectedgasKey    = ''; 
+
+                switch ($selectedstrom) {
+                    case 'strom24':
+                        $selectedstromKey = 'strom24';
+                        break;
+                    case 'strom12':
+                        $selectedstromKey = 'strom12';
+                        break;
+                }
+                switch ($selectedgas) {
+                    case 'gas24':
+                        $selectedgasKey = 'gas24';
+                        break;
+                    case 'gas12':
+                        $selectedgasKey = 'gas12';
+                        break;
+                }
+
+                foreach ($checkboxCoordinates as $key => $coords) {
+                    $isChecked = false;
+                    if (isset($$key) && $$key === 'on') {
+                        $isChecked = true;
+                    }
+                    if ($key === $selectedstromKey  || $key === $selectedgasKey) {
+                        $isChecked = true;
+                    }
+                    if ($isChecked) {
+                        $pdf->SetXY($coords['x'], $coords['y']);
+                        $pdf->Write(0, "X");
+                    }
+                }
+
+
+
+                
+                $pdf->SetXY(89.5 , 50.5);
+                $pdf->Write(0, utf8_decode($vorname));
+                $pdf->SetXY(27, 50.5);
+                $pdf->Write(0, utf8_decode($nachname));
+                $pdf->SetXY(45, 61.8);
+                $pdf->Write(0, utf8_decode($adresse));
+                $textWidth = $pdf->GetStringWidth($kundennummer);
+                while ($textWidth > $maxWidth && $fontSize > 2) {
+                    $fontSize--;
+                    $pdf->SetFont('Arial', '', $fontSize);
+                    $textWidth = $pdf->GetStringWidth($kundennummer);
+                }
+                $pdf->SetXY(168 , 50.5);
+                $pdf->Write(0, utf8_decode($kundennummer));
+                $pdf->SetFont('Arial', '', 12);
+                $pdf->SetXY(135 , 73);
+                $pdf->Write(0, utf8_decode($emailAdresse));
+                $pdf->SetXY(50, 70);
+                $pdf->Write(0,  $telefonFestnetz);
+                $pdf->SetXY(50, 75);
+                $pdf->Write(0, $telefonMobil);
+                $pdf->SetXY(32, 263);
+                $pdf->Write(0, utf8_decode($ortDatum));
+                $pdf->SetXY(49, 219);
+                $pdf->Write(0, utf8_decode($customer));
+                $pdf->SetXY(95, 230);
+                $pdf->Write(0, utf8_decode($username));
+                $pdf->SetXY(120, 250.5);
+                $pdf->Write(0, utf8_decode($customer));
+            }
         }
         $outputPdfPath = storage_path('app/' . uniqid() . '.pdf');
         $pdf->Output($outputPdfPath, 'F');
@@ -392,18 +518,18 @@
 
 
 
-         try {
-             Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
-                $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                     ->subject('Neuer Auftrag von: ' . $username)
-                         ->attach($outputPdfPath, [
-                             'as' => $customer . '.pdf',
-                            'mime' => 'application/pdf',
-                         ]);
-             });
-         } catch (\Exception $e) {
-             return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()], 500);
-         }
+            try {
+                Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+                  $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                       ->subject('Neuer Auftrag von: ' . $username)
+                           ->attach($outputPdfPath, [
+                               'as' => $customer . '.pdf',
+                              'mime' => 'application/pdf',
+                            ]);
+                });
+            } catch (\Exception $e) {
+               return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+            }
 
         
         return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);

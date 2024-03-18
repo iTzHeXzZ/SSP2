@@ -127,7 +127,7 @@
         <fieldset>
             <legend>Kontaktinformationen</legend>
             <label for="Telefon_Festnetz">Telefon Festnetz:</label>
-            <input type="text" name="fields[Telefon_Festnetz]" id="Telefon_Festnetz" >
+            <input type="text" name="fields[Telefon_Festnetz]" id="Telefon_Festnetz">
 
             <label for="Telefon_mobil">Telefon mobil:</label>
             <input type="text" name="fields[Telefon_mobil]" id="Telefon_mobil" >
@@ -160,6 +160,18 @@
 <div id="page2">
     <form id="formOnPage2" enctype="multipart/form-data">
         @csrf
+
+        <fieldset>
+            <legend>Anbieterwechsel? Wenn ja, bitte ausfüllen :</legend>
+            <label for="anbieter">Anbieter:</label>
+            <input type="text" name="anbieter" id="anbieter" >
+
+            <label for="tel1">Telefonnummer 1:</label>
+            <input type="text" name="tel1" id="tel1" value="">
+
+            <label for="tel2">Telefonnummer 2:</label>
+            <input type="text" name="tel2" id="tel2" >
+        </fieldset>
 
         <fieldset>
             <h3>Sind Sie Eigentümer?</h3>
@@ -508,7 +520,58 @@
         </div>
     </div>
 </div>
-
+<div class="row mt-3 justify-content-md-center">
+    <div class="col-sm-6">
+        <div class="card text-left h-100 border">
+            <div class="card-body">
+                <h4 class="bg-light p-1">Benötigen Sie ein Strom/Gas Produkt?</h4>
+                <hr>
+                <div class="col">
+                    <div class="mb-3 error-placeholder">
+                        <div class="form-check">
+                            <input value="none" id="none" class="form-check-input" name="strom" type="radio" checked> <label for="none">Keine Auswahl</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3 error-placeholder">
+                        <div class="form-check">
+                            <input value="strom24" id="strom24" class="form-check-input" name="strom" type="radio"> <label for="strom24">Öko-Strom für 24 Monate</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3 error-placeholder">
+                        <div class="form-check">
+                            <input value="strom12" id="strom12" class="form-check-input" name="strom" type="radio"> <label for="strom12">Öko-Strom für 12 Monate</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3 error-placeholder">
+                        <div class="form-check">
+                            <input value="none" id="none" class="form-check-input" name="gas" type="radio" checked> <label for="none">Keine Auswahl</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3 error-placeholder">
+                        <div class="form-check">
+                            <input value="gas24" id="gas24" class="form-check-input" name="gas" type="radio"> <label for="gas24">Öko-Gas für 24 Monate</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3 error-placeholder">
+                        <div class="form-check">
+                            <input value="gas12" id="gas12" class="form-check-input" name="gas" type="radio"> <label for="gas12">Öko-Gas für 12 Monate</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="signature-container">
     <p>Unterschrift Grundstückseigentümer</p>
     <canvas id="signatureCanvasOwner" width="750" height="200"></canvas>
@@ -720,6 +783,7 @@
         document.getElementById('Telefon_mobil').value = formData['fields.Telefon_mobil'] || '';
         document.getElementById('EMailAdresse').value = formData['fields.EMailAdresse'] || '';
         document.getElementById('kundennummer').value = formData['fields.kundennummer'] || 'Neukunde';
+        document.getElementById('tel1').value = formData['fields.Telefon_Festnetz'] || '';
 
         var additionalFieldsContainer = document.getElementById('additionalFieldsContainer');
         var additionalFieldInputs = additionalFieldsContainer.querySelectorAll('input[type="text"]');
@@ -729,8 +793,6 @@
             var fieldValue = formData[fieldName] || '';
             input.value = fieldValue;
         });
-
-    console.log('Populated Form Data:', formData);
     }
 
     function submitForm() {
@@ -746,18 +808,22 @@
     document.getElementById('advisor_signature').value = dataURLAdvisor;
 
 
- 
+    $('#loader').show();
     $.ajax({
         type: 'POST',
         url: '{{ route('pdf.fill') }}',
         data: $('#signatureForm').serialize(),
+        headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    },
         success: function(response) {
         alert('E-Mail wurde erfolgreich gesendet.');
         window.close(); 
     },
     error: function(error) {
-        alert('E-Mail wurde erfolgreich gesendet!.');
-        window.location.reload(); 
+        $('#loader').hide();
+         alert('E-Mail wurde erfolgreich gesendet!.');
+         window.location.reload(); 
     }
     });
     var form = document.getElementById('formOnPage2');

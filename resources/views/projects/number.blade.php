@@ -1,6 +1,118 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    .feedback-message {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+padding: 10px;
+color: #fff;
+font-size: 16px;
+border-radius: 5px;
+z-index: 999;
+}
+
+.feedback-message.success {
+background-color: #28a745; /* Grüner Hintergrund für Erfolgsmeldung */
+}
+
+.feedback-message.error {
+background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
+}
+
+
+/* Anpassung des td-Elements für relative Positionierung */
+.table td.status-vertrag, 
+.table td.status-kein-interesse {
+    position: relative; /* Wichtig für die absolute Positionierung des Kindes */
+    padding-right: 10px; /* Stellen Sie sicher, dass der Text nicht über den Streifen geht */
+}
+
+/* Vollständige Höhe für ::after */
+.table td.status-vertrag::after, 
+.table td.status-kein-interesse::after {
+    content: "";
+    position: absolute; /* Absolut innerhalb der Zelle positioniert */
+    right: 0;
+    top: 5px;
+    width: 5px; /* Breite des Streifens */
+    height: 95%; /* Volle Höhe der Zelle */
+    background-color: inherit; /* Verwendet die Hintergrundfarbe des Elternelements */
+}
+
+/* Setzen der spezifischen Hintergrundfarben */
+.table td.status-vertrag::after {
+    background-color: #007d1d; /* Grün */
+}
+
+.table td.status-kein-interesse::after {
+    background-color: #a70011; /* Rot */
+}
+
+
+
+    /* Stil für das Formular innerhalb der Zelle */
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Stil für das Select-Feld */
+    select {
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    /* Stil für das Textarea-Feld */
+    textarea {
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100%;
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Stil für den Speichern-Button */
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    @media (max-width: 768px) {
+        form {
+            flex-direction: column; /* Formular-Inhalte in Spalten anordnen */
+        }
+
+        select {
+            width: 100%; /* Feld auf volle Breite */
+        }
+
+        textarea {
+            width: 100%; /* Feld auf volle Breite */
+        }
+
+        .form-group {
+            overflow-x: auto; /* Horizontales Scrollen ermöglichen */
+            width: 100%; /* Breite auf 100% setzen */
+        }
+    }
+</style>
     <h2>{{$postleitzahl}},<a href="{{ route('projects.street', ['ort' => $ort, 'postleitzahl' => $postleitzahl]) }}" style="text-decoration : none">{{ $ort }}</a>,{{ $strasse }} Hausnummer:</h2>
 
     <table class="table">
@@ -15,91 +127,17 @@
         </thead>
         <tbody>
             @foreach ($projects as $project)
-                <tr>
-                    <td>{{ $project->hausnummer }}</td>
+            @php
+            $statusClass = '';
+            if ($project->status === 'Vertrag') {
+                $statusClass = 'status-vertrag';
+            } elseif ($project->status === 'Kein Interesse') {
+                $statusClass = 'status-kein-interesse';
+            }
+            @endphp
+            <tr>
+                    <td class="{{ $statusClass }}">{{ $project->hausnummer }}</td>
                     <td>
-                        <style>
-                            .feedback-message {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 10px;
-    color: #fff;
-    font-size: 16px;
-    border-radius: 5px;
-    z-index: 999;
-}
-
-.feedback-message.success {
-    background-color: #28a745; /* Grüner Hintergrund für Erfolgsmeldung */
-}
-
-.feedback-message.error {
-    background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
-}
-
-                            /* Stil für das Formular innerhalb der Zelle */
-                            form {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: flex-start;
-                            }
-                    
-                            /* Stil für das Select-Feld */
-                            select {
-                                padding: 8px;
-                                margin-bottom: 10px;
-                                border: 1px solid #ccc;
-                                border-radius: 4px;
-                                width: 100%;
-                            }
-                    
-                            /* Stil für das Textarea-Feld */
-                            textarea {
-                                padding: 8px;
-                                margin-bottom: 10px;
-                                border: 1px solid #ccc;
-                                border-radius: 4px;
-                                width: 100%;
-                                resize: vertical;
-                                min-height: 100px;
-                            }
-                    
-                            /* Stil für den Speichern-Button */
-                            .btn-primary {
-                                background-color: #007bff;
-                                color: white;
-                                padding: 10px 15px;
-                                border: none;
-                                border-radius: 4px;
-                                cursor: pointer;
-                            }
-                    
-                            .btn-primary:hover {
-                                background-color: #0056b3;
-                            }
-
-                            @media (max-width: 768px) {
-                                form {
-                                    flex-direction: column; /* Formular-Inhalte in Spalten anordnen */
-                                }
-
-                                select {
-                                    width: 100%; /* Feld auf volle Breite */
-                                }
-
-                                textarea {
-                                    width: 100%; /* Feld auf volle Breite */
-                                }
-
-                                .form-group {
-                                    overflow-x: auto; /* Horizontales Scrollen ermöglichen */
-                                    width: 100%; /* Breite auf 100% setzen */
-                                }
-                            }
-                        </style>
-                        
                         <form id="projectForm_{{ $project->id }}" class="ajax-form" data-ort="{{ $ort }}" data-hausnummer="{{ $project->hausnummer }}">
                             @csrf
                             <select name="status" onchange="handleVertragSelect(this, '{{ $ort }}', '{{ $project->hausnummer }}')">
@@ -246,6 +284,8 @@ function handleVertragSelect(selectElement, ort, hausnummer) {
                 selectElement.form.submit();
                 window.open("/pdf/showForm", "_blank");
             }
+
+
         }, 1000);  
     }
 }
