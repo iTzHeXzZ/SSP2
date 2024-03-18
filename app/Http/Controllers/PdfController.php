@@ -410,8 +410,15 @@
                 $pdf->Write(0, utf8_decode($strasse));
                 $pdf->SetXY(150 , 54);
                 $pdf->Write(0, utf8_decode($hausnummer));
-                $pdf->SetXY(170 , 28);
+                $textWidth = $pdf->GetStringWidth($anbieter);
+                while ($textWidth > $maxWidth && $fontSize > 2) {
+                    $fontSize--;
+                    $pdf->SetFont('Arial', '', $fontSize);
+                    $textWidth = $pdf->GetStringWidth($anbieter);
+                }
+                $pdf->SetXY(165 , 28);
                 $pdf->Write(0, utf8_decode($anbieter));
+                $pdf->SetFont('Arial', '', 12);
                 $pdf->SetXY(97 , 72);
                 $pdf->Write(0, utf8_decode($tel1));
                 $pdf->SetXY(97 , 78);
@@ -518,18 +525,18 @@
 
 
 
-            try {
-                Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
-                  $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                       ->subject('Neuer Auftrag von: ' . $username)
-                           ->attach($outputPdfPath, [
-                               'as' => $customer . '.pdf',
-                              'mime' => 'application/pdf',
-                            ]);
-                });
-            } catch (\Exception $e) {
-               return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-            }
+             try {
+                 Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+                   $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                        ->subject('Neuer Auftrag von: ' . $username)
+                            ->attach($outputPdfPath, [
+                                'as' => $customer . '.pdf',
+                               'mime' => 'application/pdf',
+                             ]);
+                 });
+             } catch (\Exception $e) {
+                return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+             }
 
         
         return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);

@@ -808,7 +808,6 @@
     document.getElementById('advisor_signature').value = dataURLAdvisor;
 
 
-    $('#loader').show();
     $.ajax({
         type: 'POST',
         url: '{{ route('pdf.fill') }}',
@@ -821,7 +820,6 @@
         window.close(); 
     },
     error: function(error) {
-        $('#loader').hide();
          alert('E-Mail wurde erfolgreich gesendet!.');
          window.location.reload(); 
     }
