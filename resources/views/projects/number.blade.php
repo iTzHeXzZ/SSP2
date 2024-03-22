@@ -273,21 +273,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleVertragSelect(selectElement, ort, hausnummer) {
     var selectedValue = selectElement.value;
 
-    if (selectedValue === 'Vertrag' && ort.includes('SWLangenfeld')) {
-        var popup = window.open('https://www.stw-langenfeld.de/media/glasfaser-ausbaugebiete-langenfeld/', '_blank');
+    if (selectedValue === 'Vertrag' && ort.includes('Langenfeld')) {
 
-        var interval = setInterval(function () {
-            if (popup.closed) {
-                clearInterval(interval);
-                alert('Vertrag erfolgreich erstellt');
-                selectElement.form.elements["status"].value = selectedValue;
-                selectElement.form.submit();
                 window.open("/pdf/showForm", "_blank");
             }
 
 
-        }, 1000);  
-    }
-}
+        }
 </script>
 @endsection
