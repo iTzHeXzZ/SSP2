@@ -545,7 +545,8 @@
     }
        
     public function fillPdfUgg(Request $request)
-    {
+    {   
+        $username           = Auth::user()->name;
         $anrede             = $request->input('anrede');
         $titel              = $request->input('titel');
         $vorname            = $request->input('vorname');
@@ -555,47 +556,291 @@
         $hausnummer         = $request->input('hausnummer');
         $plz                = $request->input('plz');
         $ort                = $request->input('ort');
-        $telefonnummer      = $request->input('telefonnummer ');
+        $telefonnummer      = $request->input('telefonnummer');
         $handynummer        = $request->input('handynummer');
         $email              = $request->input('email');
         $lieferdatum_typ    = $request->input('lieferdatum_typ');
         $anbieter           = $request->input('anbieter');
+        $bank               = $request->input('bank');
+        $iban               = $request->input('iban');
+        $kennzahl           = $request->input('kennzahl');
+        $firma              = $request->input('firma');
+        $gfpaket            = $request->input('gfpaket');
+        $hardware           = $request->input('hardwareOption');
+        $festnetzoption     = $request->input('festnetzOption');
+        error_log('Hardware: ' . $firma);
 
-        $vornameConverted = iconv('UTF-8', 'ISO-8859-1', $vorname);
-        $nachnameConverted = iconv('UTF-8', 'ISO-8859-1', $nachname);
-        $strasseConverted = iconv('UTF-8', 'ISO-8859-1', $strasse);
-        $emailConverted = iconv('UTF-8', 'ISO-8859-1', $email);
-        $ortConverted = iconv('UTF-8', 'ISO-8859-1', $ort);
-        $anbieterConverted = iconv('UTF-8', 'ISO-8859-1', $anbieter);
-        
+        $ortDatum           = $ort . ' ,' . date('d.m.Y');
+        $customer = $vorname . ' ,' . $nachname;
+        $combplzort = $plz . ' ' . $ort;
+        $combstrha = $strasse . ' ' . $hausnummer;
+
         $signaturePathData = $this->saveSignature($request);
         $pdfPath = storage_path('auftragugg.pdf');
         $pdf = new Fpdi();
-    
+ 
+        
         try {
             $pdf->setSourceFile($pdfPath);
-            $templateIndex = $pdf->importPage(1); // Importieren der ersten Seite der Vorlage
-            $pdf->AddPage();
-            $pdf->useTemplate($templateIndex);
+            $numPages = $pdf->setSourceFile($pdfPath);
+            $maxWidth = 30;
+            $fontSize = 12; 
+        
+            // Durchgehen aller Seiten
+            for ($pageNo = 1; $pageNo <= $numPages; $pageNo++) {
+                $templateIndex = $pdf->importPage($pageNo);
+                $pdf->AddPage();
+                $pdf->useTemplate($templateIndex);
+        
+                // Setzen Sie den Schrifttyp, die Größe und fügen Sie die Daten ein
+                $pdf->SetFont('Arial');
+                $pdf->SetFontSize(10);
+                
+                if ($pageNo == 1) {  
+                    if($anrede == 'Herr'){
+                        $pdf->SetXY(27, 108);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($anrede == 'Frau'){
+                        $pdf->SetXY(41, 108);
+                        $pdf->Write(0, 'X'); 
+                    }
+
+                    $pdf->SetXY(80 , 57);
+                    $pdf->Write(0, utf8_decode($kennzahl));
+                    $pdf->SetXY(42 , 102);
+                    $pdf->Write(0, utf8_decode($firma));
+                    $pdf->SetXY(42 , 114.4);
+                    $pdf->Write(0, utf8_decode($titel));
+                    $pdf->SetXY(80 , 108);
+                    $pdf->Write(0, utf8_decode($geburtstag)); 
+                    $pdf->SetXY(42 , 126.7);
+                    $pdf->Write(0, utf8_decode($vorname));
+                    $pdf->SetXY(42, 120.5);
+                    $pdf->Write(0, utf8_decode($nachname));
+                    $pdf->SetXY(135, 57.5);
+                    $pdf->Write(0, utf8_decode($ort));
+                    $pdf->SetXY(135, 52);
+                    $pdf->Write(0, utf8_decode($plz));
+                    $pdf->SetXY(135, 46.5);
+                    $pdf->Write(0, utf8_decode($strasse));
+                    $pdf->SetXY(186 , 46.5);
+                    $pdf->Write(0, utf8_decode($hausnummer));
+                    $pdf->SetXY(158 , 65);
+                    $pdf->Write(0, utf8_decode($telefonnummer));
+                    $pdf->SetXY(158 , 72);
+                    $pdf->Write(0, utf8_decode($handynummer));
+                    $pdf->SetXY(135, 78.5);
+                    $pdf->Write(0, utf8_decode($email));
+                    $pdf->SetXY(135, 203);
+                    $pdf->Write(0, utf8_decode($customer));
+                    $pdf->SetXY(135, 208.5);
+                    $pdf->Write(0, utf8_decode($iban));
+                    $pdf->SetXY(135, 221);
+                    $pdf->Write(0, utf8_decode($bank));
+
+                }
+
+                if ($pageNo == 2) {
+                    if($gfpaket == 'gf100'){
+                        $pdf->SetXY(17, 47);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($gfpaket == 'gf250'){
+                        $pdf->SetXY(17, 134);
+                        $pdf->Write(0, 'X'); 
+                    }
+                }
+
+                if ($pageNo == 3) {
+                    if($gfpaket == 'gf500'){
+                        $pdf->SetXY(17, 46.5);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($gfpaket == 'gf1000'){
+                        $pdf->SetXY(17, 122.5);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    
+                }
+
+                if ($pageNo == 4) {
+                    if($hardware == 'o2homebox'){
+                        $pdf->SetXY(17, 46.5);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($hardware == 'fritzbox'){
+                        $pdf->SetXY(17, 58.5);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($festnetzoption == 'isdn'){
+                        $pdf->SetXY(17, 82);
+                        $pdf->Write(0, 'X'); 
+                    }
+
+                }
+
+                if ($pageNo == 5) {
+                    
+                }
+                
+                if ($pageNo == 6) {
+
+                     if($lieferdatum_typ == 'schnellstmöglich'){
+                         $pdf->SetXY(108, 48);
+                         $pdf->Write(0, 'Nächstmöglicher Zeitpunkt');
+                     }else {
+                        $pdf->SetXY(108, 48);
+                         $pdf->Write(0, utf8_decode($lieferdatum_typ));
+                     }
+                    $pdf->SetXY(115, 165.5);
+                    $pdf->Write(0, utf8_decode($ort));
+                    $pdf->SetXY(85, 165.5);
+                    $pdf->Write(0, utf8_decode($plz));
+                    $pdf->SetXY(85, 158);
+                    $pdf->Write(0, utf8_decode($strasse));
+                    $pdf->SetXY(174 , 158);
+                    $pdf->Write(0, utf8_decode($hausnummer));
+                    
+                }
+
+                if ($pageNo == 7) {
+
+                }
+
+                if ($pageNo == 8) {
+                    $pdf->SetXY(15, 243);
+                    $pdf->Write(0, utf8_decode($ortDatum));
+
     
-            // Setzen Sie den Schrifttyp, die Größe und fügen Sie die Daten ein
-            $pdf->SetFont('Helvetica');
-            $pdf->SetFontSize(10);
+                    $pdf->Image($signaturePathData, 55, 240, 40, 10);
+
+                    $pdf->SetXY(105, 243);
+                    $pdf->Write(0, utf8_decode($ortDatum));
+
     
-            // Beispiel, wie man Text in das PDF einfügt
-            $pdf->SetXY(50, 50); // Positionierung anpassen
-            $pdf->Write(0, $vornameConverted);
+                    $pdf->Image($signaturePathData, 145, 240, 40, 10);
+                    
+                }
+        
+                if ($pageNo == 9) {
+                    $pdf->SetXY(152 , 70);
+                    $pdf->Write(0, utf8_decode($vorname));
+                    $pdf->SetXY(36, 70);
+                    $pdf->Write(0, utf8_decode($nachname));
+                    $pdf->SetXY(68, 82);
+                    $pdf->Write(0, utf8_decode($ort));
+                    $pdf->SetXY(36, 82);
+                    $pdf->Write(0, utf8_decode($plz));
+                    $pdf->SetXY(36, 76);
+                    $pdf->Write(0, utf8_decode($strasse));
+                    $pdf->SetXY(152 , 76);
+                    $pdf->Write(0, utf8_decode($hausnummer));
+                    $textWidth = $pdf->GetStringWidth($anbieter);
+                    while ($textWidth > $maxWidth && $fontSize > 2) {
+                        $fontSize--;
+                        $pdf->SetFont('Arial', '', $fontSize);
+                        $textWidth = $pdf->GetStringWidth($anbieter);
+                    }
+                    $pdf->SetXY(160 , 48);
+                    $pdf->Write(0, utf8_decode($anbieter));
+                    $pdf->SetFont('Arial', '', 10);
+                    $pdf->SetXY(73 , 99);
+                    $pdf->Write(0, utf8_decode($telefonnummer));
+                    $pdf->SetXY(28, 148);
+                    $pdf->Write(0, utf8_decode($ortDatum));
+                    $pdf->SetXY(18, 64);
+                    $pdf->Write(0, 'X');
+                    $pdf->SetXY(18, 90);
+                    $pdf->Write(0, 'X');
     
-            $pdf->SetXY(50, 60); // Positionierung anpassen
-            $pdf->Write(0, $nachnameConverted);
-            $pdf->Image($signaturePathData, 10, 260, 60, 20);
-            // Fügen Sie weitere Daten wie benötigt ein
+                    $pdf->Image($signaturePathData, 138, 140, 40, 10);
+                }
+
+                if ($pageNo == 10) {
+                    $pdf->SetXY(50 , 105);
+                    $pdf->Write(0, utf8_decode($customer));
+                    $pdf->SetXY(50, 113);
+                    $pdf->Write(0, utf8_decode($combstrha));
+                    $pdf->SetXY(70, 121);
+                    $pdf->Write(0, utf8_decode($ort));
+                    $pdf->SetXY(50, 121);
+                    $pdf->Write(0, utf8_decode($plz));
+                    $pdf->SetXY(50, 129);
+                    $pdf->Write(0, utf8_decode($email));
+                    $pdf->SetXY(50, 138);
+                    $pdf->Write(0, utf8_decode($bank));
+                    $pdf->SetXY(50, 145.5);
+                    $pdf->Write(0, utf8_decode($iban));
+                    $pdf->SetXY(50, 157);
+                    $pdf->Write(0, utf8_decode($ortDatum));
+
+                    $pdf->Image($signaturePathData, 90, 160, 40, 10);
+                }
+
+                if ($pageNo == 11) {
+                    $pdf->SetFontSize(12);
+
+                    if($anrede == 'Herr'){
+                        $pdf->SetXY(39, 83);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($anrede == 'Frau'){
+                        $pdf->SetXY(14, 83);
+                        $pdf->Write(0, 'X'); 
+                    }
+
+                    $pdf->SetXY(16 , 97);
+                    $pdf->Write(0, utf8_decode($customer));
+                    $pdf->SetXY(16, 128.7);
+                    $pdf->Write(0, utf8_decode($telefonnummer));
+                    $pdf->SetXY(105, 128.7);
+                    $pdf->Write(0, utf8_decode($handynummer));
+                    $pdf->SetXY(16, 144.7);
+                    $pdf->Write(0, utf8_decode($email));
+                    $pdf->SetXY(144, 144.7);
+                    $pdf->Write(0, utf8_decode($geburtstag));
+                    $pdf->SetXY(16, 160.5);
+                    $pdf->Write(0, utf8_decode($combstrha));
+                    $pdf->SetXY(16, 176.5);
+                    $pdf->Write(0, utf8_decode($combplzort));
+                    $pdf->SetXY(16 , 192.7);
+                    $pdf->Write(0, utf8_decode($ort));
+
+                    
+                }
+                
+                if ($pageNo == 12) {
+                    $pdf->SetFontSize(12);
+
+                    $pdf->SetXY(18, 173);
+                    $pdf->Write(0, utf8_decode($ortDatum));
+
     
+                    $pdf->Image($signaturePathData, 120, 165, 40, 10);
+                    
+                }
+            }
+        
             // Speichern oder Ausgeben des PDFs
             $outputPath = storage_path('app/filled_ugg_' . uniqid() . '.pdf');
             $pdf->Output('F', $outputPath);
-    
+        
             unlink($signaturePathData);
+
+            try {
+                Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
+                  $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                       ->subject('Neuer Auftrag von: ' . $username)
+                           ->attach($outputPath, [
+                               'as' => $customer . '.pdf',
+                              'mime' => 'application/pdf',
+                            ]);
+                });
+            } catch (\Exception $e) {
+               return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+            }
+
             return response()->download($outputPath, 'filled_ugg.pdf', [
                 'Content-Type' => 'application/pdf'
             ])->deleteFileAfterSend(true);            

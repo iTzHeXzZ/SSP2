@@ -92,6 +92,19 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-body" style="background-color: #f8f9fa;">
+                    <div class="card">
+                        <div class="card-header bg-light">UGG Papierauftrag erfassen:</div>
+                        <div class="card-body" style="background-color: #fff;">
+                            <div class="link-item">
+                                <a href="{{ url('/pdf/uggform') }}" target="_blank">
+                                    <span class="link-icon">&#128230;</span> 
+                                    Auftrag erfassen
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

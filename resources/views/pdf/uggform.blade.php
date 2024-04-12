@@ -4,7 +4,7 @@
 
 <script src="
 https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
-"></script>
+" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
 <style>
             .bg-green {
@@ -22,6 +22,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
             strasse: '',
             hausnummer: '',
             plz: '',
+            firma: '',
             ort: '',
             iban: '',
             bank: '',
@@ -32,6 +33,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
             handynummer: '',
             telefonnummer: '',
             email: '',
+            kennzahl: '',
             festnetzOption: 'analog', 
             hardwareOption: 'no_router', 
             lieferdatumTyp: 'schnellstmöglich',
@@ -52,7 +54,41 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
             init() {
                 console.log(`Initialer Schritt: ${this.schritt}`);
                 this.$watch('schritt', (value) => console.log(`Schritt geändert zu: ${value}`));
+                this.$watch('selectedProduct', (newValue) => {
+                    console.log(`Das ausgewählte Produkt hat sich geändert: ${newValue}`);
+                    this.updateProductDetails();
+                });
             },
+            hardwareOptions: {
+                'o2homebox': { name: 'o2 HomeBox 3', monthlyFee: 3.99, shippingCost: 9.99 },
+                'fritzbox': { name: 'AVM FRITZ!Box 7590AX o2', monthlyFee: 6.99, shippingCost: 9.99 },
+                'no_router': { name: 'Kein Router benötigt', monthlyFee: 0.00, shippingCost: 0.00 }
+            },
+            festnetzOptions: {
+                'analog': { name: 'Analog Option', description: '1 Leitung mit 1 Rufnummer', price: 0.00 },
+                'isdn': { name: 'ISDN Komfort', description: '2 Telefonleitungen und bis zu 10 Rufnummern', price: 2.99 }
+            },
+            products: {
+                'gf100': { name: 'o2 Home M 100/40', price: 29.99, regularPrice: 44.99, connectionFee: 0 },
+                'gf250': { name: 'o2 Home L 250/125', price: 34.99, regularPrice: 49.99, connectionFee: 0 },
+                'gf500': { name: 'o2 Home XL 500/250', price: 44.99, regularPrice: 59.99, connectionFee: 0 },
+                'gf1000': { name: 'o2 Home XXL 1000/500', price: 64.99, regularPrice: 79.99, connectionFee: 0 }
+            },
+            calculateMonthlyCostsFirstYear() {
+                return (this.products[this.gfpaket].price +
+                        this.hardwareOptions[this.hardwareOption].monthlyFee +
+                        this.festnetzOptions[this.festnetzOption].price).toFixed(2);
+            },
+            calculateMonthlyCostsSecondYear() {
+                return (this.products[this.gfpaket].regularPrice +
+                        this.hardwareOptions[this.hardwareOption].monthlyFee +
+                        this.festnetzOptions[this.festnetzOption].price).toFixed(2);
+            },
+            calculateOneTimeCosts() {
+                return (this.products[this.gfpaket].connectionFee +
+                        this.hardwareOptions[this.hardwareOption].shippingCost).toFixed(2);
+            },
+            selectedProduct: 'gf250',
             sendDataToController() {
                 const signatureCanvas = document.getElementById('signatureCanvas');
                 const signatureDataUrl = signatureCanvas.toDataURL();
@@ -66,6 +102,8 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     iban: this.iban,
                     bank: this.bank,
                     bic: this.bic,
+                    firma: this.firma,
+                    kennzahl: this.kennzahl,
                     unterschrift: signatureDataUrl,
                     anrede: this.anrede, 
                     titel: this.titel,
@@ -73,8 +111,8 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     handynummer: this.handynummer,
                     telefonnummer: this.telefonnummer,
                     email: this.email,
-                    festnetzOption: this.festnetz, 
-                    hardwareOption: this.hardware, 
+                    festnetzOption: this.festnetzOption, 
+                    hardwareOption: this.hardwareOption, 
                     lieferdatumTyp: this.lieferdatum_typ,
                     lieferdatum: this.lieferdatum,
                     anbieter: this.anbieter,
@@ -270,7 +308,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <h3 class="text-lg font-semibold mb-4">Festnetz Optionen</h3>
                             <div class="flex flex-col gap-4">
                                 <div class="flex items-center">
-                                    <input x-model="festnetzOption" value="analog" id="analog" class="form-radio h-6 w-6 text-blue-500 radio-custom" name="festnetz" type="radio" checked>
+                                    <input x-model="festnetzOption" value="analog" id="analog" class="form-radio h-6 w-6 text-blue-500 radio-custom" name="festnetz" type="radio">
                                     <label for="analog" class="ml-2 text-base">Analog Option - 1 Leitung mit 1 Rufnummer - 0,00 €</label>
                                 </div>
                                 <div class="flex items-center">
@@ -297,7 +335,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                                     <label for="fritzbox" class="ml-2 text-base">AVM FRITZ!Box 7590AX o2 - monatlich 6,99 € - Versandkosten 9,99 €</label>
                                 </div>
                                 <div class="flex items-center">
-                                    <input x-model="hardwareOption" value="no_router" id="no_router" class="form-radio h-6 w-6 text-blue-500 radio-custom" name="hardware" type="radio" checked>
+                                    <input x-model="hardwareOption" value="no_router" id="no_router" class="form-radio h-6 w-6 text-blue-500 radio-custom" name="hardware" type="radio">
                                     <label for="no_router" class="ml-2 text-base">Ich benötige keinen Router - 0,00 €</label>
                                 </div>
                             </div>
@@ -396,6 +434,12 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                         <input type="text" x-model="ort" name="ort" id="ort" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Musterstadt">
                     </div>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="kennzahl" class="block text-sm font-medium text-gray-700">Sicherheitskennzahl:</label>
+                        <input type="text" x-model="kennzahl" name="kennzahl" id="kennzahl" pattern="^[0-9]{4}$" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="XXXX">
+                    </div>
+                </div>
                 
             
                 <div class="flex justify-between">
@@ -457,7 +501,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     </div>
                     <div>
                         <label for="firma" class="block text-sm font-medium text-gray-700">Firma:</label>
-                        <input type="text" id="firma" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <input type="text" x-model="firma" id="firma" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
             </div>
@@ -525,8 +569,63 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
 
             <div x-show="schritt === 5">
                 <div class="mb-4">
-                    <h3 class="text-lg font-semibold mb-2">Zusammenfassung der Daten:</h3>
 
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Ausgewähltes Produkt -->
+                        <div class="bg-gray-100 p-4 rounded shadow">
+                            <h3 class="text-lg font-semibold">Ausgewähltes Produkt</h3>
+                            <p><strong>Produkt:</strong> <span x-text="products[gfpaket].name"></span></p>
+                            <p><strong>Aktionspreis (Monate 1-12):</strong> <span x-text="products[gfpaket].price + ' €'"></span></p>
+                            <p><strong>Regulärer Preis (danach):</strong> <span x-text="products[gfpaket].regularPrice + ' €'"></span></p>
+                            <p><strong>Anschlussgebühr:</strong> <span x-text="products[gfpaket].connectionFee + ' €'"></span></p>
+                        </div>
+                
+                        <!-- Ausgewählte Hardware -->
+                        <div class="bg-gray-100 p-4 rounded shadow">
+                            <h3 class="text-lg font-semibold">Ausgewählte Hardware</h3>
+                            <p><strong>Hardware:</strong> <span x-text="hardwareOptions[hardwareOption].name"></span></p>
+                            <p><strong>Monatliche Gebühr:</strong> <span x-text="hardwareOptions[hardwareOption].monthlyFee + ' €'"></span></p>
+                            <p><strong>Versandkosten:</strong> <span x-text="hardwareOptions[hardwareOption].shippingCost + ' €'"></span></p>
+                        </div>
+                
+                        <!-- Gewählte Festnetzoption -->
+                        <div class="bg-gray-100 p-4 rounded shadow">
+                            <h3 class="text-lg font-semibold">Gewählte Festnetzoption</h3>
+                            <p><strong>Option:</strong> <span x-text="festnetzOptions[festnetzOption].name"></span></p>
+                            <p><strong>Details:</strong> <span x-text="festnetzOptions[festnetzOption].description"></span></p>
+                            <p><strong>Preis:</strong> <span x-text="festnetzOptions[festnetzOption].price + ' €'"></span></p>
+                        </div>
+                    </div>
+                    <h2 class="text-lg font-semibold mb-2 mt-6">Kostenübersicht :</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gray-100 p-4 rounded shadow">
+                            <h3 class="text-lg font-semibold">Monatliche Kosten (Monate 1-12)</h3>
+                            <p><span x-text="calculateMonthlyCostsFirstYear() + ' €'"></span> pro Monat</p>
+                        </div>
+
+                        <div class="bg-gray-100 p-4 rounded shadow">
+                            <h3 class="text-lg font-semibold">Monatliche Kosten (Ab dem 13. Monat)</h3>
+                            <p><span x-text="calculateMonthlyCostsSecondYear() + ' €'"></span> pro Monat</p>
+                        </div>
+
+                        <div class="bg-gray-100 p-4 rounded shadow">
+                            <h3 class="text-lg font-semibold">Einmalige Kosten</h3>
+                            <p><span x-text="calculateOneTimeCosts() + ' €'"></span> gesamt</p>
+                        </div>
+                    </div>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold">Kontaktinformationen</h3>
+                            <div class="bg-gray-100 p-4 rounded shadow">
+                                <p><strong>Vorname:</strong> <span x-text="vorname"></span></p>
+                                <p><strong>Nachname:</strong> <span x-text="nachname"></span></p>
+                                <p><strong>Adresse:</strong> <span x-text="strasse + ' ' + hausnummer + ', ' + plz + ' ' + ort"></span></p>
+                                <p><strong>E-Mail:</strong> <span x-text="email"></span></p>
+                                <p><strong>Telefonnummer:</strong> <span x-text="telefonnummer"></span></p>
+                            </div>
+                        </div>
+                </div>
+                <div class="mb-4 mt-6 row">
+                    <p>Unterschrift des Kunden für die Beauftragung des Glasfaser Produkts</p>
                 </div>
                 <div class="flex flex-col justify-center items-center w-full" style="height: 300px;">
                     <div class="w-3/4 border border-gray-300" style="height: 150px;">
@@ -537,9 +636,6 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     </div>
                 </div>
                             
-                <div class="mb-4 row">
-                    <p>Unterschrift des Kunden.</p>
-                </div>
             
                 <!-- Schaltflächen für Navigation -->
                 <div class="flex justify-between">
