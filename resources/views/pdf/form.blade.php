@@ -137,18 +137,6 @@
         </fieldset>
 
         <fieldset>
-            <legend>Kontoinformationen</legend>
-            <label for="bank">Bank:</label>
-            <input type="text" name="bank" id="bank" >
-
-            <label for="iban">IBAN:</label>
-            <input type="text" name="iban" id="iban" value="DE" >
-
-            <label for="kontoinhaber">Kontoinhaber:</label>
-            <input type="text" name="kontoinhaber" id="kontoinhaber" value="" >
-        </fieldset>
-
-        <fieldset>
             <h3>Sind Sie bereits Kunde?</h3>
             <label for="kundennummer">Wenn ja Ihre Kundennummer:</label>
             <input type="text" name="fields[kundennummer]" id="kundennummer" >
@@ -569,6 +557,17 @@
                     </div>
                 </div>
             </div>
+            <fieldset>
+                <legend>Kontoinformationen</legend>
+                <label for="bank">Bank:</label>
+                <input type="text" name="bank" id="bank" >
+    
+                <label for="iban">IBAN:</label>
+                <input type="text" name="iban" id="iban" value="DE" >
+    
+                <label for="kontoinhaber">Kontoinhaber:</label>
+                <input type="text" name="kontoinhaber" id="kontoinhaber" value="" >
+            </fieldset>
         </div>
     </div>
 </div>
@@ -745,9 +744,6 @@
         formData['fields.Telefon_mobil'] = document.getElementById('Telefon_mobil').value;
         formData['fields.EMailAdresse'] = document.getElementById('EMailAdresse').value;
         formData['fields.kundennummer'] = document.getElementById('kundennummer').value;
-        formData['iban'] = document.getElementById('iban').value;
-        formData['bank'] = document.getElementById('bank').value;
-        formData['kontoinhaber'] = document.getElementById('kontoinhaber').value;
         formData['gb'] = document.getElementById('gb').value;
         
         var additionalFieldsContainer = document.getElementById('additionalFieldsContainer');
@@ -775,10 +771,7 @@
         document.getElementById('Hausnummer').value = formData['fields.Hausnummer'] || '';
         document.getElementById('PLZ').value = formData['fields.PLZ'] || '';
         document.getElementById('Ort').value = formData['fields.Ort'] || '';
-        document.getElementById('iban').value = formData['iban'] || '';
-        document.getElementById('bank').value = formData['bank'] || '';
         document.getElementById('gb').value = formData['gb'] || '';
-        document.getElementById('kontoinhaber').value = formData['kontoinhaber'] || '';
         document.getElementById('Telefon_Festnetz').value = formData['fields.Telefon_Festnetz'] || '';
         document.getElementById('Telefon_mobil').value = formData['fields.Telefon_mobil'] || '';
         document.getElementById('EMailAdresse').value = formData['fields.EMailAdresse'] || '';

@@ -8,6 +8,7 @@
     use setasign\Fpdi\Fpdi;
     use Illuminate\Support\Facades\Mail;
     use Illuminate\Mail\Message;
+    use Illuminate\Support\Facades\Storage;
 
     
     
@@ -542,16 +543,102 @@
         return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);
         
     }
+       
+    public function fillPdfUgg(Request $request)
+    {
+        $anrede             = $request->input('anrede');
+        $titel              = $request->input('titel');
+        $vorname            = $request->input('vorname');
+        $nachname           = $request->input('nachname');
+        $geburtstag         = $request->input('geburtstag');
+        $strasse            = $request->input('strasse');
+        $hausnummer         = $request->input('hausnummer');
+        $plz                = $request->input('plz');
+        $ort                = $request->input('ort');
+        $telefonnummer      = $request->input('telefonnummer ');
+        $handynummer        = $request->input('handynummer');
+        $email              = $request->input('email');
+        $lieferdatum_typ    = $request->input('lieferdatum_typ');
+        $anbieter           = $request->input('anbieter');
+
+        $vornameConverted = iconv('UTF-8', 'ISO-8859-1', $vorname);
+        $nachnameConverted = iconv('UTF-8', 'ISO-8859-1', $nachname);
+        $strasseConverted = iconv('UTF-8', 'ISO-8859-1', $strasse);
+        $emailConverted = iconv('UTF-8', 'ISO-8859-1', $email);
+        $ortConverted = iconv('UTF-8', 'ISO-8859-1', $ort);
+        $anbieterConverted = iconv('UTF-8', 'ISO-8859-1', $anbieter);
         
+        $signaturePathData = $this->saveSignature($request);
+        $pdfPath = storage_path('auftragugg.pdf');
+        $pdf = new Fpdi();
+    
+        try {
+            $pdf->setSourceFile($pdfPath);
+            $templateIndex = $pdf->importPage(1); // Importieren der ersten Seite der Vorlage
+            $pdf->AddPage();
+            $pdf->useTemplate($templateIndex);
+    
+            // Setzen Sie den Schrifttyp, die Größe und fügen Sie die Daten ein
+            $pdf->SetFont('Helvetica');
+            $pdf->SetFontSize(10);
+    
+            // Beispiel, wie man Text in das PDF einfügt
+            $pdf->SetXY(50, 50); // Positionierung anpassen
+            $pdf->Write(0, $vornameConverted);
+    
+            $pdf->SetXY(50, 60); // Positionierung anpassen
+            $pdf->Write(0, $nachnameConverted);
+            $pdf->Image($signaturePathData, 10, 260, 60, 20);
+            // Fügen Sie weitere Daten wie benötigt ein
+    
+            // Speichern oder Ausgeben des PDFs
+            $outputPath = storage_path('app/filled_ugg_' . uniqid() . '.pdf');
+            $pdf->Output('F', $outputPath);
+    
+            unlink($signaturePathData);
+            return response()->download($outputPath, 'filled_ugg.pdf', [
+                'Content-Type' => 'application/pdf'
+            ])->deleteFileAfterSend(true);            
+        } catch (\Exception $e) {
+            // Fehlerbehandlung
+            return response()->json(['error' => $e->getMessage()]);
+        }
+    }
 
         public function showForm()
         {
             return view('pdf.form');
         }
+        public function uggform()
+        {
+            return view('pdf.uggform');
+        }
 
         public function showProduct()
         {
             return view('pdf.productswl');
+        }
+        function saveSignature(Request $request)
+        {
+            $base64Image = $request->input('unterschrift'); // oder der entsprechende Schlüssel Ihrer Data-URL
+            // Extrahieren Sie den eigentlichen Base64-String aus der Data-URL
+            @list($type, $fileData) = explode(';', $base64Image);
+            @list(, $fileData) = explode(',', $fileData);
+        
+            if ($fileData != "") {
+                $decodedImageData = base64_decode($fileData);
+        
+                $fileName = 'signature_' . uniqid() . '.png';
+                $filePath = 'signatures/' . $fileName;
+        
+                Storage::disk('local')->put($filePath, $decodedImageData);
+        
+                // Geben Sie den Pfad zur gespeicherten Datei zurück
+                
+                return storage_path('app/' . $filePath);
+            }
+        
+            return null;
         }
 
     }

@@ -51,7 +51,9 @@ Route::middleware('auth')->group(function () {
     #Route::get('/projects/number', [ProjectController::class, 'number'])->name('projects.number');
     Route::get('/pdf/productswl', [PdfController::class, 'showProduct'])->name('pdf.showProduct');
     Route::get('/pdf/showForm', [PdfController::class, 'showForm'])->name('pdf.showForm');
+    Route::get('/pdf/uggform', [PdfController::class, 'uggform'])->name('pdf.uggform');
     Route::post('/pdf/fill', [PdfController::class, 'fillPdf'])->name('pdf.fill');
+    Route::post('/pdf/fillugg', [PdfController::class, 'fillPdfugg'])->name('pdf.fillugg');
     
 
 
@@ -86,9 +88,9 @@ Route::group(['middleware' => 'admin'], function () {
 
     Route::get('/status/{user_id}/{location}', 'App\Http\Controllers\StatusController@showLocation')->name('status.showLocation');
 
-    Route::get('/termine', [TerminController::class, 'index'])->name('termine.index');
-    Route::get('/termine/create', [TerminController::class, 'create'])->name('termine.create');
-    Route::post('/termine', [TerminController::class, 'store'])->name('termine.store');
+    // Route::get('/termine', [TerminController::class, 'index'])->name('termine.index');
+    // Route::get('/termine/create', [TerminController::class, 'create'])->name('termine.create');
+    // Route::post('/termine', [TerminController::class, 'store'])->name('termine.store');
 });
 
 
