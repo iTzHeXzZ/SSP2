@@ -113,7 +113,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     email: this.email,
                     festnetzOption: this.festnetzOption, 
                     hardwareOption: this.hardwareOption, 
-                    lieferdatumTyp: this.lieferdatum_typ,
+                    lieferdatumTyp: this.lieferdatumTyp,
                     lieferdatum: this.lieferdatum,
                     anbieter: this.anbieter,
                     rufnummer_1: this.rufnummer_1,
@@ -458,19 +458,17 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                 <fieldset class="mt-4">
                     <legend class="text-sm font-medium text-gray-700">Gewünschtes Lieferdatum:</legend>
                     <div class="flex flex-wrap items-center gap-4">
-                    <div class="flex items-center mb-4">
-                        <input x-model="lieferdatumTyp" id="lieferdatum_schnellstmoeglich" name="lieferdatum_typ" type="radio" value="schnellstmöglich" checked class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                        <label for="lieferdatum_schnellstmoeglich" class="ml-3 block text-sm font-medium text-gray-700">
-                            Schnellstmöglich
-                        </label>
-                    </div>
-                    <div class="flex items-center mb-4">
-                        <input x-model="lieferdatum" id="lieferdatum_waehlen" name="lieferdatum_typ" type="radio" value="waehlen" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
-                        <label for="lieferdatum_waehlen" class="ml-3">
-                            <span class="block text-sm font-medium text-gray-700">Datum wählen:</span>
-                            <input type="date" name="lieferdatum" id="lieferdatum" disabled class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        </label>
-                    </div>
+                        <div class="flex items-center mb-4">
+                            <input type="radio" x-model="lieferdatumTyp" value="schnellstmöglich" checked class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label class="ml-3 block text-sm font-medium text-gray-700">Schnellstmöglich</label>
+                        </div>
+                        <div class="flex items-center mb-4">
+                            <input type="radio" x-model="lieferdatumTyp" value="waehlen" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                            <label class="ml-3 block text-sm font-medium text-gray-700">
+                                Datum wählen:
+                                <input type="date" x-model="lieferdatum" x-bind:disabled="lieferdatumTyp !== 'waehlen'" x-on:change="lieferdatumTyp = lieferdatum ? '' : 'waehlen'" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            </label>
+                        </div>
                     </div>
                 </fieldset>
             
@@ -681,24 +679,34 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
 
 
     document.addEventListener('DOMContentLoaded', function () {
-        const waehlenRadio = document.getElementById('lieferdatum_waehlen');
-        const datumInput = document.getElementById('lieferdatum');
+    const waehlenRadio = document.getElementById('lieferdatum_waehlen');
+    const datumInput = document.getElementById('lieferdatum');
+    const schnellRadio = document.getElementById('lieferdatum_schnellstmoeglich');
 
-        waehlenRadio.addEventListener('change', function() {
-            if (this.checked) {
-                datumInput.disabled = false;
-            }
-        });
-
-        const schnellRadio = document.getElementById('lieferdatum_schnellstmoeglich');
-
-        schnellRadio.addEventListener('change', function() {
-            if (this.checked) {
-                datumInput.disabled = true;
-                datumInput.value = ''; 
-            }
-        });
+    
+    waehlenRadio.addEventListener('change', function() {
+        if (this.checked) {
+            datumInput.disabled = false;
+        }
     });
+
+   
+    schnellRadio.addEventListener('change', function() {
+        if (this.checked) {
+            datumInput.disabled = true;
+            datumInput.value = ''; 
+            waehlenRadio.checked = false; 
+        }
+    });
+
+    
+    datumInput.addEventListener('change', function() {
+        if (this.value) {
+            schnellRadio.checked = false; 
+        }
+    });
+});
+
 
     document.getElementById('telefonnummer').addEventListener('input', function(e) {
         const value = e.target.value;

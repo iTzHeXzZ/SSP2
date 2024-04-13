@@ -559,7 +559,8 @@
         $telefonnummer      = $request->input('telefonnummer');
         $handynummer        = $request->input('handynummer');
         $email              = $request->input('email');
-        $lieferdatum_typ    = $request->input('lieferdatum_typ');
+        $lieferdatum_typ    = $request->input('lieferdatumTyp');
+        $lieferdatum        = $request->input('lieferdatum');
         $anbieter           = $request->input('anbieter');
         $bank               = $request->input('bank');
         $iban               = $request->input('iban');
@@ -568,7 +569,16 @@
         $gfpaket            = $request->input('gfpaket');
         $hardware           = $request->input('hardwareOption');
         $festnetzoption     = $request->input('festnetzOption');
-        error_log('Hardware: ' . $firma);
+        $rufnummer_1        = $request->input('rufnummer_1');        
+        $rufnummer_2        = $request->input('rufnummer_2');
+        $rufnummer_3        = $request->input('rufnummer_3');
+        $rufnummer_4        = $request->input('rufnummer_4');
+        $rufnummer_5        = $request->input('rufnummer_5');
+        $rufnummer_6        = $request->input('rufnummer_6');
+        $rufnummer_7        = $request->input('rufnummer_7');
+        $rufnummer_8        = $request->input('rufnummer_8');
+        $rufnummer_9        = $request->input('rufnummer_9');
+        $rufnummer_10       = $request->input('rufnummer_10');
 
         $ortDatum           = $ort . ' ,' . date('d.m.Y');
         $customer = $vorname . ' ,' . $nachname;
@@ -688,10 +698,10 @@
 
                      if($lieferdatum_typ == 'schnellstmöglich'){
                          $pdf->SetXY(108, 48);
-                         $pdf->Write(0, 'Nächstmöglicher Zeitpunkt');
+                         $pdf->Write(0, utf8_decode('Nächstmöglicher Zeitpunkt'));
                      }else {
                         $pdf->SetXY(108, 48);
-                         $pdf->Write(0, utf8_decode($lieferdatum_typ));
+                         $pdf->Write(0, utf8_decode($lieferdatum));
                      }
                     $pdf->SetXY(115, 165.5);
                     $pdf->Write(0, utf8_decode($ort));
@@ -746,7 +756,25 @@
                     $pdf->Write(0, utf8_decode($anbieter));
                     $pdf->SetFont('Arial', '', 10);
                     $pdf->SetXY(73 , 99);
-                    $pdf->Write(0, utf8_decode($telefonnummer));
+                    $pdf->Write(0, utf8_decode($rufnummer_1));
+                    $pdf->SetXY(73 , 105);
+                    $pdf->Write(0, utf8_decode($rufnummer_2));
+                    $pdf->SetXY(73 , 110.5);
+                    $pdf->Write(0, utf8_decode($rufnummer_3));
+                    $pdf->SetXY(73 , 116);
+                    $pdf->Write(0, utf8_decode($rufnummer_4));
+                    $pdf->SetXY(73 , 121.5);
+                    $pdf->Write(0, utf8_decode($rufnummer_5));
+                    $pdf->SetXY(139 , 99);
+                    $pdf->Write(0, utf8_decode($rufnummer_6));
+                    $pdf->SetXY(139 , 105);
+                    $pdf->Write(0, utf8_decode($rufnummer_7));
+                    $pdf->SetXY(139 , 110.5);
+                    $pdf->Write(0, utf8_decode($rufnummer_8));
+                    $pdf->SetXY(139 , 116);
+                    $pdf->Write(0, utf8_decode($rufnummer_9));
+                    $pdf->SetXY(139 , 121.5);
+                    $pdf->Write(0, utf8_decode($rufnummer_10));
                     $pdf->SetXY(28, 148);
                     $pdf->Write(0, utf8_decode($ortDatum));
                     $pdf->SetXY(18, 64);
@@ -828,18 +856,18 @@
         
             unlink($signaturePathData);
 
-            try {
-                Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
-                  $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                       ->subject('Neuer Auftrag von: ' . $username)
-                           ->attach($outputPath, [
-                               'as' => $customer . '.pdf',
-                              'mime' => 'application/pdf',
-                            ]);
-                });
-            } catch (\Exception $e) {
-               return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-            }
+            // try {
+            //     Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
+            //       $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+            //            ->subject('Neuer Auftrag von: ' . $username)
+            //                ->attach($outputPath, [
+            //                    'as' => $customer . '.pdf',
+            //                   'mime' => 'application/pdf',
+            //                 ]);
+            //     });
+            // } catch (\Exception $e) {
+            //    return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+            // }
 
             return response()->download($outputPath, 'filled_ugg.pdf', [
                 'Content-Type' => 'application/pdf'
