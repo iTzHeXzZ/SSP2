@@ -468,18 +468,18 @@
          unlink($advisorSignaturePath);
 
 
-            //   try {
-            //       Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
-            //         $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-            //              ->subject('Neuer Auftrag von: ' . $username)
-            //                  ->attach($outputPdfPath, [
-            //                      'as' => $customer . '.pdf',
-            //                     'mime' => 'application/pdf',
-            //                   ]);
-            //       });
-            //   } catch (\Exception $e) {
-            //      return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-            //   }
+               try {
+                   Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+                     $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                          ->subject('Neuer Auftrag von: ' . $username)
+                              ->attach($outputPdfPath, [
+                                  'as' => $customer . '.pdf',
+                                 'mime' => 'application/pdf',
+                               ]);
+                   });
+               } catch (\Exception $e) {
+                  return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+               }
 
         
             $pdfUrl = url('/storage/' . basename($outputPdfPath));; 
