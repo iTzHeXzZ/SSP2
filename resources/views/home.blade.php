@@ -109,4 +109,57 @@
         </div>
     </div>
 </div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    {{ __('Meine Aufträge') }}
+                    <form action="{{ route('home') }}" method="GET" class="form-inline" style="float: right;">
+                        <div class="form-group">
+                            <label for="start_date">Von: </label>
+                            <input type="date" id="start_date" name="start_date" class="form-control mx-2" value="{{ $startDate }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date">Bis: </label>
+                            <input type="date" id="end_date" name="end_date" class="form-control mx-2" value="{{ $endDate }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Filtern</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Erstellungsdatum</th>
+                                <th>Ort</th>
+                                <th>Adresse</th>
+                                <th>Kundenname</th>
+                                <th>Status</th>
+                                <th>Notiz</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($auftraege as $auftrag)
+                                <tr>
+                                    <td>{{ $auftrag->created_at->format('d.m.Y') }}</td>
+                                    <td>{{ $auftrag->ort }}</td>
+                                    <td>{{ $auftrag->adresse }}</td>
+                                    <td>{{ $auftrag->kundenname }}</td>
+                                    <td>{{ $auftrag->status }}</td>
+                                    <td>{{ $auftrag->notiz }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6">Keine Aufträge gefunden.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                    {{ $auftraege->links() }} <!-- Pagination links -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

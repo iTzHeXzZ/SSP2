@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -22,9 +24,23 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('home');
+        $user = Auth::user();
+        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+
+        
+        $auftraege = $user->auftraege()
+                          ->whereBetween('created_at', [$startDate, $endDate])
+                          ->latest()
+                          ->paginate(10);
+
+        return view('home', [
+            'auftraege' => $auftraege,
+            'startDate' => $startDate,
+            'endDate' => $endDate
+        ]);
     }
 
     public function download($file)

@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 <style>
         .signature-container {
         margin-top: 20px;
@@ -219,6 +228,7 @@
     
                 <label for="EMailAdresse">E-Mail-Adresse:</label>
                 <input type="text" name="fields[EMailAdresse1]" id="EMailAdresse" >
+                <input type="hidden" id="kundenname" name="kundenname">
             </fieldset>
         </div>
     </fieldset> 
@@ -593,9 +603,9 @@
     <button class="clear-button" onclick="clearSignature('signatureCanvasAdvisor')">Unterschrift löschen</button>
     <p id="datetimeAdvisor"></p>
 </div>
-<input type="hidden" name="owner_signature" id="owner_signature">
-<input type="hidden" name="order_signature" id="order_signature">
-<input type="hidden" name="advisor_signature" id="advisor_signature">
+<input type="hidden" id="owner_signature" name="owner_signature">
+<input type="hidden" id="order_signature" name="order_signature">
+<input type="hidden" id="advisor_signature" name="advisor_signature">
     <input type="hidden" name="fields[StandardCheckboxStatus]" value="1" id="StandardCheckboxStatus">
     <button type="button" onclick="submitForm()">PDF ausfüllen und herunterladen</button>
 </div>
@@ -788,48 +798,157 @@
         });
     }
 
-    function submitForm() {
+            function submitForm() {
+            var canvasOwner = document.getElementById('signatureCanvasOwner');
+            var dataURLOwner = canvasOwner.toDataURL();
 
-    var canvasOwner = document.getElementById('signatureCanvasOwner');
-    var dataURLOwner = canvasOwner.toDataURL(); 
-    document.getElementById('owner_signature').value = dataURLOwner;
-    var canvasOrder = document.getElementById('signatureCanvasOrder');
-    var dataURLOrder = canvasOrder.toDataURL();
-    document.getElementById('order_signature').value = dataURLOrder;
-    var canvasAdvisor = document.getElementById('signatureCanvasAdvisor');
-    var dataURLAdvisor = canvasAdvisor.toDataURL();
-    document.getElementById('advisor_signature').value = dataURLAdvisor;
+            var canvasOrder = document.getElementById('signatureCanvasOrder');
+            var dataURLOrder = canvasOrder.toDataURL();
+
+            var canvasAdvisor = document.getElementById('signatureCanvasAdvisor');
+            var dataURLAdvisor = canvasAdvisor.toDataURL();
+
+            var vorname = document.getElementById('Vorname').value;
+            var nachname = document.getElementById('Nachname').value;
+
+            var standardCheckbox = document.getElementById('standardCheckbox');
+            var standardCheckboxStatus = standardCheckbox.checked ? '1' : '0';
+
+            formData['fields.Anrede_Frau1'] = document.getElementById('Frau').checked ? 'X' : '';
+            formData['fields.Anrede_Herr1'] = document.getElementById('Mann').checked ? 'X' : '';
+            formData['fields.Anrede_Divers1'] = document.getElementById('Divers').checked ? 'X' : '';
+            formData['fields.Eheleute1'] = document.getElementById('Eheleute').value;
+            formData['fields.Titel1'] = document.getElementById('Titel').value;
+            formData['fields.Firma_Gemeinschaft1'] = document.getElementById('Firma_Gemeinschaft').value;
+            formData['fields.Vorname1'] = document.getElementById('Vorname').value;
+            formData['fields.Nachname1'] = document.getElementById('Nachname').value;
+            formData['fields.Strasse1'] = document.getElementById('Strasse').value;
+            formData['fields.Hausnummer1'] = document.getElementById('Hausnummer').value;
+            formData['fields.PLZ1'] = document.getElementById('PLZ').value;
+            formData['fields.Ort1'] = document.getElementById('Ort').value;
+            formData['fields.Telefon_Festnetz1'] = document.getElementById('Telefon_Festnetz').value;
+            formData['fields.Telefon_mobil1'] = document.getElementById('Telefon_mobil').value;
+            formData['fields.EMailAdresse1'] = document.getElementById('EMailAdresse').value;
+            formData['anbieter'] = document.getElementById('anbieter').value;
+            formData['tel1'] = document.getElementById('tel1').value;
+            formData['tel2'] = document.getElementById('tel2').value;
+            formData['bank'] = document.getElementById('bank').value;
+            formData['iban'] = document.getElementById('iban').value;
+            formData['kontoinhaber'] = document.getElementById('kontoinhaber').value;
+            formData['anzahlwe'] = document.getElementById('anzahlwe').value;
+            formData['anzahlgk'] = document.getElementById('anzahlgk').value;
+            var pakete = document.getElementsByName('gfpaket');
+            for (var i = 0; i < pakete.length; i++) {
+                if (pakete[i].checked) {
+                    formData['gfpaket'] = pakete[i].value;
+                    break;
+                }
+            }
+            var fritzBoxOptions = document.getElementsByName('fritzBox');
+            for (var i = 0; i < fritzBoxOptions.length; i++) {
+                if (fritzBoxOptions[i].checked) {
+                    formData['fritzBox'] = fritzBoxOptions[i].value;
+                    break;
+                }
+            }
+            formData['waipustick'] = document.getElementById('waipustick').checked ? 'Ja' : 'Nein';
+            formData['cabletv'] = document.getElementById('cabletv').checked ? 'Ja' : 'Nein';
+            formData['waipucomfort'] = document.getElementById('waipucomfort').checked ? 'Ja' : 'Nein';
+            formData['waipuplus'] = document.getElementById('waipuplus').checked ? 'Ja' : 'Nein';
+            formData['firstflat'] = document.getElementById('firstflat').checked ? 'Ja' : 'Nein';
+            formData['secondflat'] = document.getElementById('secondflat').checked ? 'Ja' : 'Nein';
+            formData['staticip'] = document.getElementById('staticip').checked ? 'Ja' : 'Nein';
+            formData['postde'] = document.getElementById('postde').checked ? 'Ja' : 'Nein';
+            var stromOptions = document.getElementsByName('strom');
+            for (var i = 0; i < stromOptions.length; i++) {
+                if (stromOptions[i].checked) {
+                    formData['strom'] = stromOptions[i].value;
+                    break;
+                }
+            }
+            var gasOptions = document.getElementsByName('gas');
+            for (var i = 0; i < gasOptions.length; i++) {
+                if (gasOptions[i].checked) {
+                    formData['gas'] = gasOptions[i].value;
+                    break;
+                }
+            }
+            var additionalFieldsContainer = document.getElementById('additionalFieldsContainer');
+            var additionalFieldInputs = additionalFieldsContainer.querySelectorAll('input[type="text"]');
+            additionalFieldInputs.forEach(function (input) {
+                var fieldName = input.name;
+                var fieldValue = input.value;
+                formData[fieldName] = fieldValue;
+            });
+
+            var data = {
+                owner_signature: dataURLOwner,
+                order_signature: dataURLOrder,
+                advisor_signature: dataURLAdvisor,
+                kundenname: vorname + ' ' + nachname,
+                StandardCheckboxStatus: standardCheckboxStatus,
+                formData: formData 
+            };
+            var pdfUrl;
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('pdf.fill') }}',  // Laravel-Route für das Erstellen der PDF
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')  // CSRF-Token für Sicherheit
+                },
+                success: function(response) {
+                    pdfUrl = response.url;
+                    var downloadLink = document.createElement('a');
+                    downloadLink.href = response.url;
+                    downloadLink.target = '_blank';
+                    downloadLink.download = 'Langenfeld.pdf';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+
+                    createContract();
+                    
+                    
+                    setTimeout(() => {
+                        fetch('{{ route('pdf.delete') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')   
+                            },
+                            body: JSON.stringify({ filePath: pdfUrl }),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Netzwerkantwort war nicht ok, Status: ' + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                console.log('Datei erfolgreich gelöscht');
+                                window.close();
+                            } else {
+                                console.error('Fehler beim Löschen der Datei:', data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fehler beim Senden der Anfrage:', error);
+                        });
+                    }, 5000);
+                },
+                error: function(error) {
+                    alert('FEHLER!');
+                    console.error('Fehler beim Senden der Daten:', error);
+                }
+            });
+
+        }
 
 
-    $.ajax({
-        type: 'POST',
-        url: '{{ route('pdf.fill') }}',
-        data: $('#signatureForm').serialize(),
-        headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    },
-        success: function(response) {
-        alert('E-Mail wurde erfolgreich gesendet.');
-        window.close(); 
-    },
-    error: function(error) {
-         alert('E-Mail wurde erfolgreich gesendet!.');
-         window.location.reload(); 
-    }
-    });
-    var form = document.getElementById('formOnPage2');
-    var standardCheckbox = document.getElementById('standardCheckbox');
-        var standardCheckboxStatus = standardCheckbox.checked ? '1' : '0';
 
-        document.getElementById('StandardCheckboxStatus').value = standardCheckboxStatus;
-    form.submit(); 
-}
-
-
-
-        function closePdfFormWindow() {
-        window.close();
-    }
 
 
     function validateFormAndShowNextPage(event) {
@@ -845,28 +964,54 @@
                  return false;
              }
          }
-
-        
         saveFormData();
         populateFormData();
 
 
-        var form = document.getElementById('formOnPage2');
-    for (var key in formData) {
-        if (formData.hasOwnProperty(key)) {
-            var input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = formData[key];
-            form.appendChild(input);
+            var form = document.getElementById('formOnPage2');
+        for (var key in formData) {
+            if (formData.hasOwnProperty(key)) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = formData[key];
+                form.appendChild(input);
+            }
         }
-    }
 
 
-        document.getElementById('formOnPage2').action = "{{ route('pdf.fill') }}";
-        document.getElementById('formOnPage2').method = "post";
+        document.getElementById('page1').style.display = 'none';
         document.getElementById('page2').style.display = 'block';
 
     }
+            function createContract() {
+            $.ajax({
+                
+                type: 'POST',
+                url: '{{ route('contracts.create') }}',
+                data: $('#formOnPage2').serialize(),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    alert('Vertrag erfolgreich erstellt.');
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                // Alert für den Benutzer
+                alert('Fehler beim Erstellen des Vertrages. Bitte versuchen Sie es erneut.');
+
+                // Logge zusätzliche Fehlerinformationen in der Konsole
+                console.error("AJAX Error Status:", xhr.status); // Statuscode des Fehlers
+                console.error("Status Text:", textStatus); // Statusbeschreibung wie 'error', 'timeout', usw.
+                console.error("Error Thrown:", errorThrown); // Der von jQuery geworfene Fehler
+                console.error("Response Text:", xhr.responseText); // Der Text, den der Server als Antwort gibt
+
+                // Optional: Zeige eine detaillierte Fehlermeldung im Browser, falls benötigt
+                // Hinweis: Im Produktivsystem könnte dies aus Sicherheitsgründen vermieden werden
+                const errorDetails = `Ein Fehler ist aufgetreten: ${xhr.status} ${errorThrown}\n${xhr.responseText}`;
+                console.error("Detailed Error Information:", errorDetails);
+            }
+            });
+        }
     </script>
 @endsection

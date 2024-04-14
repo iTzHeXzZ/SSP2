@@ -54,9 +54,12 @@
                     <div><img src="/Images/ssp.png" style="max-height: 30px; border-right: 1px solid #333; padding-right : 6px " ></div>
                     <div style="padding-left: 6px">Safe-Start-Projects</div>
                 </a>
-                    @auth
+                    @auth 
                     <a class="navbar-brand d-flex" href="{{ url('/projects') }}">
                         <div style="padding-left: 6px">Projekte</div>
+                    </a>
+                    <a class="navbar-brand d-flex" href="{{ route('analyse') }}">
+                        <div style="padding-left: 6px">Analyse</div>
                     </a>
                     @endauth
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">

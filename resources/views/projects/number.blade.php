@@ -138,7 +138,7 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
             <tr>
                     <td class="{{ $statusClass }}">{{ $project->hausnummer }}</td>
                     <td>
-                        <form id="projectForm_{{ $project->id }}" class="ajax-form" data-ort="{{ $ort }}" data-hausnummer="{{ $project->hausnummer }}">
+                        <form id="projectForm_{{ $project->id }}" class="ajax-form" data-ort="{{ $ort }}" data-hausnummer="{{ $project->hausnummer }}" data-auto-submit="false">
                             @csrf
                             <select name="status" onchange="handleVertragSelect(this, '{{ $ort }}', '{{ $project->hausnummer }}')">
                                 @foreach ($statusOptions as $option)
@@ -170,31 +170,24 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
 @section('scripts')
 <script>
 function submitFormViaAjax(form) {
-    event.preventDefault();
+    if (form.dataset.autoSubmit === 'false') {
+        event.preventDefault();
+    }
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-    // Setzen des CSRF-Tokens für alle AJAX-Anfragen
     axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
-
-    // Formulardaten sammeln
     const formData = new FormData(form);
-
-    // Extrahiere die Projekt-ID aus dem Formular-ID-Attribut
     const projectId = form.id.split('_')[1];
-
 
     axios.post(`/projects/update/${projectId}`, formData)
         .then(response => {
             console.log(response.data);
             showFeedbackMessage('Speichern erfolgreich!', 'success');
+            form.dataset.autoSubmit = 'false'; // Setze es zurück auf false nach dem Absenden
         })
         .catch(error => {
-            // Fehler verarbeiten, falls nötig
             console.error(error);
             showFeedbackMessage('Fehler beim Speichern!', 'error');
-        })
-        .finally(() => {
-            restoreScrollPosition();
         });
 }
 
@@ -274,11 +267,27 @@ function handleVertragSelect(selectElement, ort, hausnummer) {
     var selectedValue = selectElement.value;
 
     if (selectedValue === 'Vertrag' && ort.includes('Langenfeld')) {
+        const newWindow = window.open("/pdf/showForm", "_blank");
 
-                window.open("/pdf/showForm", "_blank");
+        let checkWindow = setInterval(() => {
+            if (newWindow.closed) {
+                clearInterval(checkWindow);
+                submitStatusAsVertrag(ort, hausnummer);
             }
+        }, 500);
+    }
+}
 
+function submitStatusAsVertrag(ort, hausnummer) {
+    const form = document.querySelector(`form[data-ort="${ort}"][data-hausnummer="${hausnummer}"]`);
+    if (form) {
+        form.dataset.autoSubmit = 'true'; // Setze das Attribut auf true für automatische Einreichung
+        form.querySelector('select[name="status"]').value = 'Vertrag';
+        submitFormViaAjax(form);
+    } else {
+        console.error('Formular nicht gefunden');
+    }
+}
 
-        }
 </script>
 @endsection

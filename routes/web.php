@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
 
     #Route::post('/projects/{id}', [ProjectController::class, 'update'])->name('projects.update');
     Route::post('/projects/update/{id}', [ProjectController::class, 'update'])->name('projects.update');
+    Route::get('/analyse', [ProjectController::class, 'showMonthlyAnalysis'])->name('analyse');
 
 
 
@@ -53,7 +54,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/pdf/showForm', [PdfController::class, 'showForm'])->name('pdf.showForm');
     Route::get('/pdf/uggform', [PdfController::class, 'uggform'])->name('pdf.uggform');
     Route::post('/pdf/fill', [PdfController::class, 'fillPdf'])->name('pdf.fill');
+    Route::post('/contracts/create', [PDFController::class, 'createContract'])->name('contracts.create');
     Route::post('/pdf/fillugg', [PdfController::class, 'fillPdfugg'])->name('pdf.fillugg');
+    Route::post('/pdf/delete', [PdfController::class, 'deletePdf'])->name('pdf.delete');
+    
     
 
 

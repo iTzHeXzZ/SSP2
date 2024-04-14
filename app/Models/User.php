@@ -54,4 +54,7 @@ class User extends Authenticatable
     {
     $this->attributes['email'] = Str::lower($value);
     }
+    public function auftraege() {
+        return $this->hasMany(CompletedContract::class);
+    }
 }

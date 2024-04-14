@@ -7,6 +7,8 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use App\Models\ProjectStatusLog;
+
 
 
 
@@ -151,13 +153,22 @@ class ProjectController extends Controller
         try {
             // Der bestehende Code für die Aktualisierung der Notiz bleibt unverändert
             $project = Project::findOrFail($id);
-    
+            $oldStatus = $project->status;
             $inputValue1 = $request->input('status');
             $inputValue2 = $request->input('notiz');
     
             $project->status = $inputValue1;
             $project->notiz = $inputValue2;
             $project->save();
+
+            if ($oldStatus !== $inputValue1) {
+                ProjectStatusLog::create([
+                    'project_id' => $project->id,
+                    'user_id' => Auth::id(),
+                    'old_status' => $oldStatus,
+                    'new_status' => $inputValue1
+                ]);
+            }
     
             return response()->json(['success' => true, 'message' => 'Aktualisiert']);
         } catch (\Exception $e) {
@@ -294,6 +305,46 @@ class ProjectController extends Controller
     
         return response()->json(['streetsAndOrte' => $streetsAndOrte]);
     }
+
+    public function getProjectChangeLogs($projectId)
+        {
+            $logs = ProjectStatusLog::where('project_id', $projectId)->get();
+            return view('projects.logs', ['logs' => $logs]);
+        }
+
+        public function showMonthlyAnalysis(Request $request)
+        {
+            $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $endDate = $request->input('end_date', now()->endOfMonth()->toDateString());
+        
+            $logs = ProjectStatusLog::with('user')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get()
+            ->unique('project_id') // Entfernt Duplikate basierend auf der Projekt-ID
+            ->groupBy('user_id')  // Gruppiert die Ergebnisse nach Benutzer-ID
+            ->mapWithKeys(function ($entries, $userId) {
+                return [$userId => $entries->groupBy('new_status')->map(function ($statusEntries) {
+                    return $statusEntries->count(); // Zählt die Anzahl der Einträge für jeden Status
+                })];
+            });
+        
+            // Filtern der Ergebnisse, falls der Benutzer kein Admin ist
+            if (!Auth::user()->hasRole('Admin')) {
+                $logs = $logs->filter(function ($data, $userId) {
+                    return $userId == Auth::id();
+                });
+            }
+        
+            $users = User::whereIn('id', $logs->keys())->get();
+;
+            return view('projects.analyse', [
+                'stats' => $logs,
+                'users' => $users
+            ]);
+        }
+        
+        
+
     
     
 }

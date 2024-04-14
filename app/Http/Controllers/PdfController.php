@@ -9,6 +9,10 @@
     use Illuminate\Support\Facades\Mail;
     use Illuminate\Mail\Message;
     use Illuminate\Support\Facades\Storage;
+    use App\Models\CompletedContract;
+    use Illuminate\Support\Facades\Log;
+    use Illuminate\Support\Facades\Queue;
+    use App\Jobs\DeletePdfFile;
 
     
     
@@ -16,46 +20,46 @@
     {
         public function fillPdf(Request $request)
     {
-
+        $formData = $request->input('formData');
         $username           = Auth::user()->name;
-        $anredeFrau         = $request->input('fields_Anrede_Frau') === 'X' ? 'X' : '';
-        $anredeHerr         = $request->input('fields_Anrede_Herr') === 'X' ? 'X' : '';
-        $anredeDivers       = $request->input('fields_Anrede_Divers') === 'X' ? 'X' : '';                  
-        $eheleute           = $request->input('fields_Eheleute');
-        $titel              = $request->input('fields_Titel');
-        $firmaGemeinschaft  = $request->input('fields_Firma_Gemeinschaft');
-        $vorname            = $request->input('fields_Vorname');
-        $nachname           = $request->input('fields_Nachname');
-        $gebu               = $request->input('gb');
-        $strasse            = $request->input('fields_Strasse');
-        $hausnummer         = $request->input('fields_Hausnummer');
-        $plz                = $request->input('fields_PLZ');
-        $ort                = $request->input('fields_Ort');
-        $telefonFestnetz    = $request->input('fields_Telefon_Festnetz');
-        $telefonMobil       = $request->input('fields_Telefon_mobil');
-        $emailAdresse       = $request->input('fields_EMailAdresse');
-        $kundennummer       = $request->input('fields_kundennummer');
-        $abwcustom          = $request->input('kontoinhaber');
-        $iban               = $request->input('iban');
-        $bank               = $request->input('bank');
-        $we                 = $request->input('anzahlwe');
-        $gk                 = $request->input('anzahlgk');
-        $ortDatum           = 'Langenfeld ,' . date('d.m.Y');
-        $waipustick         = $request->input('waipustick');
-        $cabletv            = $request->input('cabletv');
-        $waipucomfort       = $request->input('waipucomfort');
-        $waipuplus          = $request->input('waipuplus');
-        $firstflat          = $request->input('firstflat');
-        $secondflat         = $request->input('secondflat');
-        $staticip           = $request->input('staticip');
-        $postde             = $request->input('postde');
-        $additionalFields   = $request->input('fields');
-        $anbieter           = $request->input('anbieter');
-        $tel1               = $request->input('tel1');
-        $tel2               = $request->input('tel2');
-        $selectedstrom      = $request->input('strom');
-        $selectedgas        = $request->input('gas');
-        $checkboxStatus     = $request->input('fields.StandardCheckboxStatus');
+        $anredeFrau = $formData['fields.Anrede_Frau'] === 'X' ? 'X' : '';
+        $anredeHerr = $formData['fields.Anrede_Herr'] === 'X' ? 'X' : '';
+        $anredeDivers = $formData['fields.Anrede_Divers'] === 'X' ? 'X' : '';
+        $eheleute = htmlspecialchars($formData['fields.Eheleute'] ?? '');
+        $titel = htmlspecialchars($formData['fields.Titel'] ?? '');
+        $firmaGemeinschaft = htmlspecialchars($formData['fields.Firma_Gemeinschaft'] ?? '');
+        $vorname = htmlspecialchars($formData['fields.Vorname'] ?? '');
+        $nachname = htmlspecialchars($formData['fields.Nachname'] ?? '');
+        $gebu = $formData['gb'] ?? '';
+        $strasse = htmlspecialchars($formData['fields.Strasse'] ?? '');
+        $hausnummer = htmlspecialchars($formData['fields.Hausnummer'] ?? '');
+        $plz = htmlspecialchars($formData['fields.PLZ'] ?? '');
+        $ort = htmlspecialchars($formData['fields.Ort'] ?? '');
+        $telefonFestnetz = htmlspecialchars($formData['fields.Telefon_Festnetz'] ?? '');
+        $telefonMobil = htmlspecialchars($formData['fields.Telefon_mobil'] ?? '');
+        $emailAdresse = filter_var($formData['fields.EMailAdresse'] ?? '', FILTER_VALIDATE_EMAIL);
+        $kundennummer = htmlspecialchars($formData['fields.kundennummer'] ?? '');
+        $abwcustom = $formData['kontoinhaber'] ?? '';
+        $iban = $formData['iban'] ?? '';
+        $bank = $formData['bank'] ?? '';
+        $we = $formData['anzahlwe'] ?? '';
+        $gk = $formData['anzahlgk'] ?? '';
+        $ortDatum = 'Langenfeld ,' . date('d.m.Y');
+        $waipustick = $formData['waipustick'] ?? 'Nein';
+        $cabletv = $formData['cabletv'] ?? 'Nein';
+        $waipucomfort = $formData['waipucomfort'] ?? 'Nein';
+        $waipuplus = $formData['waipuplus'] ?? 'Nein';
+        $firstflat = $formData['firstflat'] ?? 'Nein';
+        $secondflat = $formData['secondflat'] ?? 'Nein';
+        $staticip = $formData['staticip'] ?? 'Nein';
+        $postde = $formData['postde'] ?? 'Nein';
+        $additionalFields = $formData['fields'] ?? [];
+        $anbieter = $formData['anbieter'] ?? '';
+        $tel1 = $formData['tel1'] ?? '';
+        $tel2 = $formData['tel2'] ?? '';
+        $selectedstrom = $formData['strom'] ?? '';
+        $selectedgas = $formData['gas'] ?? '';
+        $checkboxStatus = $formData['fields.StandardCheckboxStatus'] ?? '';
         if ($checkboxStatus == '1') {
             $anredeFrau1         =  $anredeFrau; 
             $anredeHerr1         =  $anredeHerr;
@@ -73,21 +77,21 @@
             $telefonMobil1       =  $telefonMobil;
             $emailAdresse1       =  $emailAdresse;
         } else {
-            $anredeFrau1         =  $request->input('fields.Anrede_Frau1');
-            $anredeHerr1         =  $request->input('fields.Anrede_Herr1');
-            $anredeDivers1       =  $request->input('fields.Anrede_Divers1');
-            $eheleute1           =  $request->input('fields.Eheleute1');
-            $titel1              =  $request->input('fields.Titel1');
-            $firmaGemeinschaft1  =  $request->input('fields.Firma_Gemeinschaft1');
-            $vorname1            =  $request->input('fields.Vorname1');
-            $nachname1           =  $request->input('fields.Nachname1');
-            $strasse1            =  $request->input('fields.Strasse1');
-            $hausnummer1         =  $request->input('fields.Hausnummer1');
-            $plz1                =  $request->input('fields.PLZ1');
-            $ort1                =  $request->input('fields.Ort1');
-            $telefonFestnetz1    =  $request->input('fields.Telefon_Festnetz1');
-            $telefonMobil1       =  $request->input('fields.Telefon_mobil1');
-            $emailAdresse1       =  $request->input('fields.EMailAdresse1');
+            $anredeFrau1 = $formData['fields.Anrede_Frau1'] ?? '';
+            $anredeHerr1 = $formData['fields.Anrede_Herr1'] ?? '';
+            $anredeDivers1 = $formData['fields.Anrede_Divers1'] ?? '';
+            $eheleute1 = htmlspecialchars($formData['fields.Eheleute1'] ?? '');
+            $titel1 = htmlspecialchars($formData['fields.Titel1'] ?? '');
+            $firmaGemeinschaft1 = htmlspecialchars($formData['fields.Firma_Gemeinschaft1'] ?? '');
+            $vorname1 = htmlspecialchars($formData['fields.Vorname1'] ?? '');
+            $nachname1 = htmlspecialchars($formData['fields.Nachname1'] ?? '');
+            $strasse1 = htmlspecialchars($formData['fields.Strasse1'] ?? '');
+            $hausnummer1 = htmlspecialchars($formData['fields.Hausnummer1'] ?? '');
+            $plz1 = htmlspecialchars($formData['fields.PLZ1'] ?? '');
+            $ort1 = htmlspecialchars($formData['fields.Ort1'] ?? '');
+            $telefonFestnetz1 = htmlspecialchars($formData['fields.Telefon_Festnetz1'] ?? '');
+            $telefonMobil1 = htmlspecialchars($formData['fields.Telefon_mobil1'] ?? '');
+            $emailAdresse1 = filter_var($formData['fields.EMailAdresse1'] ?? '', FILTER_VALIDATE_EMAIL);
         }
         $adresse = $strasse . ' ' . $hausnummer . ', ' . $plz . ' ' . $ort;
         $customer = $vorname . ' ,' . $nachname;
@@ -95,77 +99,19 @@
         $combstrha = $strasse . ' ' . $hausnummer;
         $combtel = $telefonMobil . '  ' . $telefonFestnetz;
         $fillPage = false;
-
         if (($selectedstrom === 'strom12' || $selectedstrom === 'strom24') || 
             ($selectedgas === 'gas12' || $selectedgas === 'gas24')) {
             $fillPage = true;
         }
 
-
-        $selectedOption = $request->input('gfpaket'); 
-        $checkboxValue = '';
-        $checkboxDevice= '';
-            
-            if ($selectedOption === 'gf15024m') {
-                $checkboxValue = 'cbbasic';
-            } elseif ($selectedOption === 'gf15012m') {
-                $checkboxValue = 'cbbasi12';
-            } elseif ($selectedOption === 'gf300') {
-                $checkboxValue = 'cbclassic';
-            } elseif ($selectedOption === 'gf600') {
-                $checkboxValue = 'cbperformance';
-            } elseif ($selectedOption === 'gf1000') {
-                $checkboxValue = 'cbexpert';
-            }
- 
-        $selecteddevice = $request->input('fritzBox');
-        if ($selecteddevice === 'gfboxonetime') {
-            $checkboxDevice = 'cbgfboxonetime';
-        } elseif ($selecteddevice === 'gfboxrent') {
-            $checkboxDevice = 'cbgfboxrent';
-        }
-        $ownerSignatureBase64 = $request->input('owner_signature');
-        $orderSignatureBase64 = $request->input('order_signature');
-        $advisorSignatureBase64 = $request->input('advisor_signature');
-
-        function base64ToImage($base64_string, $output_file) {
-            $file = fopen($output_file, "wb");
         
-            $data = explode(',', $base64_string);
-        
-            if (count($data) > 1) {
-                fwrite($file, base64_decode($data[1]));
-                fclose($file);
-        
-                return $output_file;
-            } else {
-                fclose($file);
-                return null;
-            }
-        }
-    
-        $signatureDir = storage_path('app/signatures');
-        if (!File::exists($signatureDir)) {
-            File::makeDirectory($signatureDir, 0755, true, true);
-        }
-        $directory = storage_path('app/pdf');
-        if (!file_exists($directory)) {
-            mkdir($directory, 0755, true);
-        }
-        
-        $ownerSignaturePath = $signatureDir . '/' . uniqid() . '_owner_signature.png';
-        $orderSignaturePath = $signatureDir . '/' . uniqid() . '_order_signature.png';
-        $advisorSignaturePath = $signatureDir . '/' . uniqid() . '_advisor_signature.png';
-    
-        base64ToImage($ownerSignatureBase64, $ownerSignaturePath);
-        base64ToImage($orderSignatureBase64, $orderSignaturePath);
-        base64ToImage($advisorSignatureBase64, $advisorSignaturePath);
-
+          $ownerSignaturePath   = $this->savSignature($request);
+          $orderSignaturePath   = $this->saSignature($request);
+          $advisorSignaturePath = $this->sSignature($request); 
 
         $pdfPath = storage_path('gnvlangenfeld.pdf');
         $pdf = new Fpdi();
         $pdf->setSourceFile($pdfPath);
-        
         
         for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($pdfPath); $pageNumber++) {
 
@@ -237,8 +183,8 @@
                 ];
                 
 
-                $selectedOption = $request->input('gfpaket'); 
-                $selecteddevice = $request->input('fritzBox');
+                $selectedOption = $formData['gfpaket'] ?? '';
+                $selecteddevice = $formData['fritzBox'] ?? '';
                 
                 
                 $selectedOptionKey = ''; 
@@ -273,7 +219,7 @@
                 
                 foreach ($checkboxCoordinates as $key => $coords) {
                     $isChecked = false;
-                    if (isset($$key) && $$key === 'on') {
+                    if (isset($formData[$key]) && $formData[$key] === 'Ja') {
                         $isChecked = true;
                     }
                     if ($key === $selectedOptionKey || $key === $selectedDeviceKey) {
@@ -352,8 +298,8 @@
                         $currentX = $coords['x'] + ($xIncrement * ($i));
                         $currentY = $coords['y'] + $adjustment;
                 
-                        $fieldName = $field . '_' . $i;
-                        $fieldValue = $request->input("fields.$fieldName");
+                        $fieldName = "fields[$field" . "_$i]";
+                        $fieldValue = $formData[$fieldName] ?? '';
                 
                         if ($fieldValue !== null) {
                             $pdf->SetXY($currentX, $currentY);
@@ -513,35 +459,41 @@
                 $pdf->Write(0, utf8_decode($customer));
             }
         }
-        $outputPdfPath = storage_path('app/' . uniqid() . '.pdf');
+        $outputPdfPath = storage_path('app/public/' . uniqid() . '.pdf');
         $pdf->Output($outputPdfPath, 'F');
         
         $outputname = "$vorname $nachname " . date('Y-m-d');
-        // Aufräumen
-        // unlink($tempPdfPath); // Wenn nötig
-        // unlink($FDFfile); // Wenn nötig
-        unlink($orderSignaturePath);
-        unlink($ownerSignaturePath);
-        unlink($advisorSignaturePath);
+         unlink($orderSignaturePath);
+         unlink($ownerSignaturePath);
+         unlink($advisorSignaturePath);
 
 
-
-             try {
-                 Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
-                   $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                        ->subject('Neuer Auftrag von: ' . $username)
-                            ->attach($outputPdfPath, [
-                                'as' => $customer . '.pdf',
-                               'mime' => 'application/pdf',
-                             ]);
-                 });
-             } catch (\Exception $e) {
-                return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-             }
+            //   try {
+            //       Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+            //         $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+            //              ->subject('Neuer Auftrag von: ' . $username)
+            //                  ->attach($outputPdfPath, [
+            //                      'as' => $customer . '.pdf',
+            //                     'mime' => 'application/pdf',
+            //                   ]);
+            //       });
+            //   } catch (\Exception $e) {
+            //      return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+            //   }
 
         
-        return response()->download($outputPdfPath, $outputname)->deleteFileAfterSend(true);
-        
+            $pdfUrl = url('/storage/' . basename($outputPdfPath));; 
+            if (file_exists($outputPdfPath)) {
+                return response()->json([
+                    'success' => true,
+                    'url' => $pdfUrl  
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PDF konnte nicht erstellt werden.'
+                ]);
+            }
     }
        
     public function fillPdfUgg(Request $request)
@@ -856,18 +808,18 @@
         
             unlink($signaturePathData);
 
-            // try {
-            //     Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
-            //       $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-            //            ->subject('Neuer Auftrag von: ' . $username)
-            //                ->attach($outputPath, [
-            //                    'as' => $customer . '.pdf',
-            //                   'mime' => 'application/pdf',
-            //                 ]);
-            //     });
-            // } catch (\Exception $e) {
-            //    return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-            // }
+             try {
+                 Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
+                   $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                        ->subject('Neuer Auftrag von: ' . $username)
+                            ->attach($outputPath, [
+                               'as' => $customer . '.pdf',
+                               'mime' => 'application/pdf',
+                             ]);
+                 });
+             } catch (\Exception $e) {
+                return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+             }
 
             return response()->download($outputPath, 'filled_ugg.pdf', [
                 'Content-Type' => 'application/pdf'
@@ -878,9 +830,9 @@
         }
     }
 
-        public function showForm()
+        public function showForm($pdfUrl = null)
         {
-            return view('pdf.form');
+            return view('pdf.form')->with('pdfUrl', $pdfUrl);
         }
         public function uggform()
         {
@@ -891,6 +843,26 @@
         {
             return view('pdf.productswl');
         }
+
+        public function deletePdf(Request $request)
+        {
+            $url = $request->input('filePath');
+            $path = parse_url($url, PHP_URL_PATH);
+            $basePath = '/storage/'; // Basispfad, angepasst an deine Struktur
+            $filePath = substr($path, strlen($basePath)); // Pfad ohne Basis-URL
+    
+            // Pfad zur Datei auf dem Server
+            $fullPath = storage_path('app/public/' . $filePath);
+    
+            // Datei löschen, wenn sie existiert
+            if (Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+                return response()->json(['success' => true, 'message' => 'Datei erfolgreich gelöscht']);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Datei nicht gefunden']);
+            }
+        }
+
         function saveSignature(Request $request)
         {
             $base64Image = $request->input('unterschrift'); // oder der entsprechende Schlüssel Ihrer Data-URL
@@ -906,12 +878,101 @@
         
                 Storage::disk('local')->put($filePath, $decodedImageData);
         
-                // Geben Sie den Pfad zur gespeicherten Datei zurück
                 
                 return storage_path('app/' . $filePath);
             }
         
             return null;
+        }
+
+        function savSignature(Request $request)
+        {
+            $base64Image = $request->input('owner_signature'); // oder der entsprechende Schlüssel Ihrer Data-URL
+            // Extrahieren Sie den eigentlichen Base64-String aus der Data-URL
+            @list($type, $fileData) = explode(';', $base64Image);
+            @list(, $fileData) = explode(',', $fileData);
+        
+            if ($fileData != "") {
+                $decodedImageData = base64_decode($fileData);
+        
+                $fileName = 'signature_' . uniqid() . '.png';
+                $filePath = 'signatures/' . $fileName;
+        
+                Storage::disk('local')->put($filePath, $decodedImageData);
+        
+                
+                return storage_path('app/' . $filePath);
+            }
+        
+            return null;
+        }
+        function saSignature(Request $request)
+        {
+            $base64Image = $request->input('order_signature'); // oder der entsprechende Schlüssel Ihrer Data-URL
+            // Extrahieren Sie den eigentlichen Base64-String aus der Data-URL
+            @list($type, $fileData) = explode(';', $base64Image);
+            @list(, $fileData) = explode(',', $fileData);
+        
+            if ($fileData != "") {
+                $decodedImageData = base64_decode($fileData);
+        
+                $fileName = 'signature_' . uniqid() . '.png';
+                $filePath = 'signatures/' . $fileName;
+        
+                Storage::disk('local')->put($filePath, $decodedImageData);
+        
+                
+                return storage_path('app/' . $filePath);
+            }
+        
+            return null;
+        }
+        function sSignature(Request $request)
+        {
+            $base64Image = $request->input('advisor_signature'); // oder der entsprechende Schlüssel Ihrer Data-URL
+            // Extrahieren Sie den eigentlichen Base64-String aus der Data-URL
+            @list($type, $fileData) = explode(';', $base64Image);
+            @list(, $fileData) = explode(',', $fileData);
+        
+            if ($fileData != "") {
+                $decodedImageData = base64_decode($fileData);
+        
+                $fileName = 'signature_' . uniqid() . '.png';
+                $filePath = 'signatures/' . $fileName;
+        
+                Storage::disk('local')->put($filePath, $decodedImageData);
+        
+                
+                return storage_path('app/' . $filePath);
+            }
+        
+            return null;
+        }
+                public function createContract(Request $request)
+        {
+            if (!Auth::check()) {
+                return redirect()->back()->withErrors(['msg' => 'Nicht angemeldet']);
+            }
+            $vorname            = $request->input('fields_Vorname');
+            $nachname           = $request->input('fields_Nachname');
+            $plz                = $request->input('fields_PLZ');
+            $ort                = $request->input('fields_Ort');
+            $str                = $request->input('fields_Strasse');
+            $ha                 = $request->input('fields_Hausnummer');
+            $straha             = $str . ' ' . $ha;
+            $ort1               = $plz . ' ' . $ort;
+            $kundenname         = $vorname . ' , ' . $nachname;
+            $contract = new CompletedContract([
+                'user_id' => Auth::id(),
+                'ort' => $ort1,
+                'adresse' => $straha,
+                'status' => "Erstellt",
+                'notiz' => "",
+                'kundenname' => $kundenname,
+            ]);
+
+            $contract->save();
+            return response()->json(['success' => true, 'message' => 'Vertrag erstellt.']);
         }
 
     }
