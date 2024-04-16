@@ -42,6 +42,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
     
     
     
@@ -61,6 +62,15 @@
                     <a class="navbar-brand d-flex" href="{{ route('analyse') }}">
                         <div style="padding-left: 6px">Analyse</div>
                     </a>
+                    @if(Auth::user() && Auth::user()->hasRole('Admin'))
+                        <a class="navbar-brand d-flex" href="{{ route('pdf.contracts') }}">
+                            <div style="padding-left: 6px">Vertragsverwaltung</div>
+                        </a>
+                        <a class="navbar-brand d-flex" href="{{ route('import.projects') }}">
+                            <div style="padding-left: 6px">Excel importieren</div>
+                        </a>
+                    @endif
+
                     @endauth
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>

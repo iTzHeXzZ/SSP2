@@ -41,17 +41,106 @@
                     @foreach ($stats as $userId => $data)
                     <tr>
                         <td>{{ optional($users->find($userId))->name ?? 'Benutzer nicht gefunden' }}</td>
-                        <td>{{ $data['Vertrag'] ?? 0 }}</td>
-                        <td>{{ $data['Karte'] ?? 0 }}</td>
-                        <td>{{ $data['Überleger'] ?? 0 }}</td>
-                        <td>{{ $data['Kein Interesse'] ?? 0 }}</td>
+                        <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Vertrag">{{ $data['Vertrag'] ?? 0 }}</a></td>
+                        <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Karte">{{ $data['Karte'] ?? 0 }}</a></td>
+                        <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Überleger">{{ $data['Überleger'] ?? 0 }}</a></td>
+                        <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Kein Interesse">{{ $data['Kein Interesse'] ?? 0 }}</a></td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
     </div>
+    <div>    <div id="details-container" class="mt-4"></div>
+    <div id="pagination-container" class="mt-4"></div></div>
 </div>
 @endsection
 
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const links = document.querySelectorAll('.status-link');
 
+    links.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            const status = this.getAttribute('data-status');
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            const container = document.getElementById('details-container');
+            const paginationContainer = document.getElementById('pagination-container');
+
+            const url = `/get-project-details/${userId}/${status}?start_date=${startDate}&end_date=${endDate}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                        let content = '<div class="card"><div class="card-body"><table class="table"><thead><tr><th>Status</th><th>Ort</th><th>PLZ</th><th>Straße</th><th Hausnummer</th></tr></thead><tbody>';
+                        data.data.forEach(project => {
+                            content += `<tr>
+                                <td>${project.status}</td>
+                                <td>${project.ort}</td>
+                                <td>${project.postleitzahl}</td>
+                                <td>${project.strasse}</td>
+                                <td>${project.hausnummer}</td>
+                            </tr>`;
+                        });
+                        content += '</tbody></table>';
+
+                        // Hinzufügen der Paginationslinks direkt nach der Tabelle, aber noch innerhalb der Card
+                        let paginationHtml = '<div class="pagination-container">';
+                        if (data.pagination.links.prev) {
+                            paginationHtml += `<a href="#" class="btn btn-primary" onclick="event.preventDefault(); loadPage('${data.pagination.links.prev}');">Previous</a> `;
+                        }
+                        if (data.pagination.links.next) {
+                            paginationHtml += `<a href="#" class="btn btn-primary" onclick="event.preventDefault(); loadPage('${data.pagination.links.next}');">Next</a>`;
+                        }
+                        paginationHtml += '</div>';
+
+                        content += paginationHtml + '</div></div>'; // Schließt die Pagination-Container- und Card-Body-Divs
+                        container.innerHTML = content;
+                    })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+});
+window.loadPage = function(url) {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const container = document.getElementById('details-container');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+                let content = '<div class="card"><div class="card-body"><table class="table"><thead><tr><th>Status</th><th>Ort</th><th>PLZ</th><th>Straße</th><th Hausnummer</th></tr></thead><tbody>';
+                data.data.forEach(project => {
+                    content += `<tr>
+                        <td>${project.status}</td>
+                        <td>${project.ort}</td>
+                        <td>${project.postleitzahl}</td>
+                        <td>${project.strasse}</td>
+                        <td>${project.hausnummer}</td>
+                    </tr>`;
+                });
+                content += '</tbody></table>';
+
+                // Hinzufügen der Paginationslinks direkt nach der Tabelle, aber noch innerhalb der Card
+                let paginationHtml = '<div class="pagination-container">';
+                if (data.pagination.links.prev) {
+                    paginationHtml += `<a href="#" class="btn btn-primary" onclick="event.preventDefault(); loadPage('${data.pagination.links.prev}');">Previous</a> `;
+                }
+                if (data.pagination.links.next) {
+                    paginationHtml += `<a href="#" class="btn btn-primary" onclick="event.preventDefault(); loadPage('${data.pagination.links.next}');">Next</a>`;
+                }
+                paginationHtml += '</div>';
+
+                content += paginationHtml + '</div></div>'; // Schließt die Pagination-Container- und Card-Body-Divs
+                container.innerHTML = content;
+            })
+        .catch(error => console.error('Error:', error));
+};
+
+</script>
+@endsection

@@ -10,9 +10,7 @@
     use Illuminate\Mail\Message;
     use Illuminate\Support\Facades\Storage;
     use App\Models\CompletedContract;
-    use Illuminate\Support\Facades\Log;
-    use Illuminate\Support\Facades\Queue;
-    use App\Jobs\DeletePdfFile;
+
 
     
     
@@ -973,6 +971,42 @@
 
             $contract->save();
             return response()->json(['success' => true, 'message' => 'Vertrag erstellt.']);
+        }
+                public function showAllContracts()
+        {
+            if (!Auth::user()->hasRole('Admin')) {
+                return redirect()->route('home')->withErrors('Unauthorised');
+            }
+
+            $contracts = CompletedContract::with('user')->get();
+
+            return view('admin.contracts', compact('contracts'));
+        }
+
+        public function updateContract(Request $request, $id)
+        {
+            $contract = CompletedContract::findOrFail($id);
+            $contract->status = $request->status;
+            if ($request->has('note') && $request->note !== null) {
+                $contract->notiz = $request->note;
+            }
+            $contract->save();
+
+            return response()->json(['message' => 'Auftrag erfolgreich aktualisiert']);
+        }
+
+        public function deleteContract($contractId)
+        {
+            $contract = CompletedContract::findOrFail($contractId);
+            if (Auth::user()->hasRole('Admin')) {
+
+
+                $contract->delete();
+
+                return response()->json(['message' => 'Auftrag gelöscht']);
+            }
+
+            return back()->with('error', 'Nur Administratoren dürfen diese Aktion ausführen.');
         }
 
     }

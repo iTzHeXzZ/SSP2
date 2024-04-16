@@ -8,6 +8,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use App\Models\ProjectStatusLog;
+use Illuminate\Support\Facades\Log;
+use App\Imports\ProjectsImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 
 
@@ -118,6 +122,7 @@ class ProjectController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
+        $userId = Auth::id();
         $projects = Project::where('ort', $ort)
         ->where('postleitzahl', $postleitzahl)
         ->where('strasse', $strasse)
@@ -125,7 +130,7 @@ class ProjectController extends Controller
 
         $statusOptions = ['Unbesucht', 'Kein Interesse', 'Überleger', 'Karte', 'Vertrag'];
 
-        return view('projects.number', compact('projects','ort', 'postleitzahl','strasse','statusOptions'));
+        return view('projects.number', compact('projects','ort', 'postleitzahl','strasse','statusOptions', 'userId'));
     } 
 
     public function create(){
@@ -160,15 +165,14 @@ class ProjectController extends Controller
             $project->status = $inputValue1;
             $project->notiz = $inputValue2;
             $project->save();
+            $project->touch();
 
-            if ($oldStatus !== $inputValue1) {
                 ProjectStatusLog::create([
                     'project_id' => $project->id,
                     'user_id' => Auth::id(),
                     'old_status' => $oldStatus,
                     'new_status' => $inputValue1
                 ]);
-            }
     
             return response()->json(['success' => true, 'message' => 'Aktualisiert']);
         } catch (\Exception $e) {
@@ -317,18 +321,20 @@ class ProjectController extends Controller
             $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
             $endDate = $request->input('end_date', now()->endOfMonth()->toDateString());
         
-            $logs = ProjectStatusLog::with('user')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->get()
-            ->unique('project_id') // Entfernt Duplikate basierend auf der Projekt-ID
-            ->groupBy('user_id')  // Gruppiert die Ergebnisse nach Benutzer-ID
-            ->mapWithKeys(function ($entries, $userId) {
-                return [$userId => $entries->groupBy('new_status')->map(function ($statusEntries) {
-                    return $statusEntries->count(); // Zählt die Anzahl der Einträge für jeden Status
-                })];
-            });
+            $latestStatusLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
+                                                ->whereBetween('created_at', [$startDate, $endDate])
+                                                ->groupBy('project_id');
         
-            // Filtern der Ergebnisse, falls der Benutzer kein Admin ist
+            $logs = ProjectStatusLog::with('user', 'project')
+                                    ->whereIn('id', $latestStatusLogs)
+                                    ->get()
+                                    ->groupBy('user_id')
+                                    ->mapWithKeys(function ($entries, $userId) {
+                                        return [$userId => $entries->groupBy('new_status')->map(function ($statusEntries) {
+                                            return $statusEntries->count();
+                                        })];
+                                    });
+        
             if (!Auth::user()->hasRole('Admin')) {
                 $logs = $logs->filter(function ($data, $userId) {
                     return $userId == Auth::id();
@@ -336,7 +342,7 @@ class ProjectController extends Controller
             }
         
             $users = User::whereIn('id', $logs->keys())->get();
-;
+        
             return view('projects.analyse', [
                 'stats' => $logs,
                 'users' => $users
@@ -344,7 +350,89 @@ class ProjectController extends Controller
         }
         
         
+        
 
+        public function getProjectDetails($userId, $status, Request $request)
+        {
+            $startDate = $request->query('start_date', now()->startOfMonth()->toDateString());
+            $endDate = $request->query('end_date', now()->endOfMonth()->toDateString());
+           
+            $latestLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
+                                          ->whereBetween('created_at', [$startDate, $endDate])
+                                          ->groupBy('project_id');
+        
+            $projects = ProjectStatusLog::whereIn('id', $latestLogs)
+                                        ->where('user_id', $userId)
+                                        ->where('new_status', $status)
+                                        ->with('project')
+                                        ->paginate(10);
+
+                                        Log::info('Pagination Details', [
+                                            'total' => $projects->total(),
+                                            'current_page' => $projects->currentPage(),
+                                            'last_page' => $projects->lastPage(),
+                                            'next_page_url' => $projects->nextPageUrl(),
+                                            'prev_page_url' => $projects->previousPageUrl()
+                                        ]);
+        
+            return response()->json([
+                'data' => $projects->getCollection()->transform(function ($log) {
+                    return $log->project ? [
+                        'ort' => $log->project->ort,
+                        'postleitzahl' => $log->project->postleitzahl,
+                        'strasse' => $log->project->strasse,
+                        'hausnummer' => $log->project->hausnummer,
+                        'status' => $log->new_status  
+                    ] : null;
+                })->filter(),
+                'pagination' => [
+                    'total' => $projects->total(),
+                    'count' => $projects->count(),
+                    'per_page' => $projects->perPage(),
+                    'current_page' => $projects->currentPage(),
+                    'total_pages' => $projects->lastPage(),
+                    'links' => [
+                        'next' => $projects->nextPageUrl(),
+                        'prev' => $projects->previousPageUrl()
+                        
+                    ]
+                ]
+            ]);
+        }
+        
+        public function showImportForm()
+        {
+            return view('import');
+        }
     
+        public function import(Request $request)
+        {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+        
+                try {
+                    Excel::import(new ProjectsImport, $file);
+                    return redirect()->back()->with('success', 'Projects imported successfully!');
+                } catch (\Exception $e) {
+                    return redirect()->back()->with('error', 'An error occurred while importing projects: ' . $e->getMessage());
+                }
+            }
+            return redirect()->back()->with('error', 'No file selected!');
+        }
     
+        public function destroyProject($ort, $postleitzahl)
+        {   
+            $user = Auth::user();
+            
+            if ($user->hasRole('Admin')) {
+                Project::where('ort', $ort)->where('postleitzahl', $postleitzahl)->delete();
+                return redirect()->back()->with('success', 'Projekte erfolgreich gelöscht.');
+            }
+
+            
+            abort(403, 'Nur Administratoren dürfen Projekte löschen.');
+
+            
+
+        }
 }

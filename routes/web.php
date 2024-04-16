@@ -42,6 +42,13 @@ Route::middleware('auth')->group(function () {
     #Route::post('/projects/{id}', [ProjectController::class, 'update'])->name('projects.update');
     Route::post('/projects/update/{id}', [ProjectController::class, 'update'])->name('projects.update');
     Route::get('/analyse', [ProjectController::class, 'showMonthlyAnalysis'])->name('analyse');
+    Route::get('/get-project-details/{userId}/{status}', [ProjectController::class, 'getProjectDetails']);
+;
+
+
+
+
+
 
 
 
@@ -65,6 +72,17 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::group(['middleware' => 'admin'], function () {
+
+    Route::delete('projects/{ort}/{postleitzahl}', [ProjectController::class, 'destroyProject'])->name('projects.destroy');
+
+    Route::get('/import', [ProjectController::class, 'showImportForm'])->name('import.form');
+    Route::post('/import', [ProjectController::class, 'import'])->name('import.projects');
+
+    Route::post('/update-contract/{id}', [PdfController::class, 'updateContract'])->name('contract.update');
+    Route::post('/delete-contract/{id}', [PdfController::class, 'deleteContract'])->name('contract.delete');
+    
+
+    Route::get('/pdf/contracts', [PdfController::class, 'showAllContracts'])->name('pdf.contracts');
 
     Route::resource('roles', RoleController::class);
 

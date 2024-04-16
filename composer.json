@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.2",
         "laravelcollective/html": "^6.4",
+        "maatwebsite/excel": "^3.1",
         "mikehaertl/php-pdftk": "^0.13.1",
         "mpdf/mpdf": "^8.2",
         "nesbot/carbon": "^2.71",

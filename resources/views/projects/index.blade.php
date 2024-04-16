@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <h1>Deine Projekte</h1>
     
     <table class="table">
@@ -16,6 +17,9 @@
                 <th data-sort="7">Kein Interesse</th>
                 <th data-sort="8">Prozentsatz Vertrag</th>
                 <th data-sort="9">Bearbeitungsdatum</th>
+                @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                    <th>Aktionen</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -56,9 +60,51 @@
                     <td>{{ $countKeinInteresse }}</td>
                     <td>{{ number_format($percentage, 2) }}%</td>
                     <td>{{ $lastUpdated  }}</td>
+                    @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                    <td>
+                        <form id="deleteForm_{{ $project->id }}" action="{{ route('projects.destroy', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" method="post">
+                            @csrf
+                            @method('DELETE')
+                            <button type="button" class="btn btn-danger" onclick="confirmDelete('{{ $project->id }}')"><i class="fas fa-trash-alt"></i></button>
+                        </form>
+                    </td>
+                    @endif
                 </tr>
             @endforeach
         </tbody>
     </table>
     {{ $uniqueProjectsPaginated->links() }}
+
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Bestätigung erforderlich</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Möchten Sie dieses Projekt wirklich löschen?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteProject()">Löschen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var deleteProjectId;
+
+        function confirmDelete(projectId) {
+            deleteProjectId = projectId;
+            $('#confirmationModal').modal('show');
+        }
+
+        function deleteProject() {
+            $('#deleteForm_' + deleteProjectId).submit();
+        }
+    </script>
 @endsection

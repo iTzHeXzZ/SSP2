@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+
+
 <style>
     .feedback-message {
 position: fixed;
@@ -113,6 +115,17 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
         }
     }
 </style>
+<div class="modal fade" id="statusChangesModal" tabindex="-1" aria-labelledby="statusChangesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusChangesModalLabel">Statusänderungen</h5>
+            </div>
+            <div class="modal-body" id="statusChangesModalBody">
+            </div>
+        </div>
+    </div>
+</div>
     <h2>{{$postleitzahl}},<a href="{{ route('projects.street', ['ort' => $ort, 'postleitzahl' => $postleitzahl]) }}" style="text-decoration : none">{{ $ort }}</a>,{{ $strasse }} Hausnummer:</h2>
 
     <table class="table">
@@ -160,7 +173,11 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
                     </td>
                     <td>{{ $project->wohneinheiten }}</td>
                     <td>{{ $project->bestand }} </td>
-                    <td>{{ $project->updated_at }}</td>
+                    <td onclick="showStatusChanges('{{ $project->id }}')" 
+                        data-project-id="{{ $project->id }}" 
+                        data-status-logs="{{ json_encode($project->statusLogs) }}">
+                        {{ $project->updated_at }}
+                    </td>
                 </tr>
             @endforeach
         </tbody>
@@ -275,19 +292,60 @@ function handleVertragSelect(selectElement, ort, hausnummer) {
                 submitStatusAsVertrag(ort, hausnummer);
             }
         }, 500);
+    }else {
+        submitStatus(ort, hausnummer, selectedValue);
+    }
+}
+
+function submitStatus(ort, hausnummer, status) {
+    const form = document.querySelector(`form[data-ort="${ort}"][data-hausnummer="${hausnummer}"]`);
+    if (form) {
+        form.dataset.autoSubmit = 'false';
+        form.querySelector('select[name="status"]').value = status;
+        submitFormViaAjax(form);
+    } else {
+        console.error('Formular nicht gefunden');
     }
 }
 
 function submitStatusAsVertrag(ort, hausnummer) {
     const form = document.querySelector(`form[data-ort="${ort}"][data-hausnummer="${hausnummer}"]`);
     if (form) {
-        form.dataset.autoSubmit = 'true'; // Setze das Attribut auf true für automatische Einreichung
+        form.dataset.autoSubmit = 'true'; 
         form.querySelector('select[name="status"]').value = 'Vertrag';
         submitFormViaAjax(form);
     } else {
         console.error('Formular nicht gefunden');
     }
 }
+
+function showStatusChanges(projectId) {
+            moment.locale('de');
+            const projectElement = document.querySelector(`[data-project-id="${projectId}"]`);
+            const statusLogs = JSON.parse(projectElement.dataset.statusLogs);
+            const modalBody = document.getElementById('statusChangesModalBody');
+            
+            // Leeren des Modalinhalts
+            modalBody.innerHTML = '';
+
+            // Erzeugen und Anzeigen der Statusänderungen
+            statusLogs.forEach(log => {
+                const formattedDates = moment(log.created_at).format('LLLL');
+                const statusChangeHTML = `
+                    <div class="mb-2">
+                        <strong>Benutzer:</strong> ${log.user_id}<br>
+                        <strong>Alter Status:</strong> ${log.old_status}<br>
+                        <strong>Neuer Status:</strong> ${log.new_status}<br>
+                        <strong>Datum:</strong> ${formattedDates}<br>
+                    </div>
+                `;
+                modalBody.innerHTML += statusChangeHTML;
+            });
+
+            // Öffnen des Modals
+            $('#statusChangesModal').modal('show');
+        }
+
 
 </script>
 @endsection

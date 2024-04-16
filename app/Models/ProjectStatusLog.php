@@ -14,5 +14,9 @@ class ProjectStatusLog extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
 }
 
