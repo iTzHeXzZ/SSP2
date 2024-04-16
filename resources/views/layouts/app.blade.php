@@ -67,7 +67,7 @@
                             <div style="padding-left: 6px">Vertragsverwaltung</div>
                         </a>
                         <a class="navbar-brand d-flex" href="{{ route('import.projects') }}">
-                            <div style="padding-left: 6px">Excel importieren</div>
+                            <div style="padding-left: 6px">Projekt importieren</div>
                         </a>
                     @endif
 
