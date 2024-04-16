@@ -59,7 +59,7 @@ class ProjectsImport implements ToModel, WithHeadingRow, WithValidation
             'wohneinheiten' => 'required',
             'bestand' => 'required',
             'notiz' => 'nullable',
-            'status' => ['required', Rule::in(['Vertrag', 'Kein Interesse', 'Überleger', 'Unbesucht',null])],
+            'status' => ['nullable', Rule::in(['Vertrag', 'Kein Interesse', 'Überleger', 'Unbesucht'])],
         ];
     }
 }
