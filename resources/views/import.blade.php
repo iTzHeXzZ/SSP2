@@ -24,7 +24,7 @@
                         @csrf
                         <div class="form-group">
                             <label for="file">Bitte wählen:</label>
-                            <input type="file" class="form-control-file" name="datei" id="datei" lang="de">
+                            <input type="file" class="form-control-file" name="file" id="file" lang="de">
                         </div>
                         <button type="submit" class="btn btn-primary">Importieren</button>
                     </form>
