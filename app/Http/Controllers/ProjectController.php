@@ -412,9 +412,9 @@ class ProjectController extends Controller
         
                 try {
                     Excel::import(new ProjectsImport, $file);
-                    return redirect()->back()->with('success', 'Projects imported successfully!');
+                    return redirect()->back()->with('success', 'Projekt erfolgreich importiert!');
                 } catch (\Exception $e) {
-                    return redirect()->back()->with('error', 'An error occurred while importing projects: ' . $e->getMessage());
+                    return redirect()->back()->with('error', 'Fehler: ' . $e->getMessage());
                 }
             }
             return redirect()->back()->with('error', 'No file selected!');
