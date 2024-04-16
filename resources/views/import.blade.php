@@ -59,9 +59,8 @@
                                 <td>5</td>
                                 <td>2</td>
                                 <td>(Kann leer bleiben)</td>
-                                <td>(Kann leer bleiben)</td>
+                                <td>Unbesucht</td>
                             </tr>
-                            <!-- Weitere Beispiele hier einfügen, falls erforderlich -->
                         </tbody>
                     </table>
                 </div>
