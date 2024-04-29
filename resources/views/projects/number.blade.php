@@ -16,6 +16,24 @@ border-radius: 5px;
 z-index: 999;
 }
 
+.table-header-sticky {
+    position: sticky;
+        top: 0;
+        background-color: #f8f9fa; 
+        border-bottom: 2px solid #dee2e6; 
+        font-weight: bold; 
+        padding: 10px; 
+        text-align: left; 
+        z-index: 1000;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #f2f2f2; /* Lighter color for even rows */
+    }
+    .table tbody tr:nth-child(odd) {
+        background-color: #ffffff; /* White color for odd rows */
+    }
+    
 .feedback-message.success {
 background-color: #28a745; /* Grüner Hintergrund für Erfolgsmeldung */
 }
@@ -129,18 +147,19 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
     <h2>{{$postleitzahl}},<a href="{{ route('projects.street', ['ort' => $ort, 'postleitzahl' => $postleitzahl]) }}" style="text-decoration : none">{{ $ort }}</a>,{{ $strasse }} Hausnummer:</h2>
 
     <table class="table">
-        <thead>
+        <thead class="card-header table-header-sticky">
             <tr>
-                <th data-sort="0">Hausnummer</th>
+                <th data-sort="0">Nr.</th>
                 <th data-sort="1">Status</th>
-                <th data-sort="2">Wohneinheiten</th>
+                <th data-sort="2">WE</th>
                 <th data-sort="3">Bestand</th>
-                <th data-sort="4">Bearbeitungsdatum</th>
+                <th data-sort="4">Datum</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($projects as $project)
             @php
+                $rowClass = $loop->index % 2 == 0 ? 'even-row' : 'odd-row';
                 $statusClass = '';
                 if ($project->status === 'Vertrag') {
                     $statusClass = 'status-vertrag';
@@ -148,7 +167,7 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
                     $statusClass = 'status-kein-interesse';
                 }
             @endphp
-            <tr>
+            <tr class="{{ $rowClass }}">
                 <td class="{{ $statusClass }}">{{ $project->hausnummer }}</td>
                 <td>
                     <form id="projectForm_{{ $project->id }}" class="ajax-form" data-ort="{{ $ort }}" data-hausnummer="{{ $project->hausnummer }}" data-wohnung="1" data-auto-submit="false">
@@ -400,6 +419,21 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
         // Öffnen des Modals
         $('#statusChangesModal').modal('show');
     }
+
+    function updateRowClasses() {
+            $('.table tbody tr').each(function(index) {
+                $(this).removeClass('even-row odd-row');
+                $(this).addClass(index % 2 == 0 ? 'even-row' : 'odd-row');
+            });
+        }
+
+        $('.table').on('sortEnd', function() {
+            updateRowClasses();
+        });
+
+        $(document).ready(function() {
+            updateRowClasses();
+        });
     </script>
     
 @endsection

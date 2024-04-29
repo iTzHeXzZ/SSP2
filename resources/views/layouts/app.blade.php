@@ -62,6 +62,9 @@
                     <a class="navbar-brand d-flex" href="{{ route('analyse') }}">
                         <div style="padding-left: 6px">Analyse</div>
                     </a>
+                    <a class="navbar-brand d-flex" href="{{ route('auswertung.show') }}">
+                        <div style="padding-left: 6px">Auswertung</div>
+                    </a>
                     @if(Auth::user() && Auth::user()->hasRole('Admin'))
                         <a class="navbar-brand d-flex" href="{{ route('pdf.contracts') }}">
                             <div style="padding-left: 6px">Vertragsverwaltung</div>

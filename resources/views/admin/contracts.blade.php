@@ -12,6 +12,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>Benutzer</th>
                 <th>Kunde</th>
                 <th>Ort</th>
                 <th>Adresse</th>
@@ -23,6 +24,7 @@
         <tbody>
             @foreach ($contracts as $contract)
                 <tr>
+                    <td>{{ $contract->user->name }}</td>
                     <td>{{ $contract->kundenname }}</td>
                     <td>{{ $contract->ort }}</td>
                     <td>{{ $contract->adresse }}</td>
@@ -45,8 +47,10 @@
             @endforeach
         </tbody>
     </table>
+    {{ $contracts->links() }}
 </div>
 @endsection
+
 
 @section('scripts')
 <script>

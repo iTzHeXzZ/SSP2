@@ -466,18 +466,18 @@
          unlink($advisorSignaturePath);
 
 
-               try {
-                   Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
-                     $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                          ->subject('Neuer Auftrag von: ' . $username)
-                              ->attach($outputPdfPath, [
-                                  'as' => $customer . '.pdf',
-                                 'mime' => 'application/pdf',
-                               ]);
-                   });
-               } catch (\Exception $e) {
-                  return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-               }
+                try {
+                    Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+                      $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                           ->subject('Neuer Auftrag von: ' . $username)
+                               ->attach($outputPdfPath, [
+                                   'as' => $customer . '.pdf',
+                                  'mime' => 'application/pdf',
+                                ]);
+                    });
+                } catch (\Exception $e) {
+                   return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+                }
 
         
             $pdfUrl = url('/storage/' . basename($outputPdfPath));; 
@@ -962,8 +962,6 @@
             $kundenname         = $vorname . ' , ' . $nachname;
             $firstFlat = $request->has('firstflat') ? 1 : 0;
             $fritzBox = $request->has('fritzBox') ? 1 : 0;
-        
-            // Ausgewähltes GFPaket
             $gfpaket = $request->input('gfpaket');
 
 
@@ -976,7 +974,7 @@
                 'kundenname' => $kundenname,
                 'gfpaket' => $gfpaket,
                 'firstflat' => $firstFlat,
-                'fritzBox' => $fritzBox,
+                'fritzbox' => $fritzBox,
             ]);
 
             $contract->save();
@@ -988,8 +986,9 @@
                 return redirect()->route('home')->withErrors('Unauthorised');
             }
 
-            $contracts = CompletedContract::with('user')->get();
-
+            $contracts = CompletedContract::with('user')
+            ->latest()
+            ->paginate(15);
             return view('admin.contracts', compact('contracts'));
         }
 

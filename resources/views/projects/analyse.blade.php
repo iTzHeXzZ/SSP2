@@ -91,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                         content += '</tbody></table>';
 
-                        // Hinzufügen der Paginationslinks direkt nach der Tabelle, aber noch innerhalb der Card
                         let paginationHtml = '<div class="pagination-container">';
                         if (data.pagination.links.prev) {
                             paginationHtml += `<a href="#" class="btn btn-primary" onclick="event.preventDefault(); loadPage('${data.pagination.links.prev}');">Previous</a> `;
@@ -101,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                         paginationHtml += '</div>';
 
-                        content += paginationHtml + '</div></div>'; // Schließt die Pagination-Container- und Card-Body-Divs
+                        content += paginationHtml + '</div></div>'; 
                         container.innerHTML = content;
                     })
                 .catch(error => console.error('Error:', error));
@@ -129,7 +128,6 @@ window.loadPage = function(url) {
                 });
                 content += '</tbody></table>';
 
-                // Hinzufügen der Paginationslinks direkt nach der Tabelle, aber noch innerhalb der Card
                 let paginationHtml = '<div class="pagination-container">';
                 if (data.pagination.links.prev) {
                     paginationHtml += `<a href="#" class="btn btn-primary" onclick="event.preventDefault(); loadPage('${data.pagination.links.prev}');">Previous</a> `;
@@ -139,7 +137,7 @@ window.loadPage = function(url) {
                 }
                 paginationHtml += '</div>';
 
-                content += paginationHtml + '</div></div>'; // Schließt die Pagination-Container- und Card-Body-Divs
+                content += paginationHtml + '</div></div>'; 
                 container.innerHTML = content;
             })
         .catch(error => console.error('Error:', error));

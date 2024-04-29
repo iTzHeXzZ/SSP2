@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use App\Imports\ProjectsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\SubProject;
+use App\Models\CompletedContract;
 
 
 
@@ -374,6 +375,17 @@ class ProjectController extends Controller
         return response()->json(['streetsAndOrte' => $streetsAndOrte]);
     }
 
+
+
+    public function getProjectChangeLogs($projectId)
+    {
+        $logs = ProjectStatusLog::where('project_id', $projectId)->get();
+        return view('projects.logs', ['logs' => $logs]);
+    }
+
+
+
+
     public function showMonthlyAnalysis(Request $request)
     {
         $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
@@ -392,6 +404,12 @@ class ProjectController extends Controller
                                         return $statusEntries->count();
                                     })];
                                 });
+        
+                                if (!Auth::user()->hasRole('Admin')) {
+                                    $logs = $logs->filter(function ($data, $userId) {
+                                        return $userId == Auth::id();
+                                    });
+                                }
     
         $user = Auth::user();
         $users = $user->hasRole('Admin') ? User::all() : [$user];
@@ -473,6 +491,42 @@ class ProjectController extends Controller
             ]);
         }
         
+
+        public function show()
+        {
+            $user = auth()->user();
+            if ($user->hasRole('Admin')) {
+                $users = User::whereHas('auftraege')->get();
+            } else {
+                $users = collect([$user]);
+            }
+            $packageNames = ['gf1000', 'gf600', 'gf300', 'gf15024m', 'gf15012m', 'fritzbox', 'firstflat'];
+            $packageCounts = [];
+        
+            foreach ($users as $user) {
+                $userPackageCounts = [];
+        
+                foreach ($packageNames as $packageName) {
+                    if ($packageName === 'fritzbox' || $packageName === 'firstflat') {
+                        $packageCount = $user->auftraege()->where($packageName, 1)->count();
+                    } elseif (strpos($packageName, 'gf') === 0) {
+                        $packageCount = $user->auftraege()->where('gfpaket', $packageName)->count();
+                    } else {
+                        $packageCount = $user->auftraege()->where($packageName, $packageName)->count();
+                    }
+                    $userPackageCounts[$packageName] = $packageCount;
+                }
+        
+                $packageCounts[$user->id] = $userPackageCounts;
+            }
+        
+            return view('auswertung', [
+                'users' => $users,
+                'packageNames' => $packageNames,
+                'packageCounts' => $packageCounts,
+                'customColumnNames' => [ 'GF1000', 'GF600', 'GF300', 'GF150 24M', 'GF150 12M', 'Fritzbox', 'Flatrate'],
+            ]);
+        }
         
         public function showImportForm()
         {

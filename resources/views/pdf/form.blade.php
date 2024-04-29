@@ -985,6 +985,7 @@
 
     }
             function createContract() {
+
             $.ajax({
                 
                 type: 'POST',
@@ -997,17 +998,14 @@
                     alert('Vertrag erfolgreich erstellt.');
                 },
                 error: function(xhr, textStatus, errorThrown) {
-                // Alert für den Benutzer
                 alert('Fehler beim Erstellen des Vertrages. Bitte versuchen Sie es erneut.');
 
-                // Logge zusätzliche Fehlerinformationen in der Konsole
-                console.error("AJAX Error Status:", xhr.status); // Statuscode des Fehlers
-                console.error("Status Text:", textStatus); // Statusbeschreibung wie 'error', 'timeout', usw.
-                console.error("Error Thrown:", errorThrown); // Der von jQuery geworfene Fehler
-                console.error("Response Text:", xhr.responseText); // Der Text, den der Server als Antwort gibt
+                
+                console.error("AJAX Error Status:", xhr.status); 
+                console.error("Status Text:", textStatus); 
+                console.error("Error Thrown:", errorThrown); 
+                console.error("Response Text:", xhr.responseText); 
 
-                // Optional: Zeige eine detaillierte Fehlermeldung im Browser, falls benötigt
-                // Hinweis: Im Produktivsystem könnte dies aus Sicherheitsgründen vermieden werden
                 const errorDetails = `Ein Fehler ist aufgetreten: ${xhr.status} ${errorThrown}\n${xhr.responseText}`;
                 console.error("Detailed Error Information:", errorDetails);
             }
