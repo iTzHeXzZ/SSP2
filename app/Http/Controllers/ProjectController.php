@@ -447,13 +447,6 @@ class ProjectController extends Controller
                                         ->with('project')
                                         ->paginate(10);
         
-            Log::info('Pagination Details', [
-                'total' => $projects->total(),
-                'current_page' => $projects->currentPage(),
-                'last_page' => $projects->lastPage(),
-                'next_page_url' => $projects->nextPageUrl(),
-                'prev_page_url' => $projects->previousPageUrl()
-            ]);
         
             $unbesuchtCount = Project::where('user_id', $userId)
                                      ->where('status', 'Unbesucht')
@@ -470,7 +463,7 @@ class ProjectController extends Controller
                     'strasse' => $log->project->strasse,
                     'hausnummer' => $log->project->hausnummer,
                     'status' => $log->new_status,
-                    'sub_projects_count' => $subProjectCount  
+                    'sub_projects_count' => $subProjectCount  ?? 0
                 ] : null;
             })->filter();
         
