@@ -960,6 +960,13 @@
             $straha             = $str . ' ' . $ha;
             $ort1               = $plz . ' ' . $ort;
             $kundenname         = $vorname . ' , ' . $nachname;
+            $firstFlat = $request->has('firstflat') ? 1 : 0;
+            $fritzBox = $request->has('fritzBox') ? 1 : 0;
+        
+            // Ausgewähltes GFPaket
+            $gfpaket = $request->input('gfpaket');
+
+
             $contract = new CompletedContract([
                 'user_id' => Auth::id(),
                 'ort' => $ort1,
@@ -967,6 +974,9 @@
                 'status' => "Erstellt",
                 'notiz' => "",
                 'kundenname' => $kundenname,
+                'gfpaket' => $gfpaket,
+                'firstflat' => $firstFlat,
+                'fritzBox' => $fritzBox,
             ]);
 
             $contract->save();

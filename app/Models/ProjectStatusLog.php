@@ -8,7 +8,7 @@ use App\Models\User;
 
 class ProjectStatusLog extends Model
 {
-    protected $fillable = ['project_id', 'user_id', 'old_status', 'new_status'];
+    protected $fillable = ['project_id', 'user_id', 'old_status', 'new_status', 'wohnung_nr'];
 
     public function user()
     {

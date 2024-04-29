@@ -11,6 +11,7 @@ use App\Models\ProjectStatusLog;
 use Illuminate\Support\Facades\Log;
 use App\Imports\ProjectsImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\SubProject;
 
 
 
@@ -65,6 +66,7 @@ class ProjectController extends Controller
         $countVertrag = [];
         $countKeinInteresse = [];
         $countKarte = [];
+        $countFremdVP = [];
     
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
             $projects = Project::where('ort', $ort)
@@ -93,6 +95,7 @@ class ProjectController extends Controller
             $countVertrag[$strasse] ??= 0;
             $countKeinInteresse[$strasse] ??= 0;
             $countKarte[$strasse] ??= 0;
+            $countFremdVP[$strasse] ??= 0;
     
             // Update counters based on project status
             if ($project->status === 'Überleger') {
@@ -105,15 +108,42 @@ class ProjectController extends Controller
                 $countKeinInteresse[$strasse]++;
             } elseif ($project->status === 'Karte') {
                 $countKarte[$strasse]++;
+            } elseif ($project->status === 'Fremd VP') {
+                $countFremdVP[$strasse]++;
+            }
+    
+            // Include subproject counts
+            foreach ($project->subProjects as $subProject) {
+                // Überprüfen, ob das Subprojekt zur aktuellen Projekt-ID gehört
+                if ($subProject->project_id === $project->id) {
+                    $subProjectStatus = $subProject->status;
+            
+                    // Update counters based on subproject status
+                    if ($subProjectStatus === 'Überleger') {
+                        $countOverleger[$strasse]++;
+                    } elseif ($subProjectStatus === 'Unbesucht') {
+                        $countUnbesucht[$strasse]++;
+                    } elseif ($subProjectStatus === 'Vertrag') {
+                        $countVertrag[$strasse]++;
+                    } elseif ($subProjectStatus === 'Kein Interesse') {
+                        $countKeinInteresse[$strasse]++;
+                    } elseif ($subProjectStatus === 'Karte') {
+                        $countKarte[$strasse]++;
+                    } elseif ($subProjectStatus === 'Fremd VP') {
+                        $countFremdVP[$strasse]++;
+                    }
+                }
             }
         }
     
         return view('projects.street', compact(
             'projects', 'ort', 'postleitzahl', 'user',
             'gwohneinheiten', 'gbestand',
-            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse', 'countKarte'
+            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse', 'countKarte' , 'countFremdVP'
         ));
     }
+    
+    
     
     
     
@@ -128,7 +158,12 @@ class ProjectController extends Controller
         ->where('strasse', $strasse)
         ->get();
 
-        $statusOptions = ['Unbesucht', 'Kein Interesse', 'Überleger', 'Karte', 'Vertrag'];
+        $statusOptions = ['Unbesucht', 'Kein Interesse', 'Überleger', 'Karte', 'Vertrag', 'Fremd VP'];
+        $projects->each(function ($project) {
+            $project->wohneinheiten = max($project->wohneinheiten, 0);
+            $project->subProjects = range(1, $project->wohneinheiten);
+        });
+    
 
         return view('projects.number', compact('projects','ort', 'postleitzahl','strasse','statusOptions', 'userId'));
     } 
@@ -156,29 +191,58 @@ class ProjectController extends Controller
 
     public function update(Request $request, $id) {
         try {
-            // Der bestehende Code für die Aktualisierung der Notiz bleibt unverändert
             $project = Project::findOrFail($id);
             $oldStatus = $project->status;
-            $inputValue1 = $request->input('status');
-            $inputValue2 = $request->input('notiz');
     
-            $project->status = $inputValue1;
-            $project->notiz = $inputValue2;
-            $project->save();
-            $project->touch();
-
+            // Wenn Daten für das Hauptprojekt vorhanden sind
+            if ($request->filled('status')) {
+                $inputValue1 = $request->input('status');
+                $inputValue2 = $request->input('notiz');
+    
+                $project->status = $inputValue1;
+                $project->notiz = $inputValue2;
+                $project->save();
+                $project->touch();
+    
+                // Projektstatus-Log für das Hauptprojekt erstellen
                 ProjectStatusLog::create([
                     'project_id' => $project->id,
                     'user_id' => Auth::id(),
                     'old_status' => $oldStatus,
-                    'new_status' => $inputValue1
+                    'new_status' => $inputValue1,
+                    'wohnung_nr' => 1
                 ]);
+            }
+    
+
+    for ($i = 2; $i <= $project->wohneinheiten; $i++) {
+        if ($request->filled("status_$i")) {
+            $subProjectStatus = $request->input("status_$i", 'Unbesucht');
+            $subProjectNotiz = $request->input("notiz_$i", '');
+
+            $subProject = SubProject::updateOrCreate(
+                ['project_id' => $project->id, 'wohnung_nr' => $i],
+                ['status' => $subProjectStatus, 'notiz' => $subProjectNotiz]
+            );
+
+            // Erstelle den Projektstatus-Log für das Subprojekt
+            ProjectStatusLog::create([
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+                'old_status' => $oldStatus,
+                'new_status' => $subProjectStatus,
+                'wohnung_nr' => $i
+            ]);
+        }
+    }
     
             return response()->json(['success' => true, 'message' => 'Aktualisiert']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Fehler beim Speichern: ' . $e->getMessage()]);
         }
     }
+    
+    
 
     public function showAssignForm()
     {
@@ -310,44 +374,42 @@ class ProjectController extends Controller
         return response()->json(['streetsAndOrte' => $streetsAndOrte]);
     }
 
-    public function getProjectChangeLogs($projectId)
-        {
-            $logs = ProjectStatusLog::where('project_id', $projectId)->get();
-            return view('projects.logs', ['logs' => $logs]);
+    public function showMonthlyAnalysis(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', now()->endOfMonth()->toDateString());
+    
+        $latestStatusLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
+                                            ->whereBetween('created_at', [$startDate, $endDate])
+                                            ->groupBy('project_id');
+    
+        $logs = ProjectStatusLog::with('user', 'project')
+                                ->whereIn('id', $latestStatusLogs)
+                                ->get()
+                                ->groupBy('user_id')
+                                ->mapWithKeys(function ($entries, $userId) {
+                                    return [$userId => $entries->groupBy('new_status')->map(function ($statusEntries) {
+                                        return $statusEntries->count();
+                                    })];
+                                });
+    
+        $user = Auth::user();
+        $users = $user->hasRole('Admin') ? User::all() : [$user];
+    
+        $unbesuchteCounts = [];
+    
+        foreach ($users as $currentUser) {
+            $unbesuchteCount = $currentUser->projects()->where('status', 'Unbesucht')->count();
+            $unbesuchteCounts[$currentUser->id] = $unbesuchteCount;
         }
-
-        public function showMonthlyAnalysis(Request $request)
-        {
-            $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
-            $endDate = $request->input('end_date', now()->endOfMonth()->toDateString());
-        
-            $latestStatusLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
-                                                ->whereBetween('created_at', [$startDate, $endDate])
-                                                ->groupBy('project_id');
-        
-            $logs = ProjectStatusLog::with('user', 'project')
-                                    ->whereIn('id', $latestStatusLogs)
-                                    ->get()
-                                    ->groupBy('user_id')
-                                    ->mapWithKeys(function ($entries, $userId) {
-                                        return [$userId => $entries->groupBy('new_status')->map(function ($statusEntries) {
-                                            return $statusEntries->count();
-                                        })];
-                                    });
-        
-            if (!Auth::user()->hasRole('Admin')) {
-                $logs = $logs->filter(function ($data, $userId) {
-                    return $userId == Auth::id();
-                });
-            }
-        
-            $users = User::whereIn('id', $logs->keys())->get();
-        
-            return view('projects.analyse', [
-                'stats' => $logs,
-                'users' => $users
-            ]);
-        }
+    
+        return view('projects.analyse', [
+            'stats' => $logs,
+            'users' => $users,
+            'unbesuchte_counts' => $unbesuchteCounts 
+        ]);
+    }
+    
         
         
         
@@ -360,31 +422,43 @@ class ProjectController extends Controller
             $latestLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
                                           ->whereBetween('created_at', [$startDate, $endDate])
                                           ->groupBy('project_id');
-        
+            
             $projects = ProjectStatusLog::whereIn('id', $latestLogs)
                                         ->where('user_id', $userId)
                                         ->where('new_status', $status)
                                         ->with('project')
                                         ->paginate(10);
-
-                                        Log::info('Pagination Details', [
-                                            'total' => $projects->total(),
-                                            'current_page' => $projects->currentPage(),
-                                            'last_page' => $projects->lastPage(),
-                                            'next_page_url' => $projects->nextPageUrl(),
-                                            'prev_page_url' => $projects->previousPageUrl()
-                                        ]);
+        
+            Log::info('Pagination Details', [
+                'total' => $projects->total(),
+                'current_page' => $projects->currentPage(),
+                'last_page' => $projects->lastPage(),
+                'next_page_url' => $projects->nextPageUrl(),
+                'prev_page_url' => $projects->previousPageUrl()
+            ]);
+        
+            $unbesuchtCount = Project::where('user_id', $userId)
+                                     ->where('status', 'Unbesucht')
+                                     ->count();
+        
+            $data = $projects->getCollection()->transform(function ($log) {
+                $subProjectCount = SubProject::where('project_id', $log->project_id)
+                                              ->where('status', $log->new_status)
+                                              ->count();
+                
+                return $log->project ? [
+                    'ort' => $log->project->ort,
+                    'postleitzahl' => $log->project->postleitzahl,
+                    'strasse' => $log->project->strasse,
+                    'hausnummer' => $log->project->hausnummer,
+                    'status' => $log->new_status,
+                    'sub_projects_count' => $subProjectCount  
+                ] : null;
+            })->filter();
         
             return response()->json([
-                'data' => $projects->getCollection()->transform(function ($log) {
-                    return $log->project ? [
-                        'ort' => $log->project->ort,
-                        'postleitzahl' => $log->project->postleitzahl,
-                        'strasse' => $log->project->strasse,
-                        'hausnummer' => $log->project->hausnummer,
-                        'status' => $log->new_status  
-                    ] : null;
-                })->filter(),
+                'data' => $data,
+                'unbesucht_count' => $unbesuchtCount,
                 'pagination' => [
                     'total' => $projects->total(),
                     'count' => $projects->count(),
@@ -394,11 +468,11 @@ class ProjectController extends Controller
                     'links' => [
                         'next' => $projects->nextPageUrl(),
                         'prev' => $projects->previousPageUrl()
-                        
                     ]
                 ]
             ]);
         }
+        
         
         public function showImportForm()
         {

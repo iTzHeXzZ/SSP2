@@ -31,6 +31,7 @@
                 <thead>
                     <tr>
                         <th>Benutzer</th>
+                        <th>Unbesucht</th>
                         <th>Vertrag</th>
                         <th>Karte</th>
                         <th>Überleger</th>
@@ -40,7 +41,8 @@
                 <tbody>
                     @foreach ($stats as $userId => $data)
                     <tr>
-                        <td>{{ optional($users->find($userId))->name ?? 'Benutzer nicht gefunden' }}</td>
+                        <td>{{ optional(App\Models\User::find($userId))->name ?? 'Benutzer nicht gefunden' }}</td>
+                        <td>{{ $unbesuchte_counts[$userId] ?? 0 }}</td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Vertrag">{{ $data['Vertrag'] ?? 0 }}</a></td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Karte">{{ $data['Karte'] ?? 0 }}</a></td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Überleger">{{ $data['Überleger'] ?? 0 }}</a></td>
@@ -54,6 +56,7 @@
     <div>    <div id="details-container" class="mt-4"></div>
     <div id="pagination-container" class="mt-4"></div></div>
 </div>
+
 @endsection
 
 @section('scripts')

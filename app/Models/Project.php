@@ -26,26 +26,37 @@ class Project extends Model
 
     public function countUnbesucht()
     {
-        return $this->where('status', 'Unbesucht')->count();
+        return $this->where('status', 'Unbesucht')->count() + $this->subProjects()->where('status', 'Unbesucht')->count();
     }
-
+    
     public function countOverleger()
     {
-        return $this->where('status', 'Überleger')->count();
+        return $this->where('status', 'Überleger')->count() + $this->subProjects()->where('status', 'Überleger')->count();
     }
-
+    
     public function countVertrag()
     {
-        return $this->where('status', 'Vertrag')->count();
+        return $this->where('status', 'Vertrag')->count() + $this->subProjects()->where('status', 'Vertrag')->count();
     }
-
+    
     public function countKarte()
     {
-        return $this->where('status', 'Karte')->count();
+        return $this->where('status', 'Karte')->count() + $this->subProjects()->where('status', 'Karte')->count();
     }
-
+    
     public function countKeinInteresse()
     {
-        return $this->where('status', 'Kein Interesse')->count();
+        return $this->where('status', 'Kein Interesse')->count() + $this->subProjects()->where('status', 'Kein Interesse')->count();
+    }
+
+    public function countFremdVP()
+    {
+        return $this->where('status', 'Fremd VP')->count() + $this->subProjects()->where('status', 'Fremd VP')->count();
+    }
+    
+
+    public function subProjects()
+    {
+        return $this->hasMany(SubProject::class);
     }
 }
