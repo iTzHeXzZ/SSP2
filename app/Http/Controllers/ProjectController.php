@@ -13,6 +13,8 @@ use App\Imports\ProjectsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\SubProject;
 use App\Models\CompletedContract;
+use Carbon\Carbon;
+
 
 
 
@@ -435,8 +437,11 @@ class ProjectController extends Controller
         public function getProjectDetails($userId, $status, Request $request)
         {
             $startDate = $request->query('start_date', now()->startOfMonth()->toDateString());
-            $endDate = $request->query('end_date', now()->endOfMonth()->toDateString());
-           
+            $endDate = $request->query('end_date', now()->endOfMonth()->addDay()->toDateString());
+
+            if (empty($request->query('end_date'))) {
+                $endDate = now()->endOfMonth()->addDay()->toDateString();
+            }
             $latestLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
                                           ->whereBetween('created_at', [$startDate, $endDate])
                                           ->groupBy('project_id');
@@ -448,9 +453,11 @@ class ProjectController extends Controller
                                         ->paginate(10);
         
         
-            $unbesuchtCount = Project::where('user_id', $userId)
-                                     ->where('status', 'Unbesucht')
-                                     ->count();
+                                        $unbesuchtCount = Project::whereHas('users', function($query) use ($userId) {
+                                            $query->where('user_id', $userId);
+                                        })
+                                        ->where('status', 'Unbesucht')
+                                        ->count();
         
             $data = $projects->getCollection()->transform(function ($log) {
                 $subProjectCount = SubProject::where('project_id', $log->project_id)
