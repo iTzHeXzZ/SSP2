@@ -28,21 +28,44 @@ class HomeController extends Controller
     {
         $user = Auth::user();
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $endDate = $request->query('end_date');
 
+        if ($endDate) {
+            $endDate = Carbon::parse($endDate)->addDay()->toDateString();
+        } else {
+            $endDate = Carbon::now()->endOfMonth()->addDay()->toDateString();
+        }
         
         $auftraege = $user->auftraege()
                           ->whereBetween('created_at', [$startDate, $endDate])
                           ->latest()
                           ->paginate(10);
+    
+       if ($request->wantsJson()) {
+         $pagination = [
+             'total' => $auftraege->total(),
+             'count' => $auftraege->count(),
+             'per_page' => $auftraege->perPage(),
+             'current_page' => $auftraege->currentPage(),
+             'total_pages' => $auftraege->lastPage(),
+             'links' => [
+                 'prev' => $auftraege->previousPageUrl(),
+                 'next' => $auftraege->nextPageUrl(),
+             ],
+         ];
 
+         return response()->json([
+             'data' => $auftraege,
+             'pagination' => $pagination,
+         ]);
+     }
+    
         return view('home', [
             'auftraege' => $auftraege,
             'startDate' => $startDate,
             'endDate' => $endDate
         ]);
     }
-
     public function download($file)
     {
         $path = storage_path('app/' . $file);

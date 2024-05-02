@@ -15,6 +15,7 @@
                 <th data-sort="6">Karte</th>
                 <th data-sort="7">Fremd VP</th>
                 <th data-sort="8">Kein Interesse</th>
+                <th data-sort="8">Kein Potenzial</th>
                 <th data-sort="9">Prozentsatz Vertrag</th> 
                 <th data-sort="10">Bearbeitungsdatum</th>
             </tr>
@@ -32,11 +33,12 @@
                         <td>{{ $countKarte[$project->strasse] }}</td>
                         <td>{{ $countFremdVP[$project->strasse] }}</td>
                         <td>{{ $countKeinInteresse[$project->strasse] }}</td>
+                        <td>{{ $countKeinPotenzial[$project->strasse] }}</td>
                         <td>
                             @php
                                 $percentage = 0;
                                 if ($project->wohneinheiten > 0) {
-                                    $percentage = (($countVertrag[$project->strasse] + $countFremdVP[$project->strasse]) / $project->wohneinheiten) * 100;
+                                    $percentage = (($countVertrag[$project->strasse] + $countFremdVP[$project->strasse]) / ($project->wohneinheiten - $countKeinPotenzial[$project->strasse])) * 100;
                                 }
                             @endphp
                             {{ number_format($percentage, 2) }}%

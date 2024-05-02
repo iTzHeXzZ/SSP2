@@ -31,7 +31,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/projects', 'ProjectController@index')->name('projects');
     Route::get('/pdf/test-pdftk', [PdfController::class, 'testPdftk'])->name('pdf.testPdftk');
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->withoutMiddleware('web');
     Route::get('/download/{file}', [HomeController::class, 'download'])->name('download');
 
 
@@ -65,7 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/contracts/create', [PDFController::class, 'createContract'])->name('contracts.create');
     Route::post('/pdf/fillugg', [PdfController::class, 'fillPdfugg'])->name('pdf.fillugg');
     Route::post('/pdf/delete', [PdfController::class, 'deletePdf'])->name('pdf.delete');
-    
+
     
 
 

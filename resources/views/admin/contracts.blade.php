@@ -6,48 +6,66 @@
         display: flex; 
         gap: 5px; 
     }
+    .table.custom-table tbody tr:nth-child(even) {
+        background-color: #f8f9fa !important;
+    }
+
+    .table.custom-table tbody tr:nth-child(odd) {
+        background-color: #fff !important;
+    }
+    .table.custom-table {
+        --bs-table-bg: none;
+    }
 </style>
 <div class="container">
-    <h1>Aufträge Übersicht</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Benutzer</th>
-                <th>Kunde</th>
-                <th>Ort</th>
-                <th>Adresse</th>
-                <th>Status</th>
-                <th>Notiz</th>
-                <th>Aktion</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($contracts as $contract)
-                <tr>
-                    <td>{{ $contract->user->name }}</td>
-                    <td>{{ $contract->kundenname }}</td>
-                    <td>{{ $contract->ort }}</td>
-                    <td>{{ $contract->adresse }}</td>
-                    <td>
-                        <select class="form-control status-dropdown" data-id="{{ $contract->id }}">
-                            <option value="Erstellt" {{ $contract->status == 'Erstellt' ? 'selected' : '' }}>Erstellt</option>
-                            <option value="Angenommen" {{ $contract->status == 'Angenommen' ? 'selected' : '' }}>Angenommen</option>
-                            <option value="Abgelehnt" {{ $contract->status == 'Abgelehnt' ? 'selected' : '' }}>Abgelehnt</option>
-                            <option value="Bearbeitung" {{ $contract->status == 'Bearbeitung' ? 'selected' : '' }}>Bearbeitung</option>
-                        </select>
-                    </td>
-                    <td><input type="text" class="form-control note-input" value="{{ $contract->notiz }}" data-id="{{ $contract->id }}"></td>
-                    <td>
-                        <div class="btn-group">
-                            <button class="btn btn-primary save-changes" data-id="{{ $contract->id }}">Speichern</button>
-                            <button class="btn btn-danger delete-contract" data-id="{{ $contract->id }}"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-    {{ $contracts->links() }}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h2>Auftragsbearbeitung</h2>
+        </div>
+        <div class="card-body">
+            <div class="container">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>Benutzer</th>
+                            <th>Kunde</th>
+                            <th>Ort</th>
+                            <th>Adresse</th>
+                            <th>Status</th>
+                            <th>Notiz</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($contracts as $contract)
+                            <tr>
+                                <td>{{ $contract->user->name }}</td>
+                                <td>{{ $contract->kundenname }}</td>
+                                <td>{{ $contract->ort }}</td>
+                                <td>{{ $contract->adresse }}</td>
+                                <td>
+                                    <select class="form-control status-dropdown" data-id="{{ $contract->id }}">
+                                        <option value="Erstellt" {{ $contract->status == 'Erstellt' ? 'selected' : '' }}>Erstellt</option>
+                                        <option value="Angenommen" {{ $contract->status == 'Angenommen' ? 'selected' : '' }}>Angenommen</option>
+                                        <option value="Abgelehnt" {{ $contract->status == 'Abgelehnt' ? 'selected' : '' }}>Abgelehnt</option>
+                                        <option value="Bearbeitung" {{ $contract->status == 'Bearbeitung' ? 'selected' : '' }}>Bearbeitung</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="form-control note-input" value="{{ $contract->notiz }}" data-id="{{ $contract->id }}"></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-primary save-changes" data-id="{{ $contract->id }}">Speichern</button>
+                                        <button class="btn btn-danger delete-contract" data-id="{{ $contract->id }}"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                {{ $contracts->links() }}
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 

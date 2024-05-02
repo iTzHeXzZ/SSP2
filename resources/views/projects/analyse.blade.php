@@ -33,20 +33,32 @@
                         <th>Benutzer</th>
                         <th>Unbesucht</th>
                         <th>Vertrag</th>
+                        <th>Fremd VP</th>
                         <th>Karte</th>
                         <th>Überleger</th>
                         <th>Kein Interesse</th>
+                        <th>Kein Potenzial</th>
+                        @if (auth()->user()->hasRole('Admin')) <th>% Verträge/Bewegung</th> @endif
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($stats as $userId => $data)
                     <tr>
+                        @php
+                            $dataArray = $data->toArray();
+                            $total = array_sum($dataArray);
+                            $vertragCount = $dataArray['Vertrag'] ?? 0;
+                            $vertragPercentage = ($vertragCount / $total) * 100;
+                        @endphp
                         <td>{{ optional(App\Models\User::find($userId))->name ?? 'Benutzer nicht gefunden' }}</td>
                         <td>{{ $unbesuchte_counts[$userId] ?? 0 }}</td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Vertrag">{{ $data['Vertrag'] ?? 0 }}</a></td>
+                        <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Fremd VP">{{ $data['Fremd VP'] ?? 0 }}</a></td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Karte">{{ $data['Karte'] ?? 0 }}</a></td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Überleger">{{ $data['Überleger'] ?? 0 }}</a></td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Kein Interesse">{{ $data['Kein Interesse'] ?? 0 }}</a></td>
+                        <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Kein Potenzial">{{ $data['Kein Potenzial'] ?? 0 }}</a></td>
+                        @if (auth()->user()->hasRole('Admin')) <td>{{ number_format($vertragPercentage, 2) }}%</td> @endif
                     </tr>
                     @endforeach
                 </tbody>

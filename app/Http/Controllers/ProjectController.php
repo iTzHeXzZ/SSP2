@@ -46,6 +46,7 @@ class ProjectController extends Controller
             $counts[$key]['countOverleger'] = $group->where('status', 'Überleger')->count();
             $counts[$key]['countKarte'] = $group->where('status', 'Karte')->count();
             $counts[$key]['countKeinInteresse'] = $group->where('status', 'Kein Interesse')->count();
+            $counts[$key]['countKeinPotenzial'] = $group->where('status', 'Kein Potenzial')->count();
         }
     
         return view('projects.index', compact('projects','counts','user'));
@@ -69,6 +70,7 @@ class ProjectController extends Controller
         $countKeinInteresse = [];
         $countKarte = [];
         $countFremdVP = [];
+        $countKeinPotenzial = [];
     
         $projectsQuery = Project::with('subProjects');
 
@@ -106,6 +108,7 @@ class ProjectController extends Controller
             $countKeinInteresse[$strasse] ??= 0;
             $countKarte[$strasse] ??= 0;
             $countFremdVP[$strasse] ??= 0;
+            $countKeinPotenzial[$strasse] ??= 0;
     
             // Update counters based on project status
             switch ($project->status) {
@@ -126,6 +129,9 @@ class ProjectController extends Controller
                     break;
                 case 'Fremd VP':
                     $countFremdVP[$strasse]++;
+                    break;
+                case 'Kein Potenzial':
+                    $countKeinPotenzial[$strasse]++;
                     break;
             }
     
@@ -155,6 +161,9 @@ class ProjectController extends Controller
                         case 'Fremd VP':
                             $countFremdVP[$strasse]++;
                             break;
+                        case 'Kein Potenzial':
+                            $countKeinPotenzial[$strasse]++;
+                            break;
                     }
                 }
             }
@@ -163,7 +172,7 @@ class ProjectController extends Controller
         return view('projects.street', compact(
             'projects', 'ort', 'postleitzahl', 'user',
             'gwohneinheiten', 'gbestand',
-            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse', 'countKarte', 'countFremdVP'
+            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse', 'countKeinPotenzial', 'countKarte', 'countFremdVP'
         ));
     }
     
@@ -182,7 +191,7 @@ class ProjectController extends Controller
         ->where('strasse', $strasse)
         ->get();
 
-        $statusOptions = ['Unbesucht', 'Kein Interesse', 'Überleger', 'Karte', 'Vertrag', 'Fremd VP'];
+        $statusOptions = ['Unbesucht', 'Kein Interesse', 'Überleger', 'Karte', 'Vertrag', 'Fremd VP', 'Kein Potenzial'];
         $projects->each(function ($project) {
             $project->wohneinheiten = max($project->wohneinheiten, 0);
             $project->subProjects = range(1, $project->wohneinheiten);
@@ -302,15 +311,14 @@ class ProjectController extends Controller
                 //  }
          
                  $street = Project::where('strasse', $streetName)
-                     ->where('ort', $selectedOrt) // Hinzugefügt: Filtere nach dem ausgewählten Ort
-                     ->where('postleitzahl', $selectedPostleitzahl) // Hinzugefügt: Filtere nach der ausgewählten Postleitzahl
+                     ->where('ort', $selectedOrt)
+                     ->where('postleitzahl', $selectedPostleitzahl) 
                      ->first();
          
                  if (!$street) {
                      return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
                  }
          
-                 // Hinzugefügt: Filtere andere Projekte nach dem ausgewählten Ort und Postleitzahl
                  $otherProjects = Project::where('strasse', $streetName)
                      ->where('ort', $selectedOrt)
                      ->where('postleitzahl', $selectedPostleitzahl)

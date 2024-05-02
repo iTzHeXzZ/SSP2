@@ -15,8 +15,9 @@
                 <th data-sort="5">Überleger</th>
                 <th data-sort="6">Karte</th>
                 <th data-sort="7">Kein Interesse</th>
-                <th data-sort="8">Prozentsatz Vertrag</th>
-                <th data-sort="9">Bearbeitungsdatum</th>
+                <th data-sort="8">Kein Potenzial</th>
+                <th data-sort="9">Prozentsatz Vertrag</th>
+                <th data-sort="10">Bearbeitungsdatum</th>
                 @if(auth()->check() && auth()->user()->hasRole('Admin'))
                     <th>Aktionen</th>
                 @endif
@@ -42,6 +43,7 @@
                     $countOverleger = $filteredProjects->where('status', 'Überleger')->count();
                     $countKarte = $filteredProjects->where('status', 'Karte')->count();
                     $countKeinInteresse = $filteredProjects->where('status', 'Kein Interesse')->count();
+                    $countKeinPotenzial = $filteredProjects->where('status', 'Kein Potenzial')->count();
                     
                     $totalWohneinheiten = $filteredProjects->sum('wohneinheiten');
 
@@ -58,6 +60,7 @@
                     <td>{{ $countOverleger }}</td>
                     <td>{{ $countKarte }}</td>
                     <td>{{ $countKeinInteresse }}</td>
+                    <td>{{ $countKeinPotenzial }}</td>
                     <td>{{ number_format($percentage, 2) }}%</td>
                     <td>{{ \Carbon\Carbon::parse($lastUpdated)->isoFormat('DD.MM.YYYY HH:mm') }}</td>
                     @if(auth()->check() && auth()->user()->hasRole('Admin'))
