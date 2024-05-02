@@ -55,9 +55,6 @@ jobs:
         with:
           node-version: v16.x
 
-      - name: Install pdftk
-        run: sudo apt-get install pdftk
-
       - name: Build Node assets
         env:
           CI: true

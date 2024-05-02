@@ -439,9 +439,6 @@ class ProjectController extends Controller
             $startDate = $request->query('start_date', now()->startOfMonth()->toDateString());
             $endDate = $request->query('end_date', now()->endOfMonth()->addDay()->toDateString());
 
-            if (empty($request->query('end_date'))) {
-                $endDate = now()->endOfMonth()->addDay()->toDateString();
-            }
             $latestLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
                                           ->whereBetween('created_at', [$startDate, $endDate])
                                           ->groupBy('project_id');
