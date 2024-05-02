@@ -49,7 +49,7 @@
                                     ->where('strasse', $project->strasse)
                                     ->max('updated_at');
                             @endphp
-                            {{ $lastUpdated }}
+                            {{ \Carbon\Carbon::parse($lastUpdated)->isoFormat('DD.MM.YYYY HH:mm') }}
                         </td>
                     </tr>
                 @endif

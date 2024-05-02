@@ -63,7 +63,6 @@ class ProjectController extends Controller
         $gwohneinheiten = new Collection();
         $gbestand = new Collection();
     
-        // Initialize counters as arrays
         $countOverleger = [];
         $countUnbesucht = [];
         $countVertrag = [];
@@ -71,13 +70,21 @@ class ProjectController extends Controller
         $countKarte = [];
         $countFremdVP = [];
     
+        $projectsQuery = Project::with('subProjects');
+
+        // Check if user is admin or viewer
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
-            $projects = Project::where('ort', $ort)
-                ->where('postleitzahl', $postleitzahl)
-                ->get();
+            $projectsQuery->where('ort', $ort)->where('postleitzahl', $postleitzahl);
         } else {
-            $projects = $user->projects()->where('ort', $ort)->where('postleitzahl', $postleitzahl)->get();
+            $projectsQuery->whereHas('users', function($query) use ($user, $ort, $postleitzahl) {
+                $query->where('user_id', $user->id)
+                      ->where('ort', $ort)
+                      ->where('postleitzahl', $postleitzahl);
+            });
         }
+    
+        // Get projects
+        $projects = $projectsQuery->get();
     
         foreach ($projects as $project) {
             $existingproject = $gwohneinheiten->firstWhere('strasse', $project->strasse);
@@ -101,39 +108,53 @@ class ProjectController extends Controller
             $countFremdVP[$strasse] ??= 0;
     
             // Update counters based on project status
-            if ($project->status === 'Überleger') {
-                $countOverleger[$strasse]++;
-            } elseif ($project->status === 'Unbesucht') {
-                $countUnbesucht[$strasse]++;
-            } elseif ($project->status === 'Vertrag') {
-                $countVertrag[$strasse]++;
-            } elseif ($project->status === 'Kein Interesse') {
-                $countKeinInteresse[$strasse]++;
-            } elseif ($project->status === 'Karte') {
-                $countKarte[$strasse]++;
-            } elseif ($project->status === 'Fremd VP') {
-                $countFremdVP[$strasse]++;
+            switch ($project->status) {
+                case 'Überleger':
+                    $countOverleger[$strasse]++;
+                    break;
+                case 'Unbesucht':
+                    $countUnbesucht[$strasse]++;
+                    break;
+                case 'Vertrag':
+                    $countVertrag[$strasse]++;
+                    break;
+                case 'Kein Interesse':
+                    $countKeinInteresse[$strasse]++;
+                    break;
+                case 'Karte':
+                    $countKarte[$strasse]++;
+                    break;
+                case 'Fremd VP':
+                    $countFremdVP[$strasse]++;
+                    break;
             }
     
             // Include subproject counts
             foreach ($project->subProjects as $subProject) {
-                // Überprüfen, ob das Subprojekt zur aktuellen Projekt-ID gehört
+                // Check if the subproject belongs to the current project
                 if ($subProject->project_id === $project->id) {
                     $subProjectStatus = $subProject->status;
-            
+    
                     // Update counters based on subproject status
-                    if ($subProjectStatus === 'Überleger') {
-                        $countOverleger[$strasse]++;
-                    } elseif ($subProjectStatus === 'Unbesucht') {
-                        $countUnbesucht[$strasse]++;
-                    } elseif ($subProjectStatus === 'Vertrag') {
-                        $countVertrag[$strasse]++;
-                    } elseif ($subProjectStatus === 'Kein Interesse') {
-                        $countKeinInteresse[$strasse]++;
-                    } elseif ($subProjectStatus === 'Karte') {
-                        $countKarte[$strasse]++;
-                    } elseif ($subProjectStatus === 'Fremd VP') {
-                        $countFremdVP[$strasse]++;
+                    switch ($subProjectStatus) {
+                        case 'Überleger':
+                            $countOverleger[$strasse]++;
+                            break;
+                        case 'Unbesucht':
+                            $countUnbesucht[$strasse]++;
+                            break;
+                        case 'Vertrag':
+                            $countVertrag[$strasse]++;
+                            break;
+                        case 'Kein Interesse':
+                            $countKeinInteresse[$strasse]++;
+                            break;
+                        case 'Karte':
+                            $countKarte[$strasse]++;
+                            break;
+                        case 'Fremd VP':
+                            $countFremdVP[$strasse]++;
+                            break;
                     }
                 }
             }
@@ -142,7 +163,7 @@ class ProjectController extends Controller
         return view('projects.street', compact(
             'projects', 'ort', 'postleitzahl', 'user',
             'gwohneinheiten', 'gbestand',
-            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse', 'countKarte' , 'countFremdVP'
+            'countOverleger', 'countUnbesucht', 'countVertrag', 'countKeinInteresse', 'countKarte', 'countFremdVP'
         ));
     }
     
@@ -156,7 +177,7 @@ class ProjectController extends Controller
             return redirect()->route('login');
         }
         $userId = Auth::id();
-        $projects = Project::where('ort', $ort)
+        $projects = Project::with('statusLogs')->where('ort', $ort)
         ->where('postleitzahl', $postleitzahl)
         ->where('strasse', $strasse)
         ->get();
@@ -391,7 +412,13 @@ class ProjectController extends Controller
     public function showMonthlyAnalysis(Request $request)
     {
         $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', now()->endOfMonth()->toDateString());
+        $endDate = $request->query('end_date');
+
+        if ($endDate) {
+            $endDate = Carbon::parse($endDate)->addDay()->toDateString();
+        } else {
+            $endDate = Carbon::now()->endOfMonth()->addDay()->toDateString();
+        }
     
         $latestStatusLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
                                             ->whereBetween('created_at', [$startDate, $endDate])
@@ -437,7 +464,13 @@ class ProjectController extends Controller
         public function getProjectDetails($userId, $status, Request $request)
         {
             $startDate = $request->query('start_date', now()->startOfMonth()->toDateString());
-            $endDate = $request->query('end_date', now()->endOfMonth()->addDay()->toDateString());
+            $endDate = $request->query('end_date');
+
+            if ($endDate) {
+                $endDate = Carbon::parse($endDate)->addDay()->toDateString();
+            } else {
+                $endDate = Carbon::now()->endOfMonth()->addDay()->toDateString();
+            }
 
             $latestLogs = ProjectStatusLog::selectRaw('MAX(id) as id')
                                           ->whereBetween('created_at', [$startDate, $endDate])
@@ -489,7 +522,7 @@ class ProjectController extends Controller
         }
         
 
-        public function show()
+        public function show(Request $request)
         {
             $user = auth()->user();
             if ($user->hasRole('Admin')) {
@@ -497,6 +530,15 @@ class ProjectController extends Controller
             } else {
                 $users = collect([$user]);
             }
+            $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $endDate = $request->query('end_date');
+
+            if ($endDate) {
+                $endDate = Carbon::parse($endDate)->addDay()->toDateString();
+            } else {
+                $endDate = Carbon::now()->endOfMonth()->addDay()->toDateString();
+            }
+
             $packageNames = ['gf1000', 'gf600', 'gf300', 'gf15024m', 'gf15012m', 'fritzbox', 'firstflat'];
             $packageCounts = [];
         
@@ -505,11 +547,17 @@ class ProjectController extends Controller
         
                 foreach ($packageNames as $packageName) {
                     if ($packageName === 'fritzbox' || $packageName === 'firstflat') {
-                        $packageCount = $user->auftraege()->where($packageName, 1)->count();
+                        $packageCount = $user->auftraege()->where($packageName, 1)
+                                          ->whereBetween('created_at', [$startDate, $endDate])
+                                          ->count();
                     } elseif (strpos($packageName, 'gf') === 0) {
-                        $packageCount = $user->auftraege()->where('gfpaket', $packageName)->count();
+                        $packageCount = $user->auftraege()->where('gfpaket', $packageName)
+                                          ->whereBetween('created_at', [$startDate, $endDate])
+                                          ->count();
                     } else {
-                        $packageCount = $user->auftraege()->where($packageName, $packageName)->count();
+                        $packageCount = $user->auftraege()->where($packageName, $packageName)
+                                          ->whereBetween('created_at', [$startDate, $endDate])
+                                          ->count();
                     }
                     $userPackageCounts[$packageName] = $packageCount;
                 }
@@ -524,6 +572,59 @@ class ProjectController extends Controller
                 'customColumnNames' => [ 'GF1000', 'GF600', 'GF300', 'GF150 24M', 'GF150 12M', 'Fritzbox', 'Flatrate'],
             ]);
         }
+
+
+        public function getUserAndOrderData(Request $request)
+        {
+            $user = auth()->user();
+            if ($user->hasRole('Admin')) {
+                $users = User::whereHas('auftraege')->get();
+            } else {
+                $users = collect([$user]);
+            }
+            $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $endDate = $request->query('end_date');
+
+            if ($endDate) {
+                $endDate = Carbon::parse($endDate)->addDay()->toDateString();
+            } else {
+                $endDate = Carbon::now()->endOfMonth()->addDay()->toDateString();
+            }
+
+            $packageNames = ['gf1000', 'gf600', 'gf300', 'gf15024m', 'gf15012m', 'fritzbox', 'firstflat'];
+            $packageCounts = [];
+        
+            foreach ($users as $user) {
+                $userPackageCounts = [];
+        
+                foreach ($packageNames as $packageName) {
+                    if ($packageName === 'fritzbox' || $packageName === 'firstflat') {
+                        $packageCount = $user->auftraege()->where($packageName, 1)
+                                          ->whereBetween('created_at', [$startDate, $endDate])
+                                          ->count();
+                    } elseif (strpos($packageName, 'gf') === 0) {
+                        $packageCount = $user->auftraege()->where('gfpaket', $packageName)
+                                          ->whereBetween('created_at', [$startDate, $endDate])
+                                          ->count();
+                    } else {
+                        $packageCount = $user->auftraege()->where($packageName, $packageName)
+                                          ->whereBetween('created_at', [$startDate, $endDate])
+                                          ->count();
+                    }
+                    $userPackageCounts[$packageName] = $packageCount;
+                }
+        
+                $packageCounts[$user->id] = $userPackageCounts;
+            }
+            return response()->json([
+                'users' => $users,
+                'packageNames' => $packageNames,
+                'packageCounts' => $packageCounts,
+                'customColumnNames' => ['GF1000', 'GF600', 'GF300', 'GF150 24M', 'GF150 12M', 'Fritzbox', 'Flatrate'],
+            ]);
+        }
+
+
         
         public function showImportForm()
         {

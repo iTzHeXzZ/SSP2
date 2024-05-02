@@ -73,6 +73,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const endDate = document.getElementById('end_date').value;
             const container = document.getElementById('details-container');
             const paginationContainer = document.getElementById('pagination-container');
+            console.log('startDate:', startDate);
+    console.log('endDate:', endDate);
 
             const url = `/get-project-details/${userId}/${status}?start_date=${startDate}&end_date=${endDate}`;
 
@@ -110,10 +112,13 @@ document.addEventListener('DOMContentLoaded', function () {
 window.loadPage = function(url) {
     const startDate = document.getElementById('start_date').value;
     const endDate = document.getElementById('end_date').value;
+    const separator = url.includes('?') ? '&' : '?';
+    const urlWithDates = `${url}${separator}start_date=${startDate}&end_date=${endDate}`;
     const container = document.getElementById('details-container');
     const paginationContainer = document.getElementById('pagination-container');
 
-    fetch(url)
+
+    fetch(urlWithDates)
         .then(response => response.json())
         .then(data => {
                 let content = '<div class="card"><div class="card-body"><table class="table"><thead><tr><th>Status</th><th>Ort</th><th>PLZ</th><th>Straße</th><th Hausnummer</th></tr></thead><tbody>';

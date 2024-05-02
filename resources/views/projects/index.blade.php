@@ -59,7 +59,7 @@
                     <td>{{ $countKarte }}</td>
                     <td>{{ $countKeinInteresse }}</td>
                     <td>{{ number_format($percentage, 2) }}%</td>
-                    <td>{{ $lastUpdated  }}</td>
+                    <td>{{ \Carbon\Carbon::parse($lastUpdated)->isoFormat('DD.MM.YYYY HH:mm') }}</td>
                     @if(auth()->check() && auth()->user()->hasRole('Admin'))
                     <td>
                         <form id="deleteForm_{{ $project->id }}" action="{{ route('projects.destroy', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" method="post">

@@ -152,7 +152,7 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
                 <th data-sort="0">Nr.</th>
                 <th data-sort="1">Status</th>
                 <th data-sort="2">WE</th>
-                <th data-sort="3">Bestand</th>
+                <th data-sort="3">BK</th>
                 <th data-sort="4">Datum</th>
             </tr>
         </thead>
@@ -221,7 +221,7 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
                 <td onclick="showStatusChanges('{{ $project->id }}')" 
                     data-project-id="{{ $project->id }}" 
                     data-status-logs="{{ json_encode($project->statusLogs) }}">
-                    {{ $project->updated_at }}
+                    {{ \Carbon\Carbon::parse($project->updated_at)->isoFormat('DD.MM.YYYY HH:mm') }}
                 </td>
             </tr>
             @endforeach
@@ -398,10 +398,8 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
         const statusLogs = JSON.parse(projectElement.dataset.statusLogs);
         const modalBody = document.getElementById('statusChangesModalBody');
         
-        // Leeren des Modalinhalts
         modalBody.innerHTML = '';
     
-        // Erzeugen und Anzeigen der Statusänderungen
         statusLogs.forEach(log => {
             const formattedDates = moment(log.created_at).format('LLLL');
             const statusChangeHTML = `
@@ -415,8 +413,6 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
             `;
             modalBody.innerHTML += statusChangeHTML;
         });
-    
-        // Öffnen des Modals
         $('#statusChangesModal').modal('show');
     }
 

@@ -55,6 +55,7 @@ Route::middleware('auth')->group(function () {
     #Route::get('/projects/street', [ProjectController::class, 'street'])->name('projects.street');
     Route::get('/projects/{ort}/{postleitzahl}/street', [ProjectController::class, 'street'])->name('projects.street');
     Route::get('/auswertung', [ProjectController::class, 'show'])->name('auswertung.show');
+    Route::get('/get-user-and-order-data', [ProjectController::class, 'getUserAndOrderData'])->name('getUserAndOrderData');
     Route::get('/projects/{ort}/{postleitzahl}/{strasse}/number', [ProjectController::class, 'number'])->name('projects.number');
     #Route::get('/projects/number', [ProjectController::class, 'number'])->name('projects.number');
     Route::get('/pdf/productswl', [PdfController::class, 'showProduct'])->name('pdf.showProduct');

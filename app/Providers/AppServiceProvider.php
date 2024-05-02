@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Paginator::useBootstrapFive();
+        Model::preventLazyLoading();
 
         \Illuminate\Support\Facades\Validator::extend('case_insensitive_email', function ($attribute, $value, $parameters, $validator) {
             $user = \App\Models\User::whereRaw('LOWER(email) = ?', [strtolower($value)])->first();
