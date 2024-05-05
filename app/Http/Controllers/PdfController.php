@@ -976,7 +976,7 @@
             $ort1               = $plz . ' ' . $ort;
             $kundenname         = $vorname . ' , ' . $nachname;
             $firstFlat = $request->has('firstflat') ? 1 : 0;
-            $fritzBox = $request->has('fritzBox') ? 1 : 0;
+            $fritzBox = $request->input('fritzBox') === 'none' ? 0 : 1;
             $gfpaket = $request->input('gfpaket');
 
 
