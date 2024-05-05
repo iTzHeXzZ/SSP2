@@ -10,6 +10,7 @@
     use Illuminate\Mail\Message;
     use Illuminate\Support\Facades\Storage;
     use App\Models\CompletedContract;
+    use Carbon\Carbon;
 
 
     
@@ -501,7 +502,9 @@
         $titel              = $request->input('titel');
         $vorname            = $request->input('vorname');
         $nachname           = $request->input('nachname');
-        $geburtstag         = $request->input('geburtstag');
+        $gebu               = $request->input('geburtstag');
+        $carbonDate         = Carbon::createFromFormat('Y-m-d', $gebu);
+        $geburtstag         = $carbonDate->format('d.m.Y');
         $strasse            = $request->input('strasse');
         $hausnummer         = $request->input('hausnummer');
         $plz                = $request->input('plz');
@@ -529,6 +532,7 @@
         $rufnummer_8        = $request->input('rufnummer_8');
         $rufnummer_9        = $request->input('rufnummer_9');
         $rufnummer_10       = $request->input('rufnummer_10');
+        $we                 = $request->input('we');
 
         $ortDatum           = $ort . ' ,' . date('d.m.Y');
         $customer = $vorname . ' ,' . $nachname;
@@ -536,7 +540,7 @@
         $combstrha = $strasse . ' ' . $hausnummer;
 
         $signaturePathData = $this->saveSignature($request);
-        $pdfPath = storage_path('auftragugg.pdf');
+        $pdfPath = storage_path('uggauftrag.pdf');
         $pdf = new Fpdi();
  
         
@@ -683,7 +687,7 @@
                     
                 }
         
-                if ($pageNo == 9) {
+                if ($pageNo == 10) {
                     $pdf->SetXY(152 , 70);
                     $pdf->Write(0, utf8_decode($vorname));
                     $pdf->SetXY(36, 70);
@@ -735,7 +739,7 @@
                     $pdf->Image($signaturePathData, 138, 140, 40, 10);
                 }
 
-                if ($pageNo == 10) {
+                if ($pageNo == 11) {
                     $pdf->SetXY(50 , 105);
                     $pdf->Write(0, utf8_decode($customer));
                     $pdf->SetXY(50, 113);
@@ -756,7 +760,7 @@
                     $pdf->Image($signaturePathData, 90, 160, 40, 10);
                 }
 
-                if ($pageNo == 11) {
+                if ($pageNo == 12) {
                     $pdf->SetFontSize(12);
 
                     if($anrede == 'Herr'){
@@ -785,10 +789,23 @@
                     $pdf->SetXY(16 , 192.7);
                     $pdf->Write(0, utf8_decode($ort));
 
+                    if($we == '1'){
+                        $pdf->SetXY(60, 255.5);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($we == '2'){
+                        $pdf->SetXY(73, 255.5);
+                        $pdf->Write(0, 'X'); 
+                    }
+                    if($we == '3'){
+                        $pdf->SetXY(87, 255.5);
+                        $pdf->Write(0, 'X'); 
+                    }
+
                     
                 }
                 
-                if ($pageNo == 12) {
+                if ($pageNo == 13) {
                     $pdf->SetFontSize(12);
 
                     $pdf->SetXY(18, 173);
@@ -800,30 +817,28 @@
                 }
             }
         
-            // Speichern oder Ausgeben des PDFs
             $outputPath = storage_path('app/filled_ugg_' . uniqid() . '.pdf');
             $pdf->Output('F', $outputPath);
         
             unlink($signaturePathData);
 
-             try {
-                 Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
-                   $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                        ->subject('Neuer Auftrag von: ' . $username)
-                            ->attach($outputPath, [
-                               'as' => $customer . '.pdf',
-                               'mime' => 'application/pdf',
-                             ]);
-                 });
-             } catch (\Exception $e) {
-                return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-             }
+              try {
+                  Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
+                    $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                         ->subject('Neuer Auftrag von: ' . $username)
+                             ->attach($outputPath, [
+                                'as' => $customer . '.pdf',
+                                'mime' => 'application/pdf',
+                              ]);
+                  });
+              } catch (\Exception $e) {
+                 return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+              }
 
             return response()->download($outputPath, 'filled_ugg.pdf', [
                 'Content-Type' => 'application/pdf'
             ])->deleteFileAfterSend(true);            
         } catch (\Exception $e) {
-            // Fehlerbehandlung
             return response()->json(['error' => $e->getMessage()]);
         }
     }

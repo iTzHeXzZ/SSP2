@@ -39,6 +39,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
             lieferdatumTyp: 'schnellstmöglich',
             lieferdatum: '',
             anbieter: '',
+            we: '1',
             rufnummern: [],
             rufnummer_1: '',
             rufnummer_2: '',
@@ -60,7 +61,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                 });
             },
             hardwareOptions: {
-                'o2homebox': { name: 'o2 HomeBox 3', monthlyFee: 3.99, shippingCost: 9.99 },
+                'o2homebox': { name: 'AVM FRITZ!Box 7530AX o2', monthlyFee: 4.99, shippingCost: 9.99 },
                 'fritzbox': { name: 'AVM FRITZ!Box 7590AX o2', monthlyFee: 6.99, shippingCost: 9.99 },
                 'no_router': { name: 'Kein Router benötigt', monthlyFee: 0.00, shippingCost: 0.00 }
             },
@@ -69,10 +70,10 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                 'isdn': { name: 'ISDN Komfort', description: '2 Telefonleitungen und bis zu 10 Rufnummern', price: 2.99 }
             },
             products: {
-                'gf100': { name: 'o2 Home M 100/40', price: 29.99, regularPrice: 44.99, connectionFee: 0 },
-                'gf250': { name: 'o2 Home L 250/125', price: 34.99, regularPrice: 49.99, connectionFee: 0 },
-                'gf500': { name: 'o2 Home XL 500/250', price: 44.99, regularPrice: 59.99, connectionFee: 0 },
-                'gf1000': { name: 'o2 Home XXL 1000/500', price: 64.99, regularPrice: 79.99, connectionFee: 0 }
+                'gf100': { name: 'o2 Home M 100/40', price: 29.99, regularPrice: 39.99, connectionFee: 0 },
+                'gf250': { name: 'o2 Home L 250/125', price: 19.99, regularPrice: 44.99, connectionFee: 0 },
+                'gf500': { name: 'o2 Home XL 500/250', price: 19.99, regularPrice: 59.99, connectionFee: 0 },
+                'gf1000': { name: 'o2 Home XXL 1000/500', price: 69.99, regularPrice: 69.99, connectionFee: 0 }
             },
             calculateMonthlyCostsFirstYear() {
                 return (this.products[this.gfpaket].price +
@@ -104,6 +105,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     bic: this.bic,
                     firma: this.firma,
                     kennzahl: this.kennzahl,
+                    we: this.we,
                     unterschrift: signatureDataUrl,
                     anrede: this.anrede, 
                     titel: this.titel,
@@ -191,8 +193,8 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="">
                                 <ul class="list-unstyled">
                                     <li class="p-1">Laufzeit: 24Monate</li>
-                                    <li class="p-1">Aktionspreis 1-12Monat: 29.99€ </li>
-                                    <li class="p-1">Danach 44,99€ (o2 Kunden -5€)</li>
+                                    <li class="p-1">Aktionspreis 1-6Monat: 29,99€ </li>
+                                    <li class="p-1">Danach 39,99€ (o2 Kunden -5€)</li>
                                     <strong><li class="p-2">Anschlussgebühr 0€!</li></strong>
                                 </ul>
                             </div>
@@ -223,8 +225,8 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="">
                                 <ul class="list-unstyled">
                                     <li class="p-1">Laufzeit: 24Monate</li>
-                                    <li class="p-1">Aktionspreis 1-12Monat: 34,99€ </li>
-                                    <li class="p-1">Danach 49,99€ (o2 Kunden -5€)</li>
+                                    <li class="p-1">Aktionspreis 1-6Monat: 19,99€ </li>
+                                    <li class="p-1">Danach 44,99€ (o2 Kunden -5€)</li>
                                     <strong><li class="p-2">Anschlussgebühr 0€!</li></strong>
                                 </ul>
                             </div>
@@ -255,7 +257,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="">
                                 <ul class="list-unstyled">
                                     <li class="p-1">Laufzeit: 24Monate</li>
-                                    <li class="p-1">Aktionspreis 1-12Monat: 44,99€ </li>
+                                    <li class="p-1">Aktionspreis 1-6Monat: 19,99€ </li>
                                     <li class="p-1">Danach 59,99€ (o2 Kunden -5€)</li>
                                     <strong><li class="p-2">Anschlussgebühr 0€!</li></strong>
                                 </ul>
@@ -287,8 +289,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="">
                                 <ul class="list-unstyled">
                                     <li class="p-1">Laufzeit: 24Monate</li>
-                                    <li class="p-1">Aktionspreis 1-12Monat: 64,99€ </li>
-                                    <li class="p-1">Danach 79,99€ (o2 Kunden -5€)</li>
+                                    <li class="p-1">Dauerhaft 69,99€ (o2 Kunden -5€)</li>
                                     <strong><li class="p-2">Anschlussgebühr 0€!</li></strong>
                                 </ul>
                             </div>
@@ -332,7 +333,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="flex flex-col gap-4">
                                 <div class="flex items-center">
                                     <input x-model="hardwareOption" value="o2homebox" id="o2homebox" class="form-radio h-6 w-6 text-blue-500 radio-custom" name="hardware" type="radio">
-                                    <label for="o2homebox" class="ml-2 text-base">o2 HomeBox 3 - monatlich 3,99 € - Versandkosten 9,99 €</label>
+                                    <label for="o2homebox" class="ml-2 text-base">AVM FRITZ!Box 7530AX o2 - monatlich 4,99 € - Versandkosten 9,99 €</label>
                                 </div>
                                 <div class="flex items-center">
                                     <input x-model="hardwareOption" value="fritzbox" id="fritzbox" class="form-radio h-6 w-6 text-blue-500 radio-custom" name="hardware" type="radio">
@@ -442,6 +443,10 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     <div>
                         <label for="kennzahl" class="block text-sm font-medium text-gray-700">Sicherheitskennzahl:</label>
                         <input type="text" x-model="kennzahl" name="kennzahl" id="kennzahl" pattern="^[0-9]{4}$" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="XXXX">
+                    </div>
+                    <div>
+                        <label for="we" class="block text-sm font-medium text-gray-700">Anzahl Wohneinheiten:</label>
+                        <input type="text" x-model="we" name="we" id="we" pattern="^[0-9]{2}$" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="1-X">
                     </div>
                 </div>
                 
@@ -601,12 +606,12 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     <h2 class="text-lg font-semibold mb-2 mt-6">Kostenübersicht :</h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="bg-gray-100 p-4 rounded shadow">
-                            <h3 class="text-lg font-semibold">Monatliche Kosten (Monate 1-12)</h3>
+                            <h3 class="text-lg font-semibold">Monatliche Kosten <br>(Monate 1-6)</h3>
                             <p><span x-text="calculateMonthlyCostsFirstYear() + ' €'"></span> pro Monat</p>
                         </div>
 
                         <div class="bg-gray-100 p-4 rounded shadow">
-                            <h3 class="text-lg font-semibold">Monatliche Kosten (Ab dem 13. Monat)</h3>
+                            <h3 class="text-lg font-semibold">Monatliche Kosten <br>(Ab dem 13. Monat)</h3>
                             <p><span x-text="calculateMonthlyCostsSecondYear() + ' €'"></span> pro Monat</p>
                         </div>
 
