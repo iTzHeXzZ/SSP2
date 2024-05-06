@@ -611,7 +611,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                         </div>
 
                         <div class="bg-gray-100 p-4 rounded shadow">
-                            <h3 class="text-lg font-semibold">Monatliche Kosten <br>(Ab dem 13. Monat)</h3>
+                            <h3 class="text-lg font-semibold">Monatliche Kosten <br>(Ab dem 7. Monat)</h3>
                             <p><span x-text="calculateMonthlyCostsSecondYear() + ' €'"></span> pro Monat</p>
                         </div>
 
