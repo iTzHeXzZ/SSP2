@@ -38,12 +38,27 @@
                         ->where('ort', $project->ort)
                         ->where('postleitzahl', $project->postleitzahl);
 
-                    $countUnbesucht = $filteredProjects->where('status', 'Unbesucht')->count();
-                    $countVertrag = $filteredProjects->where('status', 'Vertrag')->count();
-                    $countOverleger = $filteredProjects->where('status', 'Überleger')->count();
-                    $countKarte = $filteredProjects->where('status', 'Karte')->count();
-                    $countKeinInteresse = $filteredProjects->where('status', 'Kein Interesse')->count();
-                    $countKeinPotenzial = $filteredProjects->where('status', 'Kein Potenzial')->count();
+                    $subProjects = collect();
+                    foreach ($filteredProjects as $filteredProject) {
+                        $subProjects = $subProjects->merge($filteredProject->subProjects);
+                    }
+
+                    $groupedSubProjects = $subProjects->groupBy('status');
+
+                    $countUnbesucht = $groupedSubProjects->get('Unbesucht', collect())->count();
+                    $countVertrag = $groupedSubProjects->get('Vertrag', collect())->count();
+                    $countOverleger = $groupedSubProjects->get('Überleger', collect())->count();
+                    $countKarte = $groupedSubProjects->get('Karte', collect())->count();
+                    $countKeinInteresse = $groupedSubProjects->get('Kein Interesse', collect())->count();
+                    $countKeinPotenzial = $groupedSubProjects->get('Kein Potenzial', collect())->count();
+                    
+                    // Zählungen für Projekte ohne Subprojekte
+                    $countUnbesucht += $filteredProjects->where('status', 'Unbesucht')->count();
+                    $countVertrag += $filteredProjects->where('status', 'Vertrag')->count();
+                    $countOverleger += $filteredProjects->where('status', 'Überleger')->count();
+                    $countKarte += $filteredProjects->where('status', 'Karte')->count();
+                    $countKeinInteresse += $filteredProjects->where('status', 'Kein Interesse')->count();
+                    $countKeinPotenzial += $filteredProjects->where('status', 'Kein Potenzial')->count();
                     
                     $totalWohneinheiten = $filteredProjects->sum('wohneinheiten');
 

@@ -48,16 +48,16 @@ class Project extends Model
     {
         return $this->where('status', 'Kein Interesse')->count() + $this->subProjects()->where('status', 'Kein Interesse')->count();
     }
-
+    
     public function countKeinPotenzial()
     {
         return $this->where('status', 'Kein Potenzial')->count() + $this->subProjects()->where('status', 'Kein Potenzial')->count();
     }
-
+    
     public function countFremdVP()
     {
         return $this->where('status', 'Fremd VP')->count() + $this->subProjects()->where('status', 'Fremd VP')->count();
-    }
+    }    
     
 
     public function subProjects()

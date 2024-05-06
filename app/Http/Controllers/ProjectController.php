@@ -38,30 +38,24 @@ class ProjectController extends Controller
         $counts = [];
     
         foreach ($projects as $project) {
-            $groupKey = $project->ort . '-' . $project->postleitzahl;
+            $groupedSubProjects = $project->subProjects->groupBy('status');
     
-            if (!isset($counts[$groupKey])) {
-                $counts[$groupKey] = [
-                    'countUnbesucht' => 0,
-                    'countVertrag' => 0,
-                    'countOverleger' => 0,
-                    'countKarte' => 0,
-                    'countKeinInteresse' => 0,
-                    'countKeinPotenzial' => 0,
-                ];
+            $counts[$project->id] = [
+                'Unbesucht' => 0,
+                'Vertrag' => 0,
+                'Überleger' => 0,
+                'Karte' => 0,
+                'Kein Interesse' => 0,
+                'Kein Potenzial' => 0
+            ];
+    
+            foreach ($groupedSubProjects as $status => $subProjects) {
+                $counts[$project->id][$status] = $subProjects->count();
             }
-    
-            $counts[$groupKey]['countUnbesucht'] += $project->subProjects()->where('status', 'Unbesucht')->count();
-            $counts[$groupKey]['countVertrag'] += $project->subProjects()->where('status', 'Vertrag')->count();
-            $counts[$groupKey]['countOverleger'] += $project->subProjects()->where('status', 'Überleger')->count();
-            $counts[$groupKey]['countKarte'] += $project->subProjects()->where('status', 'Karte')->count();
-            $counts[$groupKey]['countKeinInteresse'] += $project->subProjects()->where('status', 'Kein Interesse')->count();
-            $counts[$groupKey]['countKeinPotenzial'] += $project->subProjects()->where('status', 'Kein Potenzial')->count();
         }
     
         return view('projects.index', compact('projects','counts','user'));
     }
-    
     
     
     
@@ -97,6 +91,7 @@ class ProjectController extends Controller
             });
         }
     
+        // Get projects
         $projects = $projectsQuery->get();
     
         foreach ($projects as $project) {
