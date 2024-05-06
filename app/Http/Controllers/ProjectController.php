@@ -29,28 +29,40 @@ class ProjectController extends Controller
     
         $user = Auth::user();
     
-        // Alle Projekte abrufen, die dem Benutzer zugeordnet sind (abhängig von seiner Rolle)
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
-            $projects = Project::all();
+            $projects = Project::with('subProjects')->get();
         } else {
-            $projects = $user->projects;
+            $projects = $user->projects()->with('subProjects')->get();
         }
     
-        // Gruppieren der Projekte nach Ort und Postleitzahl und Berechnungen für jeden Ort/Postleitzahl durchführen
-        $groupedProjects = $projects->groupBy(['ort', 'postleitzahl']);
         $counts = [];
     
-        foreach ($groupedProjects as $key => $group) {
-            $counts[$key]['countUnbesucht'] = $group->where('status', 'Unbesucht')->count();
-            $counts[$key]['countVertrag'] = $group->where('status', 'Vertrag')->count();
-            $counts[$key]['countOverleger'] = $group->where('status', 'Überleger')->count();
-            $counts[$key]['countKarte'] = $group->where('status', 'Karte')->count();
-            $counts[$key]['countKeinInteresse'] = $group->where('status', 'Kein Interesse')->count();
-            $counts[$key]['countKeinPotenzial'] = $group->where('status', 'Kein Potenzial')->count();
+        foreach ($projects as $project) {
+            $groupKey = $project->ort . '-' . $project->postleitzahl;
+    
+            if (!isset($counts[$groupKey])) {
+                $counts[$groupKey] = [
+                    'countUnbesucht' => 0,
+                    'countVertrag' => 0,
+                    'countOverleger' => 0,
+                    'countKarte' => 0,
+                    'countKeinInteresse' => 0,
+                    'countKeinPotenzial' => 0,
+                ];
+            }
+    
+            $counts[$groupKey]['countUnbesucht'] += $project->subProjects()->where('status', 'Unbesucht')->count();
+            $counts[$groupKey]['countVertrag'] += $project->subProjects()->where('status', 'Vertrag')->count();
+            $counts[$groupKey]['countOverleger'] += $project->subProjects()->where('status', 'Überleger')->count();
+            $counts[$groupKey]['countKarte'] += $project->subProjects()->where('status', 'Karte')->count();
+            $counts[$groupKey]['countKeinInteresse'] += $project->subProjects()->where('status', 'Kein Interesse')->count();
+            $counts[$groupKey]['countKeinPotenzial'] += $project->subProjects()->where('status', 'Kein Potenzial')->count();
         }
     
         return view('projects.index', compact('projects','counts','user'));
     }
+    
+    
     
     
 
@@ -85,7 +97,6 @@ class ProjectController extends Controller
             });
         }
     
-        // Get projects
         $projects = $projectsQuery->get();
     
         foreach ($projects as $project) {
