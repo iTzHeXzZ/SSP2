@@ -582,7 +582,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                         <div class="bg-gray-100 p-4 rounded shadow">
                             <h3 class="text-lg font-semibold">Ausgewähltes Produkt</h3>
                             <p><strong>Produkt:</strong> <span x-text="products[gfpaket].name"></span></p>
-                            <p><strong>Aktionspreis (Monate 1-12):</strong> <span x-text="products[gfpaket].price + ' €'"></span></p>
+                            <p><strong>Aktionspreis (Monate 1-6):</strong> <span x-text="products[gfpaket].price + ' €'"></span></p>
                             <p><strong>Regulärer Preis (danach):</strong> <span x-text="products[gfpaket].regularPrice + ' €'"></span></p>
                             <p><strong>Anschlussgebühr:</strong> <span x-text="products[gfpaket].connectionFee + ' €'"></span></p>
                         </div>
