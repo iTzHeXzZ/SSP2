@@ -553,7 +553,7 @@ class ProjectController extends Controller
                 $endDate = Carbon::now()->endOfMonth()->addDay()->toDateString();
             }
 
-            $packageNames = ['gf1000', 'gf600', 'gf300', 'gf15024m', 'gf15012m', 'fritzbox', 'firstflat'];
+            $packageNames = ['gf1000', 'gf600', 'gf300', 'gf15024m', 'gf15012m', 'fritzbox', 'firstflat', 'UGG100', 'UGG250', 'UGG500', 'UGG1000'];
             $packageCounts = [];
         
             foreach ($users as $user) {
@@ -564,7 +564,7 @@ class ProjectController extends Controller
                         $packageCount = $user->auftraege()->where($packageName, 1)
                                           ->whereBetween('created_at', [$startDate, $endDate])
                                           ->count();
-                    } elseif (strpos($packageName, 'gf') === 0) {
+                    } elseif (strpos($packageName, 'gf') === 0|| strpos($packageName, 'UGG') === 0) {
                         $packageCount = $user->auftraege()->where('gfpaket', $packageName)
                                           ->whereBetween('created_at', [$startDate, $endDate])
                                           ->count();
@@ -583,7 +583,7 @@ class ProjectController extends Controller
                 'users' => $users,
                 'packageNames' => $packageNames,
                 'packageCounts' => $packageCounts,
-                'customColumnNames' => [ 'GF1000', 'GF600', 'GF300', 'GF150 24M', 'GF150 12M', 'Fritzbox', 'Flatrate'],
+                'customColumnNames' => [ 'GF1000', 'GF600', 'GF300', 'GF150 24M', 'GF150 12M', 'Fritzbox', 'Flatrate', 'UGG100', 'UGG250', 'UGG500', 'UGG1000'],
             ]);
         }
 
@@ -605,7 +605,7 @@ class ProjectController extends Controller
                 $endDate = Carbon::now()->endOfMonth()->addDay()->toDateString();
             }
 
-            $packageNames = ['gf1000', 'gf600', 'gf300', 'gf15024m', 'gf15012m', 'fritzbox', 'firstflat'];
+            $packageNames = ['gf1000', 'gf600', 'gf300', 'gf15024m', 'gf15012m', 'fritzbox', 'firstflat', 'UGG100', 'UGG250', 'UGG500', 'UGG1000'];
             $packageCounts = [];
         
             foreach ($users as $user) {
@@ -616,7 +616,7 @@ class ProjectController extends Controller
                         $packageCount = $user->auftraege()->where($packageName, 1)
                                           ->whereBetween('created_at', [$startDate, $endDate])
                                           ->count();
-                    } elseif (strpos($packageName, 'gf') === 0) {
+                    } elseif (strpos($packageName, 'gf') === 0 || strpos($packageName, 'UGG') === 0) {
                         $packageCount = $user->auftraege()->where('gfpaket', $packageName)
                                           ->whereBetween('created_at', [$startDate, $endDate])
                                           ->count();
@@ -634,7 +634,7 @@ class ProjectController extends Controller
                 'users' => $users,
                 'packageNames' => $packageNames,
                 'packageCounts' => $packageCounts,
-                'customColumnNames' => ['GF1000', 'GF600', 'GF300', 'GF150 24M', 'GF150 12M', 'Fritzbox', 'Flatrate'],
+                'customColumnNames' => ['GF1000', 'GF600', 'GF300', 'GF150 24M', 'GF150 12M', 'Fritzbox', 'Flatrate', 'UGG100', 'UGG250', 'UGG500', 'UGG1000'],
             ]);
         }
 

@@ -606,22 +606,22 @@
                 }
 
                 if ($pageNo == 2) {
-                    if($gfpaket == 'gf100'){
+                    if($gfpaket == 'UGG100'){
                         $pdf->SetXY(17, 47);
                         $pdf->Write(0, 'X'); 
                     }
-                    if($gfpaket == 'gf250'){
+                    if($gfpaket == 'UGG250'){
                         $pdf->SetXY(17, 134);
                         $pdf->Write(0, 'X'); 
                     }
                 }
 
                 if ($pageNo == 3) {
-                    if($gfpaket == 'gf500'){
+                    if($gfpaket == 'UGG500'){
                         $pdf->SetXY(17, 46.5);
                         $pdf->Write(0, 'X'); 
                     }
-                    if($gfpaket == 'gf1000'){
+                    if($gfpaket == 'UGG1000'){
                         $pdf->SetXY(17, 122.5);
                         $pdf->Write(0, 'X'); 
                     }
@@ -822,18 +822,33 @@
         
             unlink($signaturePathData);
 
-              try {
-                  Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
-                    $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                         ->subject('Neuer Auftrag von: ' . $username)
-                             ->attach($outputPath, [
-                                'as' => $customer . '.pdf',
-                                'mime' => 'application/pdf',
-                              ]);
-                  });
-              } catch (\Exception $e) {
-                 return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-              }
+                try {
+                    Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
+                      $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                           ->subject('Neuer Auftrag von: ' . $username)
+                               ->attach($outputPath, [
+                                  'as' => $customer . '.pdf',
+                                  'mime' => 'application/pdf',
+                                ]);
+                    });
+                } catch (\Exception $e) {
+                   return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+                }
+             if (!Auth::check()) {
+                 return response()->json(['error' => 'Nicht angemeldet'], 403);
+             }
+        
+            $contract = new CompletedContract([
+                'user_id' => Auth::id(),
+                'ort' => $request->input('plz') . ' ' . $request->input('ort'),
+                'adresse' => $request->input('strasse') . ' ' . $request->input('hausnummer'),
+                'status' => "Erstellt",
+                'notiz' => "",
+                'kundenname' => $request->input('vorname') . ' , ' . $request->input('nachname'),
+                'gfpaket' => $request->input('gfpaket'),
+            ]);
+        
+            $contract->save();     
 
             return response()->download($outputPath, 'filled_ugg.pdf', [
                 'Content-Type' => 'application/pdf'
@@ -961,7 +976,7 @@
         
             return null;
         }
-                public function createContract(Request $request)
+        public function createContract(Request $request)
         {
             if (!Auth::check()) {
                 return redirect()->back()->withErrors(['msg' => 'Nicht angemeldet']);
@@ -995,7 +1010,11 @@
             $contract->save();
             return response()->json(['success' => true, 'message' => 'Vertrag erstellt.']);
         }
-                public function showAllContracts()
+
+
+
+
+        public function showAllContracts()
         {
             if (!Auth::user()->hasRole('Admin')) {
                 return redirect()->route('home')->withErrors('Unauthorised');

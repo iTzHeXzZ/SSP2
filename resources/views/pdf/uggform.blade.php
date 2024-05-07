@@ -51,7 +51,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
             rufnummer_8: '',
             rufnummer_9: '',
             rufnummer_10: '',
-            gfpaket: 'gf250',
+            gfpaket: 'UGG250',
             init() {
                 console.log(`Initialer Schritt: ${this.schritt}`);
                 this.$watch('schritt', (value) => console.log(`Schritt geändert zu: ${value}`));
@@ -70,10 +70,10 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                 'isdn': { name: 'ISDN Komfort', description: '2 Telefonleitungen und bis zu 10 Rufnummern', price: 2.99 }
             },
             products: {
-                'gf100': { name: 'o2 Home M 100/40', price: 29.99, regularPrice: 39.99, connectionFee: 0 },
-                'gf250': { name: 'o2 Home L 250/125', price: 19.99, regularPrice: 44.99, connectionFee: 0 },
-                'gf500': { name: 'o2 Home XL 500/250', price: 19.99, regularPrice: 59.99, connectionFee: 0 },
-                'gf1000': { name: 'o2 Home XXL 1000/500', price: 69.99, regularPrice: 69.99, connectionFee: 0 }
+                'UGG100': { name: 'o2 Home M 100/40', price: 29.99, regularPrice: 39.99, connectionFee: 0 },
+                'UGG250': { name: 'o2 Home L 250/125', price: 19.99, regularPrice: 44.99, connectionFee: 0 },
+                'UGG500': { name: 'o2 Home XL 500/250', price: 19.99, regularPrice: 59.99, connectionFee: 0 },
+                'UGG1000': { name: 'o2 Home XXL 1000/500', price: 69.99, regularPrice: 69.99, connectionFee: 0 }
             },
             calculateMonthlyCostsFirstYear() {
                 return (this.products[this.gfpaket].price +
@@ -89,7 +89,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                 return (this.products[this.gfpaket].connectionFee +
                         this.hardwareOptions[this.hardwareOption].shippingCost).toFixed(2);
             },
-            selectedProduct: 'gf250',
+            selectedProduct: 'UGG250',
             sendDataToController() {
                 const signatureCanvas = document.getElementById('signatureCanvas');
                 const signatureDataUrl = signatureCanvas.toDataURL();
@@ -202,7 +202,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="bg-green bg-gradient p-1 text-white">
                                 <div class="error-placeholder">
                                     <div class="form-check">
-                                        <input x-model="gfpaket" value="gf100" id="gf100" class="form-check-input" name="gfpaket" type="radio" > <label>Tarif wählen</label>
+                                        <input x-model="gfpaket" value="UGG100" id="UGG100" class="form-check-input" name="gfpaket" type="radio" > <label>Tarif wählen</label>
                                     </div>
                                 </div>
                             </div>
@@ -234,7 +234,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="bg-green bg-gradient p-1 text-white">
                                 <div class="error-placeholder">
                                     <div class="form-check">
-                                        <input x-model="gfpaket"  value="gf250" id="gf250" class="form-check-input" name="gfpaket" type="radio" checked> <label>Tarif wählen</label>
+                                        <input x-model="gfpaket"  value="UGG250" id="UGG250" class="form-check-input" name="gfpaket" type="radio" checked> <label>Tarif wählen</label>
                                     </div>
                                 </div>
                             </div>
@@ -266,7 +266,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="bg-green bg-gradient p-1 text-white">
                                 <div class="error-placeholder">
                                     <div class="form-check">
-                                        <input x-model="gfpaket" value="gf500" id="gf500" class="form-check-input" name="gfpaket" type="radio"> <label>Tarif wählen</label>
+                                        <input x-model="gfpaket" value="UGG500" id="UGG500" class="form-check-input" name="gfpaket" type="radio"> <label>Tarif wählen</label>
                                     </div>
                                 </div>
                             </div>
@@ -297,7 +297,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                             <div class="error-placeholder">
                                 <div class="bg-green bg-gradient p-1 text-white">
                                     <div class="form-check">
-                                        <input x-model="gfpaket" value="gf1000" id="gf1000" class="form-check-input" name="gfpaket" type="radio"> <label>Tarif wählen</label>
+                                        <input x-model="gfpaket" value="UGG1000" id="UGG1000" class="form-check-input" name="gfpaket" type="radio"> <label>Tarif wählen</label>
                                     </div>
                                 </div>
                             </div>
