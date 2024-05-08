@@ -52,6 +52,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
             rufnummer_9: '',
             rufnummer_10: '',
             gfpaket: 'UGG250',
+            bestandskunde: false,
             init() {
                 console.log(`Initialer Schritt: ${this.schritt}`);
                 this.$watch('schritt', (value) => console.log(`Schritt geändert zu: ${value}`));
@@ -129,6 +130,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     rufnummer_9: this.rufnummer_9,
                     rufnummer_10: this.rufnummer_10,
                     gfpaket: this.gfpaket,
+                    bestandskunde: this.bestandskunde,
                 };
 
                 fetch('{{ route('pdf.fillugg') }}', {
@@ -447,6 +449,12 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     <div>
                         <label for="we" class="block text-sm font-medium text-gray-700">Anzahl Wohneinheiten:</label>
                         <input type="text" x-model="we" name="we" id="we" pattern="^[0-9]{2}$" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="1-X">
+                    </div>
+                    <div class="flex items-center">
+                        <label for="bestandskunde" class="block text-sm font-medium text-gray-900">Bestandskunde:</label>
+                        <div class="ml-2 border border-gray-300 rounded-md flex items-center justify-center h-6 w-6">
+                            <input type="checkbox" x-model="bestandskunde" id="bestandskunde" name="bestandskunde" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-transparent rounded">
+                        </div>
                     </div>
                 </div>
                 

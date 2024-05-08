@@ -533,6 +533,7 @@
         $rufnummer_9        = $request->input('rufnummer_9');
         $rufnummer_10       = $request->input('rufnummer_10');
         $we                 = $request->input('we');
+        $bestandskunde      = $request->input('bestandskunde');
 
         $ortDatum           = $ort . ' ,' . date('d.m.Y');
         $customer = $vorname . ' ,' . $nachname;
@@ -560,7 +561,13 @@
                 $pdf->SetFont('Arial');
                 $pdf->SetFontSize(10);
                 
-                if ($pageNo == 1) {  
+                if ($pageNo == 1) { 
+
+                    if($bestandskunde == true){
+                        $pdf->SetXY(35, 48);
+                        $pdf->Write(0, 'X'); 
+                    }
+
                     if($anrede == 'Herr'){
                         $pdf->SetXY(27, 108);
                         $pdf->Write(0, 'X'); 

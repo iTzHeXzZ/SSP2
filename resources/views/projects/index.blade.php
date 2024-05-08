@@ -80,11 +80,25 @@
                     <td>{{ \Carbon\Carbon::parse($lastUpdated)->isoFormat('DD.MM.YYYY HH:mm') }}</td>
                     @if(auth()->check() && auth()->user()->hasRole('Admin'))
                     <td>
-                        <form id="deleteForm_{{ $project->id }}" action="{{ route('projects.destroy', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" method="post">
-                            @csrf
-                            @method('DELETE')
-                            <button type="button" class="btn btn-danger" onclick="confirmDelete('{{ $project->id }}')"><i class="fas fa-trash-alt"></i></button>
-                        </form>
+                        <div class="d-flex">
+                            <a href="{{ route('projects.export.excel', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" class="btn btn-sm btn-success mr-2">
+                                <i class="fas fa-file-excel"></i>
+                            </a>
+                            <form id="archiveForm_{{ $project->id }}" action="{{ route('projects.archive', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" method="post">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" class="btn btn-sm btn-warning mr-2" onclick="confirmArchive('{{ $project->id }}')">
+                                    <i class="fa-solid fa-box-archive"></i>
+                                </button>
+                            </form>
+                            <form id="deleteForm_{{ $project->id }}" action="{{ route('projects.destroy', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" method="post">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" class="btn btn-sm btn-danger mr-2" onclick="confirmDelete('{{ $project->id }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                     @endif
                 </tr>
@@ -112,8 +126,37 @@
             </div>
         </div>
     </div>
-
+    <div class="modal fade" id="archiveConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="archiveConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="archiveConfirmationModalLabel">Bestätigung erforderlich</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Möchten Sie dieses Projekt wirklich archivieren?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-warning" onclick="archiveProject()">Archivieren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        var archiveProjectId;
+
+        function confirmArchive(projectId) {
+            archiveProjectId = projectId;
+            $('#archiveConfirmationModal').modal('show');
+        }
+
+        function archiveProject() {
+            $('#archiveForm_' + archiveProjectId).submit();
+        }
         var deleteProjectId;
 
         function confirmDelete(projectId) {

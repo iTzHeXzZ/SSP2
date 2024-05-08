@@ -11,9 +11,12 @@ use App\Models\ProjectStatusLog;
 use Illuminate\Support\Facades\Log;
 use App\Imports\ProjectsImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProjectsExport;
 use App\Models\SubProject;
 use App\Models\CompletedContract;
 use Carbon\Carbon;
+use App\Models\ArchivedProject;
+use DB;
 
 
 
@@ -56,6 +59,27 @@ class ProjectController extends Controller
     
         return view('projects.index', compact('projects','counts','user'));
     }
+
+    public function archivedIndex()
+    {
+        $archivedProjects = ArchivedProject::all();
+        
+        $groupedProjects = $archivedProjects->groupBy(['ort', 'postleitzahl']);
+        $counts = [];
+    
+        foreach ($groupedProjects as $key => $group) {
+            $counts[$key]['countUnbesucht'] = $group->where('status', 'Unbesucht')->count();
+            $counts[$key]['countVertrag'] = $group->where('status', 'Vertrag')->count();
+            $counts[$key]['countOverleger'] = $group->where('status', 'Überleger')->count();
+            $counts[$key]['countKarte'] = $group->where('status', 'Karte')->count();
+            $counts[$key]['countKeinInteresse'] = $group->where('status', 'Kein Interesse')->count();
+        }
+    
+        return view('projects.index', compact('archivedProjects','counts'));
+    }
+    
+    
+
     
     
     
@@ -675,4 +699,105 @@ class ProjectController extends Controller
             
 
         }
+
+
+
+        public function showArchivedProjects()
+        {
+            $archivedProjects = ArchivedProject::all();
+        
+            $groupedProjects = $archivedProjects->groupBy(['ort', 'postleitzahl']);
+            $counts = [];
+        
+            foreach ($groupedProjects as $key => $group) {
+                $counts[$key]['countUnbesucht'] = $group->where('status', 'Unbesucht')->count();
+                $counts[$key]['countVertrag'] = $group->where('status', 'Vertrag')->count();
+                $counts[$key]['countOverleger'] = $group->where('status', 'Überleger')->count();
+                $counts[$key]['countKarte'] = $group->where('status', 'Karte')->count();
+                $counts[$key]['countKeinInteresse'] = $group->where('status', 'Kein Interesse')->count();
+            }
+        
+            return view('archived_projects', compact('archivedProjects','counts'));
+        }
+        
+
+
+
+        public function archiveProject($ort, $postleitzahl)
+        {
+            $user = Auth::user();
+        
+            if ($user->hasRole('Admin')) {
+                $projects = Project::where('ort', $ort)->where('postleitzahl', $postleitzahl)->get();
+        
+                foreach ($projects as $project) {
+                    $archivedProject = new ArchivedProject();
+                    $archivedProject->id = $project->id;
+                    $archivedProject->ort = $project->ort;
+                    $archivedProject->postleitzahl = $project->postleitzahl;
+                    $archivedProject->strasse = $project->strasse;
+                    $archivedProject->hausnummer = $project->hausnummer;
+                    $archivedProject->wohneinheiten = $project->wohneinheiten;
+                    $archivedProject->bestand = $project->bestand;
+                    $archivedProject->notiz = $project->notiz;
+                    $archivedProject->status = $project->status;
+                    $archivedProject->created_at = $project->created_at;
+                    $archivedProject->updated_at = $project->updated_at;
+                    $archivedProject->save();
+                    $project->delete();
+                }
+        
+                return redirect()->back()->with('success', 'Projekte erfolgreich archiviert.');
+            }
+            
+            abort(403, 'Nur Administratoren dürfen Projekte archivieren.');
+        }
+
+        public function restoreProject($ort, $postleitzahl)
+        {
+            $user = Auth::user();
+        
+            if ($user->hasRole('Admin')) {
+                $archivedProjects = ArchivedProject::where('ort', $ort)->where('postleitzahl', $postleitzahl)->get();
+        
+                foreach ($archivedProjects as $archivedProject) {
+                    $project = new Project();
+                    $project->id = $archivedProject->id;
+                    $project->ort = $archivedProject->ort;
+                    $project->postleitzahl = $archivedProject->postleitzahl;
+                    $project->strasse = $archivedProject->strasse;
+                    $project->hausnummer = $archivedProject->hausnummer;
+                    $project->wohneinheiten = $archivedProject->wohneinheiten;
+                    $project->bestand = $archivedProject->bestand;
+                    $project->notiz = $archivedProject->notiz;
+                    $project->status = $archivedProject->status;
+                    $project->created_at = $archivedProject->created_at;
+                    $project->updated_at = $archivedProject->updated_at;
+        
+                    $project->save();
+                    $archivedProject->delete();
+                }
+        
+                return redirect()->back()->with('success', 'Projekte erfolgreich wiederhergestellt.');
+            }
+            
+            abort(403, 'Nur Administratoren dürfen Projekte wiederherstellen.');
+        }
+        
+        public function exportExcel(Request $request)
+        {
+            $ort = $request->ort;
+            $postleitzahl = $request->postleitzahl;
+            
+            $name = $ort . ',' . $postleitzahl;
+
+            $projects = Project::where('ort', $ort)
+                               ->where('postleitzahl', $postleitzahl)
+                               ->get();
+            
+            return Excel::download(new ProjectsExport($projects), $name . '.xlsx');
+        }
+        
+        
+        
 }

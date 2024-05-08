@@ -75,6 +75,11 @@ Route::middleware('auth')->group(function () {
 Route::group(['middleware' => 'admin'], function () {
 
     Route::delete('projects/{ort}/{postleitzahl}', [ProjectController::class, 'destroyProject'])->name('projects.destroy');
+    Route::delete('/projects/{ort}/{postleitzahl}/archive', [ProjectController::class, 'archiveProject'])->name('projects.archive');
+    Route::get('/archived_projects', [ProjectController::class, 'showArchivedProjects'])->name('archived_projects.index');
+    Route::put('/projects/{ort}/{postleitzahl}/restore', [ProjectController::class, 'restoreProject'])->name('projects.restore');
+    Route::get('/projects/export-excel', [ProjectController::class, 'exportExcel'])->name('projects.export.excel');
+    
 
     Route::get('/import', [ProjectController::class, 'showImportForm'])->name('import.form');
     Route::post('/import', [ProjectController::class, 'import'])->name('import.projects');
