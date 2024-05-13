@@ -798,6 +798,25 @@ class ProjectController extends Controller
             return Excel::download(new ProjectsExport($projects), $name . '.xlsx');
         }
         
+        public function getProjectAnalysis($userId)
+        {
+            $user = User::findOrFail($userId);
+            $projects = $user->projects()->with('subProjects')->get();
+            
+            $counts = [];
+        
+            foreach ($projects as $project) {
+                $status = $project->status;
+                $counts[$status] = isset($counts[$status]) ? $counts[$status] + 1 : 1;
+        
+                foreach ($project->subProjects as $subProject) {
+                    $subStatus = $subProject->status;
+                    $counts[$subStatus] = isset($counts[$subStatus]) ? $counts[$subStatus] + 1 : 1;
+                }
+            }
+        
+            return response()->json($counts);
+        }
         
         
 }

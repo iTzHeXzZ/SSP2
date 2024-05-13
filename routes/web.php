@@ -87,7 +87,7 @@ Route::group(['middleware' => 'admin'], function () {
     Route::post('/update-contract/{id}', [PdfController::class, 'updateContract'])->name('contract.update');
     Route::post('/delete-contract/{id}', [PdfController::class, 'deleteContract'])->name('contract.delete');
     
-
+    Route::get('/get-project-analysis/{userId}', [ProjectController::class, 'getProjectAnalysis']);
     Route::get('/pdf/contracts', [PdfController::class, 'showAllContracts'])->name('pdf.contracts');
 
     Route::resource('roles', RoleController::class);

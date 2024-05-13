@@ -50,7 +50,16 @@
                             $vertragCount = $dataArray['Vertrag'] ?? 0;
                             $vertragPercentage = ($vertragCount / $total) * 100;
                         @endphp
-                        <td>{{ optional(App\Models\User::find($userId))->name ?? 'Benutzer nicht gefunden' }}</td>
+                        @php
+                            $user = App\Models\User::find($userId);
+                        @endphp
+                        <td>
+                            @if ($user && auth()->user()->hasRole('Admin'))
+                                <a href="#" class="user-link" data-user-id="{{ $userId }}">{{ $user->name }}</a>
+                            @else
+                                {{ $user ? $user->name : 'Benutzer nicht gefunden' }}
+                            @endif
+                        </td>
                         <td>{{ $unbesuchte_counts[$userId] ?? 0 }}</td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Vertrag">{{ $data['Vertrag'] ?? 0 }}</a></td>
                         <td><a style="text-decoration : none" href="#" class="status-link" data-user-id="{{ $userId }}" data-status="Fremd VP">{{ $data['Fremd VP'] ?? 0 }}</a></td>
@@ -68,7 +77,22 @@
     <div>    <div id="details-container" class="mt-4"></div>
     <div id="pagination-container" class="mt-4"></div></div>
 </div>
-
+<div class="modal fade" id="projectAnalysisModal" tabindex="-1" aria-labelledby="projectAnalysisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="projectAnalysisModalLabel">Projektanalyse für <span id="modalUsername"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="projectAnalysisContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -159,6 +183,38 @@ window.loadPage = function(url) {
             })
         .catch(error => console.error('Error:', error));
 };
+document.addEventListener('DOMContentLoaded', function () {
+    const userLinks = document.querySelectorAll('.user-link');
 
+    userLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            const modalUsername = this.textContent.trim();
+            const container = document.getElementById('projectAnalysisContent');
+            const modalUsernameElement = document.getElementById('modalUsername');
+
+            modalUsernameElement.textContent = modalUsername;
+
+            const url = `/get-project-analysis/${userId}`;
+
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                let content = '<table class="table"><thead><tr><th>Status</th><th>Anzahl</th></tr></thead><tbody>';
+                Object.entries(data).forEach(([status, count]) => {
+                    content += `<tr><td>${status}</td><td>${count}</td></tr>`;
+                });
+                console.log(data);
+                content += '</tbody></table>';
+
+                container.innerHTML = content;
+
+                $('#projectAnalysisModal').modal('show');
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
 </script>
 @endsection

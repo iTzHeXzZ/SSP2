@@ -103,6 +103,12 @@
             $fillPage = true;
         }
 
+        $selectedOption = $formData['gfpaket'] ?? '';
+        $selecteddevice = $formData['fritzBox'] ?? '';
+        
+        
+        $selectedOptionKey = ''; 
+        $selectedDeviceKey = '';
         
           $ownerSignaturePath   = $this->savSignature($request);
           $orderSignaturePath   = $this->saSignature($request);
@@ -111,6 +117,29 @@
         $pdfPath = storage_path('gnvlangenfeld.pdf');
         $pdf = new Fpdi();
         $pdf->setSourceFile($pdfPath);
+        $pdf->AddPage();
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(10 , 10);
+        $pdf->Write(0, utf8_decode($vorname));
+        $pdf->SetXY(10 , 15);
+        $pdf->Write(0, utf8_decode($nachname));
+        $pdf->SetXY(10 , 20);
+        $pdf->Write(0, utf8_decode($adresse));
+        $pdf->SetXY(10  , 25);
+        $pdf->Write(0, utf8_decode($emailAdresse));
+        $pdf->SetXY(10 , 30);
+        $pdf->Write(0,  $telefonFestnetz);
+        $pdf->SetXY(10 , 35);
+        $pdf->Write(0, $telefonMobil);
+        $pdf->SetXY(10 , 55);
+        $pdf->Write(0, utf8_decode($anbieter));
+        $pdf->SetXY(10 , 40);
+        $pdf->Write(0, utf8_decode($iban));
+        $pdf->SetXY(10 , 45);
+        $pdf->Write(0, utf8_decode($selectedOption));
+        $pdf->SetXY(10 , 50);
+        $pdf->Write(0, utf8_decode($selecteddevice));
         
         for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($pdfPath); $pageNumber++) {
 
@@ -182,12 +211,6 @@
                 ];
                 
 
-                $selectedOption = $formData['gfpaket'] ?? '';
-                $selecteddevice = $formData['fritzBox'] ?? '';
-                
-                
-                $selectedOptionKey = ''; 
-                $selectedDeviceKey = '';
 
                 switch ($selectedOption) {
                     case 'gf15024m':
@@ -467,18 +490,18 @@
          unlink($advisorSignaturePath);
 
 
-                try {
-                    Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
-                      $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
-                           ->subject('Neuer Auftrag von: ' . $username)
-                               ->attach($outputPdfPath, [
-                                   'as' => $customer . '.pdf',
-                                  'mime' => 'application/pdf',
-                                ]);
-                    });
-                } catch (\Exception $e) {
-                   return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
-                }
+                 try {
+                     Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
+                       $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                            ->subject('Neuer Auftrag von: ' . $username)
+                                ->attach($outputPdfPath, [
+                                    'as' => $customer . '.pdf',
+                                   'mime' => 'application/pdf',
+                                 ]);
+                     });
+                 } catch (\Exception $e) {
+                    return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
+                 }
 
         
             $pdfUrl = url('/storage/' . basename($outputPdfPath));; 

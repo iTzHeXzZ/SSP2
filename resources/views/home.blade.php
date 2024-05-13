@@ -207,6 +207,10 @@
                     fetchData(url, startDate, endDate);
                 });
             }
+            const initialStartDate = document.getElementById('start_date').value;
+            const initialEndDate = document.getElementById('end_date').value;
+            const initialUrl = `/home?start_date=${initialStartDate}&end_date=${initialEndDate}`;
+            fetchData(initialUrl, initialStartDate, initialEndDate);
         });
 
         async function fetchData(url, startDate, endDate) {
