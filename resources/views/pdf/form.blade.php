@@ -574,9 +574,10 @@
     
                 <label for="iban">IBAN:</label>
                 <input type="text" name="iban" id="iban" value="DE" >
-    
+                <div id="iban-feedback" style="display: none;">Die eingegebene IBAN ist ungültig.</div>
+
                 <label for="kontoinhaber">Kontoinhaber:</label>
-                <input type="text" name="kontoinhaber" id="kontoinhaber" value="" >
+                <input type="text" name="kontoinhaber" id="kontoinhaber" value="">
             </fieldset>
         </div>
     </div>
@@ -892,11 +893,11 @@
             var pdfUrl;
             $.ajax({
                 type: 'POST',
-                url: '{{ route('pdf.fill') }}',  // Laravel-Route für das Erstellen der PDF
+                url: '{{ route('pdf.fill') }}', 
                 data: JSON.stringify(data),
                 contentType: 'application/json',
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')  // CSRF-Token für Sicherheit
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')  
                 },
                 success: function(response) {
                     pdfUrl = response.url;
@@ -1011,5 +1012,33 @@
             }
             });
         }
+        function isValidIBAN(iban) {
+            iban = iban.replace(/\s+/g, '').toUpperCase();
+
+            const ibanRegex = /^[A-Z0-9]+$/;
+            if (!ibanRegex.test(iban)) {
+                return false;
+            }
+
+            if (iban.length != 22) {
+                return false;
+            }
+
+            return true;
+        }
+
+        document.getElementById('iban').addEventListener('input', function(e) {
+            const value = e.target.value;
+            const feedbackElement = document.getElementById('iban-feedback');
+            console.log(isValidIBAN(value));
+            if (isValidIBAN(value)) {
+                feedbackElement.style.display = 'none';
+                feedbackElement.textContent = '';
+            } else {
+                feedbackElement.style.display = 'block';
+                feedbackElement.textContent = 'Bitte überprüfen Sie die IBAN.';
+            }
+        });
+
     </script>
 @endsection
