@@ -199,6 +199,8 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
                     @endphp
                     <form class="mt-2" id="projectForm_{{ $project->id }}_{{ $i }}" class="ajax-form" data-ort="{{ $ort }}" data-hausnummer="{{ $project->hausnummer }}" data-wohnung="{{ $i }}" data-auto-submit="false">
                         @csrf
+                        <input type="hidden" name="strasse" value="{{ $strasse }}">
+                        <input type="hidden" name="plz" value="{{ $postleitzahl }}">
                         <select name="status_{{ $i }}" onchange="handleVertragSelect(this, '{{ $ort }}', '{{ $project->hausnummer }}', '{{ $i }}')">
                             @foreach ($statusOptions as $option)
                                 <option value="{{ $option }}" {{ $status === $option ? 'selected' : '' }}>
