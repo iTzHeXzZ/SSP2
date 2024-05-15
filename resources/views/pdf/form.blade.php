@@ -625,6 +625,26 @@
         }
 
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const strasse = urlParams.get('strasse');
+        const hausnummer = urlParams.get('hausnummer');
+        const plz = urlParams.get('plz');
+        const ort = urlParams.get('ort');
+
+        if (strasse) {
+            document.getElementById('Strasse').value = strasse;
+        }
+        if (hausnummer) {
+            document.getElementById('Hausnummer').value = hausnummer;
+        }
+        if (plz) {
+            document.getElementById('PLZ').value = plz;
+        }
+        if (ort) {
+            document.getElementById('Ort').value = ort;
+        }
+
+
             var checkbox = document.getElementById('standardCheckbox');
             var zusatzFelderContainer = document.getElementById('zusatzFelder');
 

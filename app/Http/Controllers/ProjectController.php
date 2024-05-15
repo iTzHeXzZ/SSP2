@@ -56,7 +56,8 @@ class ProjectController extends Controller
                 $counts[$project->id][$status] = $subProjects->count();
             }
         }
-    
+        
+        
         return view('projects.index', compact('projects','counts','user'));
     }
 

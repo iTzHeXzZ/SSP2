@@ -172,6 +172,8 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
                 <td>
                     <form id="projectForm_{{ $project->id }}" class="ajax-form" data-ort="{{ $ort }}" data-hausnummer="{{ $project->hausnummer }}" data-wohnung="1" data-auto-submit="false">
                         @csrf
+                        <input type="hidden" name="strasse" value="{{ $strasse }}">
+                        <input type="hidden" name="plz" value="{{ $postleitzahl }}">
                         <select name="status" onchange="handleVertragSelect(this, '{{ $ort }}', '{{ $project->hausnummer }}', '1')">
                             @foreach ($statusOptions as $option)
                                 <option value="{{ $option }}" {{ $project->status === $option ? 'selected' : '' }}>
@@ -327,25 +329,31 @@ background-color: #dc3545; /* Roter Hintergrund für Fehlermeldung */
     
     
     function handleVertragSelect(selectElement, ort, hausnummer, wohnung) {
-        var status = selectElement.value;
+    var status = selectElement.value;
+    const form = selectElement.form;
+    const strasse = form.querySelector('input[name="strasse"]').value;
+    const plz = form.querySelector('input[name="plz"]').value;
+    const queryParams = `?ort=${ort}&hausnummer=${hausnummer}&wohnung=${wohnung}&strasse=${strasse}&plz=${plz}`;
     
-        if (status === 'Vertrag' && ort.includes('Langenfeld')) {
-            const newWindow = window.open("/pdf/showForm", "_blank");
-    
-            let checkWindow = setInterval(() => {
-                if (newWindow.closed) {
-                    clearInterval(checkWindow);
-                    submitStatusAsVertrag(ort, hausnummer, wohnung);
-                }
-            }, 500);
-        } else {
-            if (wohnung === '1'){
-                submitStatusForMainProject(ort, hausnummer, status);
-            }else {
-            submitStatus(ort, hausnummer, wohnung, status);
+    if (status === 'Vertrag' && ort.includes('Langenfeld')) {
+        const url = "/pdf/showForm" + queryParams;
+
+        const newWindow = window.open(url, "_blank");
+
+        let checkWindow = setInterval(() => {
+            if (newWindow.closed) {
+                clearInterval(checkWindow);
+                submitStatusAsVertrag(ort, hausnummer, wohnung);
             }
+        }, 500);
+    } else {
+        if (wohnung === '1'){
+            submitStatusForMainProject(ort, hausnummer, status);
+        } else {
+            submitStatus(ort, hausnummer, wohnung, status);
         }
     }
+}
 
     function submitStatusForMainProject(ort, hausnummer, status) {
     const form = document.querySelector(`form[data-ort="${ort}"][data-hausnummer="${hausnummer}"][data-wohnung="1"]`);
