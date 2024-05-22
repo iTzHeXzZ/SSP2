@@ -35,12 +35,21 @@
                         <td>{{ $countKeinInteresse[$project->strasse] }}</td>
                         <td>{{ $countKeinPotenzial[$project->strasse] }}</td>
                         <td>
+                            @if ($project->wohneinheiten > 0)
                             @php
-                                $percentage = 0;
-                                if ($project->wohneinheiten > 0) {
-                                    $percentage = (($countVertrag[$project->strasse] + $countFremdVP[$project->strasse]) / ($project->wohneinheiten - $countKeinPotenzial[$project->strasse])) * 100;
-                                }
+                                $denominator = $project->wohneinheiten - $countKeinPotenzial[$project->strasse];
                             @endphp
+                        
+                            @if ($denominator > 0)
+                                @php
+                                    $percentage = (($countVertrag[$project->strasse] + $countFremdVP[$project->strasse]) / $denominator) * 100;
+                                @endphp
+                            @else
+                                @php
+                                    $percentage = 0;
+                                @endphp
+                            @endif
+                        @endif
                             {{ number_format($percentage, 2) }}%
                         </td>
                         <td>
