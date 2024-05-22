@@ -140,6 +140,8 @@
         $pdf->Write(0, utf8_decode($selectedOption));
         $pdf->SetXY(10 , 50);
         $pdf->Write(0, utf8_decode($selecteddevice));
+        $pdf->SetXY(10 , 60);
+        $pdf->Write(0, utf8_decode($gebu));
         
         for ($pageNumber = 1; $pageNumber <= $pdf->setSourceFile($pdfPath); $pageNumber++) {
 
@@ -492,7 +494,7 @@
 
                  try {
                      Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPdfPath, $username, $customer) {
-                       $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                       $message->to('info@rhein-ruhr-vertrieb.de')
                             ->subject('Neuer Auftrag von: ' . $username)
                                 ->attach($outputPdfPath, [
                                     'as' => $customer . '.pdf',
@@ -854,7 +856,7 @@
 
                 try {
                     Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
-                      $message->to('c.mehmann@rhein-ruhr-vertrieb.de')
+                      $message->to('info@rhein-ruhr-vertrieb.de')
                            ->subject('Neuer Auftrag von: ' . $username)
                                ->attach($outputPath, [
                                   'as' => $customer . '.pdf',
