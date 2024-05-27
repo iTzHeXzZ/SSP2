@@ -22,10 +22,9 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
-        $data = User::latest()->paginate(5);
+        $data = User::paginate(10);
   
-        return view('users.index',compact('data'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        return view('users.index',compact('data'));
     }
     
     /**
@@ -61,7 +60,7 @@ class UserController extends Controller
         $user->assignRole($request->input('roles'));
     
         return redirect()->route('users.index')
-                        ->with('success','User created successfully');
+                        ->with('success','Erfolgreich erstellt!');
     }
     
     /**
@@ -121,7 +120,7 @@ class UserController extends Controller
         $user->assignRole($request->input('roles'));
     
         return redirect()->route('users.index')
-                        ->with('success','User updated successfully');
+                        ->with('success','Erfolgreich Aktualisiert!');
     }
     
     /**
@@ -134,7 +133,7 @@ class UserController extends Controller
     {
         User::find($id)->delete();
         return redirect()->route('users.index')
-                        ->with('success','User deleted successfully');
+                        ->with('success','Erfolgreich gelöscht');
     }
 
     public function showSettingsForm()

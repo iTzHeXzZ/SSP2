@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
                 <div class="card-header">Projekt und Straßen einem Benutzer zuweisen</div>
-
                 <div class="card-body">
                     <form method="POST" action="{{ route('assign.project') }}">
                         @csrf
@@ -18,16 +18,15 @@
                                     @php
                                         $firstProject = $group->first();
                                     @endphp
-                                        <option value="{{ $firstProject->id }}_{{ $firstProject->ort }}_{{ $firstProject->postleitzahl }}" {{ old('project_id') == $firstProject->id ? 'selected' : '' }}>
-                                                        {{ $firstProject->ort }}, {{ $firstProject->postleitzahl }}
-                                        </option>
+                                    <option value="{{ $firstProject->id }}_{{ $firstProject->ort }}_{{ $firstProject->postleitzahl }}" {{ old('project_id') == $firstProject->id ? 'selected' : '' }}>
+                                        {{ $firstProject->ort }}, {{ $firstProject->postleitzahl }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="street">Straßen auswählen:</label>
                             <select name="streets[]" id="street" class="form-control" multiple>
-                                <!-- Hier werden die Straßenoptionen eingefügt -->
                             </select>
                         </div>
                         <div class="form-group">
@@ -44,44 +43,71 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">Zugewiesene Projekte und Straßen</div>
-
-<div class="card-body">
-    <ul>
-        @foreach ($allUsers as $user)
-            <li>
-                <strong>{{ $user->name }}</strong>:
-                <button class="toggle-streets-btn" data-toggle="modal" data-target="#assignStreetsModal" data-user-id="{{ $user->id }}">
-                    <i class="fas fa-chevron-down"></i> Anzeigen
-                </button>
-            </li>
-        @endforeach
-    </ul>
-</div>
-      
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Zugewiesene Projekte und Straßen</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        @php
+                            // Paginierung der Benutzer
+                            $perPage = 10;
+                            $page = request()->get('page', 1);
+                            $paginatedUsers = $allUsers->slice(($page - 1) * $perPage, $perPage);
+                            $lastPage = ceil($allUsers->count() / $perPage);
+                        @endphp
+                        @foreach ($paginatedUsers as $user)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <strong>{{ $user->name }}</strong>
+                                <button class="btn btn-link p-0 toggle-streets-btn" data-toggle="modal" data-target="#assignStreetsModal" data-user-id="{{ $user->id }}">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <nav aria-label="Users Pagination">
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item {{ $page <= 1 ? 'disabled' : '' }}">
+                                <a class="page-link" href="{{ $page <= 1 ? '#' : '?page=1' }}" tabindex="-1" aria-disabled="true"><<</a>
+                            </li>
+                            <li class="page-item {{ $page <= 1 ? 'disabled' : '' }}">
+                                <a class="page-link" href="{{ $page <= 1 ? '#' : '?page=' . ($page - 1) }}" tabindex="-1" aria-disabled="true">Zurück</a>
+                            </li>
+                            @for ($i = max(1, $page - 2); $i <= min($page + 2, $lastPage); $i++)
+                                <li class="page-item {{ $page == $i ? 'active' : '' }}">
+                                    <a class="page-link" href="?page={{ $i }}">{{ $i }}</a>
+                                </li>
+                            @endfor
+                            <li class="page-item {{ $page >= $lastPage ? 'disabled' : '' }}">
+                                <a class="page-link" href="?page={{ $page + 1 }}">Weiter</a>
+                            </li>
+                            <li class="page-item {{ $page >= $lastPage ? 'disabled' : '' }}">
+                                <a class="page-link" href="?page={{ $lastPage }}">>></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<!-- Modal -->
+
 <div class="modal fade" id="assignStreetsModal" tabindex="-1" role="dialog" aria-labelledby="assignStreetsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="assignStreetsModalLabel">Straßen löschen</h5>
-                {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
-                </button> --}}
+                </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y: auto;">
             </div>
-            {{-- <div class="modal-footer">
+            <div class="modal-footer justify-content-between">
+                <button type="submit" class="btn btn-danger btn-sm" id="removeSelectedStreetsBtn">Ausgewählte Straßen entfernen</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
-            </div> --}}
+            </div>
         </div>
     </div>
 </div>
@@ -91,6 +117,7 @@
 
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css">
@@ -141,26 +168,25 @@
         });
 
         function initializeMultiselect(isModal = false, targetSelector = '#street') {
-    const targetSelect = $(targetSelector);
+            const targetSelect = $(targetSelector);
 
-    console.log('Initializing Multiselect on:', isModal ? 'Modal' : 'Main Page');
+            console.log('Initializing Multiselect on:', isModal ? 'Modal' : 'Main Page');
 
-    targetSelect.multiselect('destroy');
-    targetSelect.multiselect({
-        enableFiltering: true,
-        maxHeight: 300,
-        includeSelectAllOption: true,
-        onSelectAll: function () {
-            targetSelect.multiselect('updateButtonText');
-        },
-        onChange: function (option, checked) {
-            if (option.val() === 'alle') {
-                targetSelect.multiselect('selectAll', checked);
-            }
+            targetSelect.multiselect('destroy');
+            targetSelect.multiselect({
+                enableFiltering: true,
+                maxHeight: 300,
+                includeSelectAllOption: true,
+                onSelectAll: function () {
+                    targetSelect.multiselect('updateButtonText');
+                },
+                onChange: function (option, checked) {
+                    if (option.val() === 'alle') {
+                        targetSelect.multiselect('selectAll', checked);
+                    }
+                }
+            });
         }
-    });
-}
-
 
         $('.toggle-streets-btn').click(function () {
             const userId = $(this).data('user-id');
@@ -203,7 +229,6 @@
                                 `;
                             }).join('')}
 
-                            <button type="submit" class="btn btn-danger btn-sm">Ausgewählte Straßen entfernen</button>
                         </form>
                     `);
 
@@ -212,12 +237,18 @@
                 })
                 .catch(error => console.error('Error:', error));
         });
+
+        $('#assignStreetsModal .close, #assignStreetsModal .btn-secondary').on('click', function () {
+            $('#assignStreetsModal').modal('hide');
+        });
+
+        $('#assignStreetsModal').on('hidden.bs.modal', function () {
+            $(this).find('.modal-body').empty();
+        });
+
+        $('#removeSelectedStreetsBtn').on('click', function () {
+            $('#assignStreetsModal form').submit();
+        });
     });
 </script>
 @endsection
-
-
-
-
-
-

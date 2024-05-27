@@ -2,9 +2,19 @@
 
 @section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <h1>Deine Projekte</h1>
+    <h1 class="ml-1">Deine Projekte</h1>
+    @if(auth()->check() && auth()->user()->hasRole('Admin'))
+    <form method="GET" action="{{ route('projects.index') }}" class="mb-2 mt-4" id="searchForm">
+        <div class="input-group input-group-sm" style="max-width: 400px;">
+            <input type="text" name="search" id="searchInput" class="form-control" style="" placeholder="Projekt suchen" value="{{ request()->get('search') }}">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary ml-1" type="submit">Suchen</button>
+            </div>
+        </div>
+    </form>
+    @endif
     
-    <table class="table">
+    <table class="table ml-1">
         <thead>
             <tr>
                 <th data-sort="0">Ort</th>

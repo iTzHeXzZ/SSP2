@@ -25,17 +25,27 @@ use DB;
 
 class ProjectController extends Controller
 {
-    public function index(){
+    public function index(Request $request)
+    {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
     
         $user = Auth::user();
+        $search = $request->get('search');
     
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
-            $projects = Project::with('subProjects')->get();
+            $projects = Project::with('subProjects')
+                ->when($search, function ($query, $search) {
+                    return $query->where('ort', 'like', '%' . $search . '%')
+                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%');
+                })->get();
         } else {
-            $projects = $user->projects()->with('subProjects')->get();
+            $projects = $user->projects()->with('subProjects')
+                ->when($search, function ($query, $search) {
+                    return $query->where('ort', 'like', '%' . $search . '%')
+                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%');
+                })->get();
         }
     
         $counts = [];
@@ -56,10 +66,10 @@ class ProjectController extends Controller
                 $counts[$project->id][$status] = $subProjects->count();
             }
         }
-        
-        
-        return view('projects.index', compact('projects','counts','user'));
+    
+        return view('projects.index', compact('projects', 'counts', 'user', 'search'));
     }
+    
 
     public function archivedIndex()
     {
