@@ -868,7 +868,7 @@
 
                 try {
                     Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($geePdfPath, $outputPath, $username, $customer) {
-                      $message->to('micha-undso@web.de')
+                      $message->to('info@rhein-ruhr-vertrieb.de')
                            ->subject('Neuer Auftrag von: ' . $username)
                                ->attach($outputPath, [
                                   'as' => $customer . '.pdf',
