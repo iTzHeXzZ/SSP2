@@ -63,7 +63,7 @@
         <div class="col-md-8">
             <div class="card dashboard-card">
                 <div class="card-header">{{ __('Dashboard') }}</div>
-
+                
                 <div class="card-body" style="background-color: #f8f9fa;">
                     <div class="card">
                         <div class="card-header bg-light">UGG Links:</div>

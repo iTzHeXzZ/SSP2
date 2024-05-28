@@ -852,16 +852,32 @@
             $outputPath = storage_path('app/filled_ugg_' . uniqid() . '.pdf');
             $pdf->Output('F', $outputPath);
         
+            $lastFourPages = new Fpdi();
+            $lastFourPages->setSourceFile($outputPath);
+    
+            for ($pageNo = $numPages - 3; $pageNo <= $numPages; $pageNo++) {
+                $templateIndex = $lastFourPages->importPage($pageNo);
+                $lastFourPages->AddPage();
+                $lastFourPages->useTemplate($templateIndex);
+            }
+    
+            $geePdfPath = storage_path('app/gee.pdf');
+            $lastFourPages->Output($geePdfPath, 'F');
+            
             unlink($signaturePathData);
 
                 try {
-                    Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($outputPath, $username, $customer) {
-                      $message->to('info@rhein-ruhr-vertrieb.de')
+                    Mail::send('emails.sendPdf', ['name' => $username], function (Message $message) use ($geePdfPath, $outputPath, $username, $customer) {
+                      $message->to('micha-undso@web.de')
                            ->subject('Neuer Auftrag von: ' . $username)
                                ->attach($outputPath, [
                                   'as' => $customer . '.pdf',
                                   'mime' => 'application/pdf',
-                                ]);
+                                ])
+                                ->attach($geePdfPath, [
+                                    'as' => $customer . '_GEE.pdf',
+                                    'mime' => 'application/pdf',
+                                  ]);
                     });
                 } catch (\Exception $e) {
                    return response()->json(['success' => false, 'message' => 'Ein Fehler ist aufgetreten: ' . $e->getMessage()],500);
@@ -880,7 +896,8 @@
                 'gfpaket' => $request->input('gfpaket'),
             ]);
         
-            $contract->save();     
+            $contract->save();
+            unlink($geePdfPath);     
 
             return response()->download($outputPath, 'filled_ugg.pdf', [
                 'Content-Type' => 'application/pdf'

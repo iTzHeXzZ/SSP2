@@ -158,7 +158,7 @@ https://cdn.jsdelivr.net/npm/alpinejs@3.13.8/dist/cdn.min.js
                     a.remove();
                     alert('Auftrag erstellt, das Fenster Schließt automatisch');
                     setTimeout(() => {
-                        window.close();  // Versucht das Fenster zu schließen
+                        {{-- window.close();  // Versucht das Fenster zu schließen --}}
                     }, 1000);
                 
                 })
