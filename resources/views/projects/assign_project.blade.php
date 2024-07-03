@@ -3,6 +3,11 @@
 @section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <div class="container">
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
     <div class="row">
         <div class="col-md-6">
             <div class="card mb-4">
@@ -97,7 +102,8 @@
     <div class="modal-dialog modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="assignStreetsModalLabel">Straßen löschen</h5>
+                <h5 class="modal-title" id="assignStreetsModalLabel">Straßen verwalten</h5>
+                <button type="button" class="btn btn-danger btn-sm ml-auto" id="removeAllStreetsBtn">Alle Straßen entfernen</button>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -111,6 +117,7 @@
         </div>
     </div>
 </div>
+
 
 
 @endsection
@@ -189,54 +196,59 @@
         }
 
         $('.toggle-streets-btn').click(function () {
-            const userId = $(this).data('user-id');
+        const userId = $(this).data('user-id'); // Hole die userId aus dem Button-Datenattribut
 
-            fetch(`/get-streets-for-user/${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const modalBody = $('#assignStreetsModal .modal-body');
-                    const projectName = data.projectName;
+        fetch(`/get-streets-for-user/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                const modalBody = $('#assignStreetsModal .modal-body');
+                const projectName = data.projectName;
 
-                    const uniqueOrte = Array.from(new Set(data.streetsAndOrte.map(item => item.ort)));
+                const uniqueOrte = Array.from(new Set(data.streetsAndOrte.map(item => item.ort)));
 
-                    modalBody.html(`
-                        <form action="{{ route('remove.street.from.project') }}" method="post" style="display: inline-block;">
-                            @csrf
-                            <input type="hidden" name="user_id" value="${userId}">
-                            <input type="hidden" name="project_id" value="${projectName}">
-                            
-                            ${uniqueOrte.map(ort => {
-                                const uniqueStreetsForOrt = Array.from(new Set(
-                                    data.streetsAndOrte
-                                        .filter(item => item.ort === ort)
-                                        .map(item => `${item.strasse}, ${item.ort}`)
-                                ));
+                modalBody.html(`
+                    <form id="removeAllStreetsForm" action="{{ route('remove.all.streets') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="user_id" value="${userId}">
+                        <input type="hidden" name="project_id" value="${projectName}">
+                        
+                        ${uniqueOrte.map(ort => {
+                            // Eindeutige Straßen für jeden Ort sammeln
+                            const uniqueStreetsForOrt = Array.from(new Set(
+                                data.streetsAndOrte
+                                    .filter(item => item.ort === ort)
+                                    .map(item => `${item.strasse}, ${item.ort}`)
+                            ));
 
-                                return `
-                                    <ul class="user-streets-list-${userId}" style="list-style-type: none;">
+                            return `
+                                <ul class="user-streets-list-${userId}" style="list-style-type: none;">
+                                    <li>
+                                        <h5>${ort}</h5>
+                                    </li>
+                                    ${uniqueStreetsForOrt.map(streetAndOrt => `
                                         <li>
-                                            <h5>${ort}</h5>
+                                            <label>
+                                                <input type="checkbox" name="streets[]" value="${streetAndOrt}" class="street-checkbox">
+                                                <strong>${streetAndOrt}</strong>
+                                            </label>
                                         </li>
-                                        ${uniqueStreetsForOrt.map(streetAndOrt => `
-                                            <li>
-                                                <label>
-                                                    <input type="checkbox" name="streets[]" value="${streetAndOrt}" class="street-checkbox">
-                                                    <strong>${streetAndOrt}</strong>
-                                                </label>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                `;
-                            }).join('')}
+                                    `).join('')}
+                                </ul>
+                            `;
+                        }).join('')}
+                    </form>
+                `);
 
-                        </form>
-                    `);
+                $('#assignStreetsModal').modal('show');
+            })
+            .catch(error => console.error('Error:', error));
+    });
 
-                    initializeMultiselect(true, '#assignStreetsModal #street'); 
-                    $('#assignStreetsModal').modal('show');
-                })
-                .catch(error => console.error('Error:', error));
-        });
+    $('#removeAllStreetsBtn').click(function () {
+        if (confirm('Möchten Sie wirklich alle Straßen entfernen?')) {
+            $('#removeAllStreetsForm').submit();
+        }
+    });
 
         $('#assignStreetsModal .close, #assignStreetsModal .btn-secondary').on('click', function () {
             $('#assignStreetsModal').modal('hide');

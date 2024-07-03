@@ -7,17 +7,20 @@
         <thead>
             <tr>
                 <th data-sort="0">Strasse</th>
-                <th data-sort="1">Wohneinheiten</th>
-                <th data-sort="2">Bestand</th>
-                <th data-sort="3">Unbesuchte</th>
-                <th data-sort="4">Vertrag</th>
-                <th data-sort="5">Überleger</th>
-                <th data-sort="6">Karte</th>
-                <th data-sort="7">Fremd VP</th>
-                <th data-sort="8">Kein Interesse</th>
-                <th data-sort="8">Kein Potenzial</th>
-                <th data-sort="9">Prozentsatz Vertrag</th> 
-                <th data-sort="10">Bearbeitungsdatum</th>
+                @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                <th data-sort="1">Benutzer</th>
+                @endif
+                <th data-sort="2">Wohneinheiten</th>
+                <th data-sort="3">Bestand</th>
+                <th data-sort="4">Unbesuchte</th>
+                <th data-sort="5">Vertrag</th>
+                <th data-sort="6">Überleger</th>
+                <th data-sort="7">Karte</th>
+                <th data-sort="8">Fremd VP</th>
+                <th data-sort="9">Kein Interesse</th>
+                <th data-sort="10">Kein Potenzial</th>
+                <th data-sort="11">Prozentsatz Vertrag</th> 
+                <th data-sort="12">Bearbeitungsdatum</th>
             </tr>
         </thead>
         <tbody>
@@ -25,6 +28,14 @@
                 @if (auth()->user()->hasRole(['Admin', 'Viewer']) || auth()->user()->projects->contains($project))
                     <tr>
                         <td><a class="locc" href="{{ route('projects.number', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl, 'strasse' => $project->strasse]) }}" style="text-decoration: none">{{ $project->strasse }}</a></td>
+                        
+                        @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                        <td>
+                            @foreach ($project->users as $user)
+                                <span>{{ $user->name }}</span><br>
+                            @endforeach
+                        </td>
+                        @endif
                         <td>{{ $project->wohneinheiten }}</td>
                         <td>{{ $project->bestand }}</td>
                         <td>{{ $countUnbesucht[$project->strasse] }}</td>
@@ -36,21 +47,14 @@
                         <td>{{ $countKeinPotenzial[$project->strasse] }}</td>
                         <td>
                             @if ($project->wohneinheiten > 0)
-                            @php
-                                $denominator = $project->wohneinheiten - $countKeinPotenzial[$project->strasse];
-                            @endphp
-                        
-                            @if ($denominator > 0)
                                 @php
-                                    $percentage = (($countVertrag[$project->strasse] + $countFremdVP[$project->strasse]) / $denominator) * 100;
+                                    $denominator = $project->wohneinheiten - $countKeinPotenzial[$project->strasse];
+                                    $percentage = ($denominator > 0) ? (($countVertrag[$project->strasse] + $countFremdVP[$project->strasse]) / $denominator) * 100 : 0;
                                 @endphp
+                                {{ number_format($percentage, 2) }}%
                             @else
-                                @php
-                                    $percentage = 0;
-                                @endphp
+                                0%
                             @endif
-                        @endif
-                            {{ number_format($percentage, 2) }}%
                         </td>
                         <td>
                             @php

@@ -35,13 +35,13 @@ class ProjectController extends Controller
         $search = $request->get('search');
     
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
-            $projects = Project::with('subProjects')
+            $projects = Project::with('subProjects' ,'users')
                 ->when($search, function ($query, $search) {
                     return $query->where('ort', 'like', '%' . $search . '%')
                                  ->orWhere('postleitzahl', 'like', '%' . $search . '%');
                 })->get();
         } else {
-            $projects = $user->projects()->with('subProjects')
+            $projects = $user->projects()->with('subProjects', 'users')
                 ->when($search, function ($query, $search) {
                     return $query->where('ort', 'like', '%' . $search . '%')
                                  ->orWhere('postleitzahl', 'like', '%' . $search . '%');
@@ -66,7 +66,7 @@ class ProjectController extends Controller
                 $counts[$project->id][$status] = $subProjects->count();
             }
         }
-    
+        
         return view('projects.index', compact('projects', 'counts', 'user', 'search'));
     }
     
@@ -113,7 +113,7 @@ class ProjectController extends Controller
         $countFremdVP = [];
         $countKeinPotenzial = [];
     
-        $projectsQuery = Project::with('subProjects');
+        $projectsQuery = Project::with('subProjects', 'users');
 
         // Check if user is admin or viewer
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
@@ -376,7 +376,32 @@ class ProjectController extends Controller
     }
     
     
+    public function removeAllStreets(Request $request)
+    {
+        $user = User::find($request->user_id);
+        
+        if (!$user) {
+            return back()->with('error', 'Benutzer nicht gefunden.');
+        }
+        $projects = $user->projects;
     
+        if ($projects->isEmpty()) {
+            return back()->with('error', 'Der Benutzer hat keine Projekte.');
+        }
+    
+        try {
+            foreach ($projects as $project) {
+                $user->projects()->detach($project->id);
+            }
+    
+            return back()->with('success', 'Alle Straßen für alle Projekte des Benutzers erfolgreich entfernt.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Fehler beim Entfernen der Straßen: ' . $e->getMessage());
+        }
+    }
+    
+    
+      
     
 
 

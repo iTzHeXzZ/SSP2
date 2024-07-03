@@ -18,16 +18,19 @@
         <thead>
             <tr>
                 <th data-sort="0">Ort</th>
-                <th data-sort="1">Postleitzahl</th>
-                <th data-sort="2">Wohneinheiten</th>
-                <th data-sort="3">Unbesuchte</th>
-                <th data-sort="4">Vertrag</th>
-                <th data-sort="5">Überleger</th>
-                <th data-sort="6">Karte</th>
-                <th data-sort="7">Kein Interesse</th>
-                <th data-sort="8">Kein Potenzial</th>
-                <th data-sort="9">Prozentsatz Vertrag</th>
-                <th data-sort="10">Bearbeitungsdatum</th>
+                @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                <th data-sort="1">Benutzer</th>
+                @endif
+                <th data-sort="2">Postleitzahl</th>
+                <th data-sort="3">Wohneinheiten</th>
+                <th data-sort="4">Unbesuchte</th>
+                <th data-sort="5">Vertrag</th>
+                <th data-sort="6">Überleger</th>
+                <th data-sort="7">Karte</th>
+                <th data-sort="8">Kein Interesse</th>
+                <th data-sort="9">Kein Potenzial</th>
+                <th data-sort="10">Prozentsatz Vertrag</th>
+                <th data-sort="11">Bearbeitungsdatum</th>
                 @if(auth()->check() && auth()->user()->hasRole('Admin'))
                     <th>Aktionen</th>
                 @endif
@@ -43,6 +46,15 @@
             @endphp
 
             @foreach ($uniqueProjectsPaginated as $project)
+            @php
+            $users = collect();
+            foreach ($projects as $proj) {
+                if ($proj->ort == $project->ort && $proj->postleitzahl == $project->postleitzahl) {
+                    $users = $users->merge($proj->users);
+                }
+            }
+            $users = $users->unique('id');
+        @endphp
                 @php
                     $filteredProjects = $projects
                         ->where('ort', $project->ort)
@@ -78,6 +90,13 @@
                 @endphp
                 <tr>
                     <td><a class="locc" href="{{ route('projects.street', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" style="text-decoration : none">{{ $project->ort }}</a></td>
+                    @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                    <td>
+                        @foreach ($users as $user)
+                            <span>{{ $user->name }}</span><br>
+                        @endforeach
+                    </td>
+                    @endif
                     <td>{{ $project->postleitzahl }}</td>
                     <td>{{ $totalWohneinheiten }}</td>
                     <td>{{ $countUnbesucht }}</td>

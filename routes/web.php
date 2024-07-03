@@ -79,6 +79,7 @@ Route::group(['middleware' => 'admin'], function () {
     Route::get('/archived_projects', [ProjectController::class, 'showArchivedProjects'])->name('archived_projects.index');
     Route::put('/projects/{ort}/{postleitzahl}/restore', [ProjectController::class, 'restoreProject'])->name('projects.restore');
     Route::get('/projects/export-excel', [ProjectController::class, 'exportExcel'])->name('projects.export.excel');
+    Route::post('/remove-all-streets', [ProjectController::class, 'removeAllStreets'])->name('remove.all.streets');
     
 
     Route::get('/import', [ProjectController::class, 'showImportForm'])->name('import.form');
