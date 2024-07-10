@@ -54,7 +54,6 @@
                 <div class="card-body">
                     <ul class="list-group">
                         @php
-                            // Paginierung der Benutzer
                             $perPage = 10;
                             $page = request()->get('page', 1);
                             $paginatedUsers = $allUsers->slice(($page - 1) * $perPage, $perPage);
@@ -111,14 +110,12 @@
             <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y: auto;">
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="submit" class="btn btn-danger btn-sm" id="removeSelectedStreetsBtn">Ausgewählte Straßen entfernen</button>
+                <button type="button" class="btn btn-danger btn-sm" id="removeSelectedStreetsBtn">Ausgewählte Straßen entfernen</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
             </div>
         </div>
     </div>
 </div>
-
-
 
 @endsection
 
@@ -196,59 +193,70 @@
         }
 
         $('.toggle-streets-btn').click(function () {
-        const userId = $(this).data('user-id'); // Hole die userId aus dem Button-Datenattribut
+            const userId = $(this).data('user-id');
 
-        fetch(`/get-streets-for-user/${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                const modalBody = $('#assignStreetsModal .modal-body');
-                const projectName = data.projectName;
+            fetch(`/get-streets-for-user/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const modalBody = $('#assignStreetsModal .modal-body');
+                    const projectName = data.projectName;
 
-                const uniqueOrte = Array.from(new Set(data.streetsAndOrte.map(item => item.ort)));
+                    const uniqueOrte = Array.from(new Set(data.streetsAndOrte.map(item => item.ort)));
 
-                modalBody.html(`
-                    <form id="removeAllStreetsForm" action="{{ route('remove.all.streets') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="user_id" value="${userId}">
-                        <input type="hidden" name="project_id" value="${projectName}">
+                    modalBody.html(`
+                        <form id="removeAllStreetsForm" action="{{ route('remove.all.streets') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="user_id" value="${userId}">
+                            <input type="hidden" name="project_id" value="${projectName}">
+                        </form>
                         
-                        ${uniqueOrte.map(ort => {
-                            // Eindeutige Straßen für jeden Ort sammeln
-                            const uniqueStreetsForOrt = Array.from(new Set(
-                                data.streetsAndOrte
-                                    .filter(item => item.ort === ort)
-                                    .map(item => `${item.strasse}, ${item.ort}`)
-                            ));
+                        <form id="removeSelectedStreetsForm" action="{{ route('remove.street.from.project') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="user_id" value="${userId}">
+                            <input type="hidden" name="project_id" value="${projectName}">
+                        
+                            ${uniqueOrte.map(ort => {
+                                const uniqueStreetsForOrt = Array.from(new Set(
+                                    data.streetsAndOrte
+                                        .filter(item => item.ort === ort)
+                                        .map(item => `${item.strasse}, ${item.ort}`)
+                                ));
 
-                            return `
-                                <ul class="user-streets-list-${userId}" style="list-style-type: none;">
-                                    <li>
-                                        <h5>${ort}</h5>
-                                    </li>
-                                    ${uniqueStreetsForOrt.map(streetAndOrt => `
+                                return `
+                                    <ul class="user-streets-list-${userId}" style="list-style-type: none;">
                                         <li>
-                                            <label>
-                                                <input type="checkbox" name="streets[]" value="${streetAndOrt}" class="street-checkbox">
-                                                <strong>${streetAndOrt}</strong>
-                                            </label>
+                                            <h5>${ort}</h5>
                                         </li>
-                                    `).join('')}
-                                </ul>
-                            `;
-                        }).join('')}
-                    </form>
-                `);
+                                        ${uniqueStreetsForOrt.map(streetAndOrt => `
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" name="streets[]" value="${streetAndOrt}" class="street-checkbox">
+                                                    <strong>${streetAndOrt}</strong>
+                                                </label>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                `;
+                            }).join('')}
+                        </form>
+                    `);
 
-                $('#assignStreetsModal').modal('show');
-            })
-            .catch(error => console.error('Error:', error));
-    });
+                    $('#assignStreetsModal').modal('show');
+                })
+                .catch(error => console.error('Error:', error));
+        });
 
-    $('#removeAllStreetsBtn').click(function () {
-        if (confirm('Möchten Sie wirklich alle Straßen entfernen?')) {
-            $('#removeAllStreetsForm').submit();
-        }
-    });
+        $('#removeAllStreetsBtn').click(function () {
+            if (confirm('Möchten Sie wirklich alle Straßen entfernen?')) {
+                $('#removeAllStreetsForm').submit();
+            }
+        });
+
+        $('#removeSelectedStreetsBtn').click(function () {
+            if (confirm('Möchten Sie die ausgewählten Straßen entfernen?')) {
+                $('#removeSelectedStreetsForm').submit();
+            }
+        });
 
         $('#assignStreetsModal .close, #assignStreetsModal .btn-secondary').on('click', function () {
             $('#assignStreetsModal').modal('hide');
@@ -258,9 +266,6 @@
             $(this).find('.modal-body').empty();
         });
 
-        $('#removeSelectedStreetsBtn').on('click', function () {
-            $('#assignStreetsModal form').submit();
-        });
     });
 </script>
 @endsection
