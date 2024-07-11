@@ -776,7 +776,18 @@ class ProjectController extends Controller
                     $archivedProject->bestand = $project->bestand;
                     $archivedProject->notiz = $project->notiz;
                     $archivedProject->status = $project->status;
-                    $archivedProject->created_at = $project->created_at;
+                    try {
+        $createdAt = new Carbon($project->created_at);
+        if ($createdAt->year > 0) {
+            $archivedProject->created_at = $createdAt->format('Y-m-d H:i:s');
+        } else {
+            // Falls das Datum ungültig ist, auf 1.1.2000 setzen
+            $archivedProject->created_at = Carbon::create(2000, 1, 1, 0, 0, 0)->format('Y-m-d H:i:s');
+        }
+    } catch (Exception $e) {
+        // Falls ein Fehler auftritt, auf 1.1.2000 setzen
+        $archivedProject->created_at = Carbon::create(2000, 1, 1, 0, 0, 0)->format('Y-m-d H:i:s');
+    }
                     $archivedProject->updated_at = $project->updated_at;
                     $archivedProject->save();
                     $project->delete();
