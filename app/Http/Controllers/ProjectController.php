@@ -332,6 +332,7 @@ class ProjectController extends Controller
 
         public function assignProjectToUser(Request $request)
          {
+            
              $request->validate([
                  'project_id' => 'required',
                  'user_id' => 'required',
@@ -347,10 +348,6 @@ class ProjectController extends Controller
              $selectedPostleitzahl = $project->postleitzahl;
          
              foreach ($request->streets as $streetName) {
-                //  if ($user->projects->contains($project) && $user->streets->contains('strasse', $streetName)) {
-                //      return redirect()->back()->with('error', 'Der Benutzer ist bereits diesem Projekt und dieser Straße zugewiesen.');
-                //  }
-         
                  $street = Project::where('strasse', $streetName)
                      ->where('ort', $selectedOrt)
                      ->where('postleitzahl', $selectedPostleitzahl) 
@@ -359,18 +356,20 @@ class ProjectController extends Controller
                  if (!$street) {
                      return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
                  }
-         
+        
+
                  $otherProjects = Project::where('strasse', $streetName)
                      ->where('ort', $selectedOrt)
                      ->where('postleitzahl', $selectedPostleitzahl)
-                     ->where('id', '!=', $projectId)
                      ->get();
          
-                 if ($otherProjects->isNotEmpty()) {
-                     foreach ($otherProjects as $otherProject) {
-                         $user->projects()->attach($otherProject);
-                     }
-                 }
+                if ($otherProjects->isNotEmpty()) {
+                            foreach ($otherProjects as $otherProject) {
+                                if (!$user->projects->contains($otherProject)) {
+                                    $user->projects()->attach($otherProject);
+                                }
+                            }
+                        }
              }
              return redirect()->route('assign.form')->with('success', 'Projekt und Straßen erfolgreich zugewiesen.');
     }
