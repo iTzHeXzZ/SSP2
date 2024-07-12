@@ -36,7 +36,7 @@
                 @endif
             </tr>
         </thead>
-        <tbody>
+        <tbody >
             @php
             $uniqueNames = $projects->unique('ort');
             $perPage = 10; 
@@ -174,27 +174,66 @@
             </div>
         </div>
     </div>
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+        <div id="loadingSpinner" class="text-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <i class="fas fa-spinner fa-spin fa-3x" style="color: white;"></i>
+            <p style="color: white;">Daten werden geladen...</p>
+        </div>
+    </div>
     
     <script>
+        function showLoadingOverlay() {
+            $('#loadingOverlay').show();
+        }
+    
+        function hideLoadingOverlay() {
+            $('#loadingOverlay').hide();
+        }
+    
+        $(document).ready(function() {
+            $('a').on('click', function() {
+                showLoadingOverlay();
+            });
+    
+            $('form').on('submit', function() {
+                showLoadingOverlay();
+            });
+        });
+    
         var archiveProjectId;
-
+    
         function confirmArchive(projectId) {
             archiveProjectId = projectId;
             $('#archiveConfirmationModal').modal('show');
         }
-
+    
         function archiveProject() {
             $('#archiveForm_' + archiveProjectId).submit();
+            hideLoadingOverlay(); // Verstecke das Overlay, bevor die Aktion abgeschlossen ist
+            $('#archiveConfirmationModal').modal('hide'); // Schließe das Archivierungsmodal
+            showLoadingOverlay(); // Zeige den Spinner an
         }
+    
         var deleteProjectId;
-
+    
         function confirmDelete(projectId) {
             deleteProjectId = projectId;
             $('#confirmationModal').modal('show');
         }
-
+    
         function deleteProject() {
             $('#deleteForm_' + deleteProjectId).submit();
+            hideLoadingOverlay(); // Verstecke das Overlay, bevor die Aktion abgeschlossen ist
+            $('#confirmationModal').modal('hide'); // Schließe das Löschmodal
+            showLoadingOverlay(); // Zeige den Spinner an
         }
+
+        $('#confirmationModal .close, #confirmationModal .btn-secondary').on('click', function () {
+            $('#confirmationModal').modal('hide');
+        });
+
+        $('#archiveConfirmationModal .close, #archiveConfirmationModal .btn-secondary').on('click', function () {
+            $('#archiveConfirmationModal').modal('hide');
+        });
     </script>
 @endsection

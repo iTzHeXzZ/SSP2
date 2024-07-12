@@ -17,6 +17,7 @@ use App\Models\CompletedContract;
 use Carbon\Carbon;
 use App\Models\ArchivedProject;
 use DB;
+use Exception;
 
 
 
@@ -330,49 +331,51 @@ class ProjectController extends Controller
     }
 
 
-        public function assignProjectToUser(Request $request)
-         {
-            
-             $request->validate([
-                 'project_id' => 'required',
-                 'user_id' => 'required',
-                 'streets' => 'required|array',
-             ]);
-         
-             $selectedValue = $request->input('project_id');
-             list($projectId) = explode('_', $selectedValue);
-             $project = Project::findOrFail($projectId);
-             $user = User::findOrFail($request->user_id);
-     
-             $selectedOrt = $project->ort;
-             $selectedPostleitzahl = $project->postleitzahl;
-         
-             foreach ($request->streets as $streetName) {
-                 $street = Project::where('strasse', $streetName)
-                     ->where('ort', $selectedOrt)
-                     ->where('postleitzahl', $selectedPostleitzahl) 
-                     ->first();
-         
-                 if (!$street) {
-                     return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
-                 }
-        
-
-                 $otherProjects = Project::where('strasse', $streetName)
-                     ->where('ort', $selectedOrt)
-                     ->where('postleitzahl', $selectedPostleitzahl)
-                     ->get();
-         
-                if ($otherProjects->isNotEmpty()) {
-                            foreach ($otherProjects as $otherProject) {
-                                if (!$user->projects->contains($otherProject)) {
-                                    $user->projects()->attach($otherProject);
-                                }
-                            }
-                        }
-             }
-             return redirect()->route('assign.form')->with('success', 'Projekt und Straßen erfolgreich zugewiesen.');
+    public function assignProjectToUser(Request $request)
+    {
+        $streets = json_decode($request->streets[0]);
+    
+        $request->validate([
+            'project_id' => 'required',
+            'user_id' => 'required',
+            'streets' => 'required|array',
+        ]);
+    
+        $selectedValue = $request->input('project_id');
+        list($projectId) = explode('_', $selectedValue);
+        $project = Project::findOrFail($projectId);
+        $user = User::findOrFail($request->user_id);
+    
+        $selectedOrt = $project->ort;
+        $selectedPostleitzahl = $project->postleitzahl;
+    
+        foreach ($streets as $streetName) {
+            $street = Project::where('strasse', $streetName)
+                ->where('ort', $selectedOrt)
+                ->where('postleitzahl', $selectedPostleitzahl) 
+                ->first();
+    
+            if (!$street) {
+                return redirect()->back()->with('error', 'Die ausgewählte Straße konnte nicht gefunden werden.');
+            }
+    
+            $otherProjects = Project::where('strasse', $streetName)
+                ->where('ort', $selectedOrt)
+                ->where('postleitzahl', $selectedPostleitzahl)
+                ->get();
+    
+            if ($otherProjects->isNotEmpty()) {
+                foreach ($otherProjects as $otherProject) {
+                    if (!$user->projects->contains($otherProject)) {
+                        $user->projects()->attach($otherProject);
+                    }
+                }
+            }
+        }
+    
+        return redirect()->route('assign.form')->with('success', 'Projekt und Straßen erfolgreich zugewiesen.');
     }
+    
     
     
     public function removeAllStreets(Request $request)
@@ -781,11 +784,9 @@ class ProjectController extends Controller
         if ($createdAt->year > 0) {
             $archivedProject->created_at = $createdAt->format('Y-m-d H:i:s');
         } else {
-            // Falls das Datum ungültig ist, auf 1.1.2000 setzen
             $archivedProject->created_at = Carbon::create(2000, 1, 1, 0, 0, 0)->format('Y-m-d H:i:s');
         }
     } catch (Exception $e) {
-        // Falls ein Fehler auftritt, auf 1.1.2000 setzen
         $archivedProject->created_at = Carbon::create(2000, 1, 1, 0, 0, 0)->format('Y-m-d H:i:s');
     }
                     $archivedProject->updated_at = $project->updated_at;

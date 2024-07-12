@@ -21,9 +21,29 @@
         th[data-sort]:not(.desc)::after {
             content: ' ↑'; /* Pfeilsymbol nach oben für aufsteigende Sortierung */
         }
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        /* Spinner-Stil */
+        #loadingSpinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+        }
+
     </style>
 
     <!-- Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
         <!-- CSS -->
@@ -39,7 +59,11 @@
     
         <!-- Bootstrap Multiselect JS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"></script>
-    <!-- Scripts -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+        <!-- Leaflet JavaScript -->
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment-with-locales.min.js"></script>
@@ -131,6 +155,12 @@
                 </div>
             </div>
         </nav>
+        <div id="loadingOverlay">
+            <div id="loadingSpinner" class="text-center">
+                <i class="fas fa-spinner fa-spin fa-3x"></i>
+                <p>Daten werden geladen...</p>
+            </div>
+        </div>
 
         <main class="py-4">
             @yield('content')
@@ -141,7 +171,6 @@
 </html>
 <script>
 $(document).ready(function () {
-    // Funktion zum Sortieren der Tabelle
     const sortTable = function (column, descending = false) {
         const $table = $('table');
         const $rows = $table.find('tbody tr').toArray();
@@ -164,37 +193,30 @@ $(document).ready(function () {
         $table.find('tbody').empty().append($rows);
     };
 
-    // Funktion zum Extrahieren des Werts aus einer Zelle (unterstützt Hyperlinks und Zahlen)
     const getValue = function ($cell) {
         const text = $cell.text().trim();
 
-        // Versuchen, den Text als Zahl zu interpretieren
         const numericValue = parseFloat(text.replace(',', ''));
         if (!isNaN(numericValue)) {
             return numericValue;
         }
 
-        // Wenn der Text keine gültige Zahl ist, Hyperlink-Text verwenden
         const $link = $cell.find('a');
         if ($link.length > 0) {
             return $link.text();
         }
 
-        // Wenn weder Zahl noch Hyperlink-Text, den ursprünglichen Text zurückgeben
         return text;
     };
 
-    // Standardmäßig erste Spalte sortieren
     sortTable(0);
 
-    // Klickereignisse auf Tabellenüberschriften hinzufügen
     $('th[data-sort]').on('click', function () {
         const column = $(this).data('sort');
         const descending = $(this).hasClass('desc');
 
         sortTable(column, descending);
 
-        // CSS-Klasse 'desc' umkehren, um aufsteigende und absteigende Sortierung anzuzeigen
         $('th[data-sort]').removeClass('desc');
         if (descending) {
             $(this).removeClass('desc');
@@ -202,6 +224,23 @@ $(document).ready(function () {
             $(this).addClass('desc');
         }
     });
+
+        function showLoadingOverlay() {
+            $('#loadingOverlay').show();
+        }
+
+        function hideLoadingOverlay() {
+            $('#loadingOverlay').hide();
+        }
+        $('a').on('click', function () {
+            showLoadingOverlay();
+        });
+
+        $('form').on('submit', function () {
+            showLoadingOverlay();
+        });
+
+        hideLoadingOverlay();
 });
         
 </script>

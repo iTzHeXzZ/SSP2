@@ -29,11 +29,28 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="street">Straßen auswählen:</label>
-                            <select name="streets[]" id="street" class="form-control" multiple>
-                            </select>
-                        </div>
+                        <div class="form-group" id="selectedStreetsList" style="display: none;">
+                            <label class="font-weight-bold">Ausgewählte Straßen:</label>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <ul id="selectedStreetsUl1" class="list-unstyled"></ul>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <ul id="selectedStreetsUl2" class="list-unstyled"></ul>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <ul id="selectedStreetsUl3" class="list-unstyled"></ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                                                                   
                         <div class="form-group">
                             <label for="user_id">Benutzer auswählen:</label>
                             <select name="user_id" id="user_id" class="form-control">
@@ -43,6 +60,7 @@
                             </select>
                         </div>
                         <input type="hidden" name="project_id" id="project_id" value="{{ old('project_id') }}">
+                        <input type="hidden" name="streets[]" id="selected_streets">
                         <button type="submit" class="btn btn-primary">Projekt und Straße zuweisen</button>
                     </form>
                 </div>
@@ -97,6 +115,29 @@
     </div>
 </div>
 
+<!-- Street Selection Modal -->
+<div class="modal fade" id="selectStreetModal" tabindex="-1" role="dialog" aria-labelledby="selectStreetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectStreetModalLabel">Straßen auswählen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="streetsContainer"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary mr-auto" id="selectAllStreetsBtn">Alle auswählen</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Schließen</button>
+                <button type="button" class="btn btn-primary " id="saveSelectedStreetsBtn">Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="modal fade" id="assignStreetsModal" tabindex="-1" role="dialog" aria-labelledby="assignStreetsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable" role="document">
         <div class="modal-content">
@@ -123,21 +164,24 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css">
 <script>
     $(document).ready(function () {
         const locationZipcodeSelect = $('#location_zipcode');
-        const streetSelect = $('#street');
+        const streetsContainer = $('#streetsContainer');
         const projectIdInput = $('#project_id');
+        const selectedStreetsInput = $('#selected_streets');
+        const selectStreetModalLabel = $('#selectStreetModalLabel');
+        const selectAllStreetsBtn = $('#selectAllStreetsBtn');
 
         locationZipcodeSelect.on('change', function () {
-            streetSelect.empty();
+            streetsContainer.empty();
 
             const selectedLocationZipcode = $(this).val();
             const [projectId, ort, postleitzahl] = selectedLocationZipcode.split('_');
             projectIdInput.val(projectId);
-            console.log('Projekt-ID:', projectId);
+
+            // Update modal title with the selected project
+            selectStreetModalLabel.text(`Straßen auswählen für ${ort}, ${postleitzahl}`);
 
             fetch(`/get-streets-for-location-zipcode/${ort}/${postleitzahl}`, {
                 method: 'GET',
@@ -157,40 +201,62 @@
                         groupedStreets[street.strasse].push(street.hausnummer);
                     });
 
-                    const sortedStreets = Object.keys(groupedStreets).sort((a, b) => a.localeCompare(b));
+                    const sortedStreets = Object.entries(groupedStreets).sort(([a], [b]) => a.localeCompare(b));
 
-                    sortedStreets.forEach(strasse => {
-                        streetSelect.append($('<option>', {
-                            value: strasse,
-                            text: strasse
-                        }));
+                    sortedStreets.forEach(([strasse, hausnummern]) => {
+                        const streetHtml = `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="${strasse}" id="street_${strasse}">
+                                <label class="form-check-label" for="street_${strasse}">${strasse}</label>
+                            </div>
+                        `;
+                        streetsContainer.append(streetHtml);
                     });
 
-                    initializeMultiselect(); 
+                    $('#selectStreetModal').modal('show');
                 })
                 .catch(error => console.error('Error:', error));
         });
 
-        function initializeMultiselect(isModal = false, targetSelector = '#street') {
-            const targetSelect = $(targetSelector);
+        selectAllStreetsBtn.on('click', function () {
+            streetsContainer.find('input[type="checkbox"]').prop('checked', true);
+        });
 
-            console.log('Initializing Multiselect on:', isModal ? 'Modal' : 'Main Page');
+        $('#saveSelectedStreetsBtn').on('click', function () {
+            const selectedStreets = [];
+            $('#streetsContainer').find('input[type="checkbox"]:checked').each(function () {
+                selectedStreets.push($(this).val());
+            });
 
-            targetSelect.multiselect('destroy');
-            targetSelect.multiselect({
-                enableFiltering: true,
-                maxHeight: 300,
-                includeSelectAllOption: true,
-                onSelectAll: function () {
-                    targetSelect.multiselect('updateButtonText');
-                },
-                onChange: function (option, checked) {
-                    if (option.val() === 'alle') {
-                        targetSelect.multiselect('selectAll', checked);
-                    }
+            $('#selected_streets').val(JSON.stringify(selectedStreets));
+
+            $('#selectedStreetsUl1').empty();
+            $('#selectedStreetsUl2').empty();
+            $('#selectedStreetsUl3').empty();
+
+            const column1 = $('#selectedStreetsUl1');
+            const column2 = $('#selectedStreetsUl2');
+            const column3 = $('#selectedStreetsUl3');
+
+            selectedStreets.forEach((street, index) => {
+                const listItem = `<li>${street}</li>`;
+                if (index % 3 === 0) {
+                    column1.append(listItem);
+                } else if (index % 3 === 1) {
+                    column2.append(listItem);
+                } else {
+                    column3.append(listItem);
                 }
             });
-        }
+
+            $('#selectedStreetsList').show();
+
+            $('#selectStreetModal').modal('hide');
+        });
+
+
+
+
 
         $('.toggle-streets-btn').click(function () {
             const userId = $(this).data('user-id');
@@ -258,8 +324,13 @@
             }
         });
 
+
         $('#assignStreetsModal .close, #assignStreetsModal .btn-secondary').on('click', function () {
             $('#assignStreetsModal').modal('hide');
+        });
+
+        $('#selectStreetModal .close, #selectStreetModal .btn-secondary').on('click', function () {
+            $('#selectStreetModal').modal('hide');
         });
 
         $('#assignStreetsModal').on('hidden.bs.modal', function () {
