@@ -97,6 +97,13 @@
 
 @section('scripts')
 <script>
+            function showLoadingOverlay() {
+            $('#loadingOverlay').show();
+        }
+    
+        function hideLoadingOverlay() {
+            $('#loadingOverlay').hide();
+        }
 document.addEventListener('DOMContentLoaded', function () {
     const links = document.querySelectorAll('.status-link');
 
@@ -109,8 +116,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const endDate = document.getElementById('end_date').value;
             const container = document.getElementById('details-container');
             const paginationContainer = document.getElementById('pagination-container');
-            console.log('startDate:', startDate);
-    console.log('endDate:', endDate);
 
             const url = `/get-project-details/${userId}/${status}?start_date=${startDate}&end_date=${endDate}`;
 
@@ -140,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         content += paginationHtml + '</div></div>'; 
                         container.innerHTML = content;
+                        hideLoadingOverlay();
                     })
                 .catch(error => console.error('Error:', error));
         });
@@ -180,6 +186,7 @@ window.loadPage = function(url) {
 
                 content += paginationHtml + '</div></div>'; 
                 container.innerHTML = content;
+                hideLoadingOverlay();
             })
         .catch(error => console.error('Error:', error));
 };
@@ -211,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 container.innerHTML = content;
 
                 $('#projectAnalysisModal').modal('show');
+                hideLoadingOverlay();
             })
             .catch(error => console.error('Error:', error));
         });
