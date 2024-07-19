@@ -42,8 +42,7 @@
             $perPage = 10; 
             $currentPage = request()->get('page', 1); 
             $slicedProjects = array_slice($uniqueNames->all(), ($currentPage - 1) * $perPage, $perPage);
-            $uniqueProjectsPaginated = new \Illuminate\Pagination\LengthAwarePaginator($slicedProjects, count($uniqueNames), $perPage, $currentPage, ['path' => request()->url()]);
-            @endphp
+            $uniqueProjectsPaginated = new \Illuminate\Pagination\LengthAwarePaginator($slicedProjects, count($uniqueNames), $perPage, $currentPage, ['path' => request()->url(), 'query' => ['search' => request()->get('search')]]);            @endphp
 
             @foreach ($uniqueProjectsPaginated as $project)
             @php
