@@ -27,49 +27,52 @@ use Exception;
 class ProjectController extends Controller
 {
     public function index(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-    
-        $user = Auth::user();
-        $search = $request->get('search');
-    
-        if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
-            $projects = Project::with('subProjects' ,'users')
-                ->when($search, function ($query, $search) {
-                    return $query->where('ort', 'like', '%' . $search . '%')
-                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%');
-                })->get();
-        } else {
-            $projects = $user->projects()->with('subProjects', 'users')
-                ->when($search, function ($query, $search) {
-                    return $query->where('ort', 'like', '%' . $search . '%')
-                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%');
-                })->get();
-        }
-    
-        $counts = [];
-    
-        foreach ($projects as $project) {
-            $groupedSubProjects = $project->subProjects->groupBy('status');
-    
-            $counts[$project->id] = [
-                'Unbesucht' => 0,
-                'Vertrag' => 0,
-                'Überleger' => 0,
-                'Karte' => 0,
-                'Kein Interesse' => 0,
-                'Kein Potenzial' => 0
-            ];
-    
-            foreach ($groupedSubProjects as $status => $subProjects) {
-                $counts[$project->id][$status] = $subProjects->count();
-            }
-        }
-        
-        return view('projects.index', compact('projects', 'counts', 'user', 'search'));
+{
+    if (!Auth::check()) {
+        return redirect()->route('login');
     }
+
+    $user = Auth::user();
+    $search = $request->get('search');
+
+    if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
+        $projectsQuery = Project::with('subProjects', 'users')
+            ->when($search, function ($query, $search) {
+                return $query->where('ort', 'like', '%' . $search . '%')
+                             ->orWhere('postleitzahl', 'like', '%' . $search . '%');
+            });
+    } else {
+        $projectsQuery = $user->projects()->with('subProjects', 'users')
+            ->when($search, function ($query, $search) {
+                return $query->where('ort', 'like', '%' . $search . '%')
+                             ->orWhere('postleitzahl', 'like', '%' . $search . '%');
+            });
+    }
+
+    $projects = $projectsQuery->paginate(10)->withQueryString();
+
+    $counts = [];
+
+    foreach ($projects as $project) {
+        $groupedSubProjects = $project->subProjects->groupBy('status');
+
+        $counts[$project->id] = [
+            'Unbesucht' => 0,
+            'Vertrag' => 0,
+            'Überleger' => 0,
+            'Karte' => 0,
+            'Kein Interesse' => 0,
+            'Kein Potenzial' => 0
+        ];
+
+        foreach ($groupedSubProjects as $status => $subProjects) {
+            $counts[$project->id][$status] = $subProjects->count();
+        }
+    }
+
+    return view('projects.index', compact('projects', 'counts', 'user', 'search'));
+}
+
     
 
     public function archivedIndex()
