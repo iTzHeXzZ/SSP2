@@ -17,6 +17,89 @@
     
     class PdfController extends Controller
     {
+        public function showDG()
+        {
+            return view('dg');
+        }
+    
+        public function submitForm(Request $request)
+        {
+            // Validierung der Eingabedaten
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'tarif' => 'required|string',
+                'unterschrift' => 'required|string',
+            ]);
+        
+            // Eingabedaten abrufen
+            $name = $request->input('name');
+            $email = $request->input('email');
+            $tarif = $request->input('tarif');
+            $signaturePathData = $this->saveSignature($request);
+            $currentDate = now()->format('d.m.Y');
+        
+            // PDF-Pfad basierend auf dem Tarif abrufen
+            $pdfPath = $this->getPdfPathForPlan($tarif);
+        
+            // FPDI Instanz erstellen
+            $pdf = new Fpdi();
+            $pdf->setSourceFile($pdfPath);
+            $pdf->SetFont('Arial', 'I', 12);
+            $pdf->SetTextColor(100, 149, 237);
+        
+            // Alle Seiten der PDF importieren
+            $pageCount = $pdf->setSourceFile($pdfPath);
+            for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+                $pdf->AddPage();
+                $templateId = $pdf->importPage($pageNo);
+                $pdf->useTemplate($templateId);
+        
+                // Nur auf der zweiten Seite Daten schreiben
+                if ($pageNo == 2) {
+                    $pdf->SetXY(131, 232);
+                    $pdf->Write(0,utf8_decode($name));
+        
+                    $pdf->SetXY(67, 218);
+                    $pdf->Write(0,utf8_decode($currentDate) . " Bad Bentheim");
+        
+                    $pdf->Image($signaturePathData, 140, 207, 40);
+                }
+            }
+            
+            unlink($signaturePathData);
+            $fileName = "{$name}_{$currentDate}.pdf";
+            $filePath = storage_path("{$fileName}");
+            $pdf->Output('F', $filePath);
+        
+            $username = Auth::user()->name; // Name des aktuell angemeldeten Users
+
+            Mail::send('emails.dgPdf', ['name' => $name, 'user' => $username], function (Message $message) use ($filePath, $email, $username, $name) {
+                $message->to($email)
+                        ->subject('Ihre Vertragszusammenfassung')
+                        ->attach($filePath, [
+                            'as' => "{$name}.pdf",
+                            'mime' => 'application/pdf',
+                        ]);
+            });
+
+            return response()->download($filePath)->deleteFileAfterSend();
+        }
+        
+    
+        private function getPdfPathForPlan($tarif)
+        {
+            $paths = [
+                'DG Giga 12M' => storage_path('dg/dg_giga_12m.pdf'),
+                'DG Giga' => storage_path('dg/dg_giga.pdf'),
+                'DG Premium 500' => storage_path('dg/dg_premium_500.pdf'),
+                'DG Classic 300' => storage_path('dg/dg_classic_300.pdf'),
+                'DG Basic 100' => storage_path('dg/dg_basic_100.pdf'),
+                'DG Universal' => storage_path('dg/dg_universal.pdf'),
+            ];
+    
+            return $paths[$tarif] ?? storage_path('dg/default.pdf');
+        }
         public function fillPdf(Request $request)
     {
         $formData = $request->input('formData');

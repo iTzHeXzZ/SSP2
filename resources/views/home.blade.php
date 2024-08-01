@@ -133,6 +133,19 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-body" style="background-color: #f8f9fa;">
+                    <div class="card">
+                        <div class="card-header bg-light">DG VZF erstellen:</div>
+                        <div class="card-body" style="background-color: #fff;">
+                            <div class="link-item">
+                                <a href="{{ url('/dg') }}" target="_blank">
+                                    <span class="link-icon">&#128230;</span> 
+                                    Auftrag erfassen
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

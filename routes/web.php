@@ -51,7 +51,8 @@ Route::middleware('auth')->group(function () {
 
 
 
-
+    Route::get('/dg', [PdfController::class, 'showDG'])->name('dg');
+    Route::post('/dg', [PdfController::class, 'submitForm'])->name('dg.submit');
     #Route::get('/projects/street', [ProjectController::class, 'street'])->name('projects.street');
     Route::get('/projects/{ort}/{postleitzahl}/street', [ProjectController::class, 'street'])->name('projects.street');
     Route::get('/auswertung', [ProjectController::class, 'show'])->name('auswertung.show');
