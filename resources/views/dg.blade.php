@@ -81,6 +81,7 @@ function formHandler() {
         startDrawing(event) {
             this.isDrawing = true;
             this.updateCoordinates(event);
+            if (event.type.includes('touch')) event.preventDefault(); // Prevent default touch action
         },
         draw(event) {
             if (!this.isDrawing) return;
@@ -90,9 +91,11 @@ function formHandler() {
             this.ctx.lineTo(this.x, this.y);
             this.ctx.stroke();
             this.unterschrift = this.canvas.toDataURL();
+            if (event.type.includes('touch')) event.preventDefault(); // Prevent default touch action
         },
-        stopDrawing() {
+        stopDrawing(event) {
             this.isDrawing = false;
+            if (event.type.includes('touch')) event.preventDefault(); // Prevent default touch action
         },
         updateCoordinates(event) {
             const rect = this.canvas.getBoundingClientRect();
@@ -116,6 +119,7 @@ function formHandler() {
 document.addEventListener('alpine:init', () => {
     Alpine.data('formHandler', formHandler);
 });
+
 
 </script>
 @endsection
