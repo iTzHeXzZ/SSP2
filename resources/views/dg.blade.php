@@ -49,57 +49,73 @@
 </div>
 
 <script>
-    function formHandler() {
-        return {
-            name: '',
-            email: '',
-            tarif: '',
-            isDrawing: false,
-            x: 0,
-            y: 0,
-            unterschrift: '',
-            canvas: null,
-            ctx: null,
-            init() {
-                this.canvas = this.$refs.signatureCanvas;
-                this.ctx = this.canvas.getContext('2d');
-                this.ctx.strokeStyle = 'rgb(100, 149, 237)';
-                this.ctx.lineWidth = 2;
-                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
-                this.canvas.addEventListener('mousemove', this.draw.bind(this));
-                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
-                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
-            },
-            startDrawing(event) {
-                this.isDrawing = true;
-                this.updateCoordinates(event);
-            },
-            draw(event) {
-                if (!this.isDrawing) return;
-                this.ctx.beginPath();
-                this.ctx.moveTo(this.x, this.y);
-                this.updateCoordinates(event);
-                this.ctx.lineTo(this.x, this.y);
-                this.ctx.stroke();
-                this.unterschrift = this.canvas.toDataURL();
-            },
-            stopDrawing() {
-                this.isDrawing = false;
-            },
-            updateCoordinates(event) {
-                const rect = this.canvas.getBoundingClientRect();
+function formHandler() {
+    return {
+        name: '',
+        email: '',
+        tarif: '',
+        isDrawing: false,
+        x: 0,
+        y: 0,
+        unterschrift: '',
+        canvas: null,
+        ctx: null,
+        init() {
+            this.canvas = this.$refs.signatureCanvas;
+            this.ctx = this.canvas.getContext('2d');
+            this.ctx.strokeStyle = 'rgb(100, 149, 237)';
+            this.ctx.lineWidth = 2;
+
+            // Mouse events
+            this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+            this.canvas.addEventListener('mousemove', this.draw.bind(this));
+            this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+            this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+
+            // Touch events
+            this.canvas.addEventListener('touchstart', this.startDrawing.bind(this));
+            this.canvas.addEventListener('touchmove', this.draw.bind(this));
+            this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+            this.canvas.addEventListener('touchcancel', this.stopDrawing.bind(this));
+        },
+        startDrawing(event) {
+            this.isDrawing = true;
+            this.updateCoordinates(event);
+        },
+        draw(event) {
+            if (!this.isDrawing) return;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.x, this.y);
+            this.updateCoordinates(event);
+            this.ctx.lineTo(this.x, this.y);
+            this.ctx.stroke();
+            this.unterschrift = this.canvas.toDataURL();
+        },
+        stopDrawing() {
+            this.isDrawing = false;
+        },
+        updateCoordinates(event) {
+            const rect = this.canvas.getBoundingClientRect();
+            if (event.touches && event.touches.length > 0) {
+                // Touch event
+                this.x = event.touches[0].clientX - rect.left;
+                this.y = event.touches[0].clientY - rect.top;
+            } else {
+                // Mouse event
                 this.x = event.clientX - rect.left;
                 this.y = event.clientY - rect.top;
-            },
-            clearSignature() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.signature = '';
             }
+        },
+        clearSignature() {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.unterschrift = '';
         }
     }
+}
 
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('formHandler', formHandler);
-    });
+document.addEventListener('alpine:init', () => {
+    Alpine.data('formHandler', formHandler);
+});
+
 </script>
 @endsection
