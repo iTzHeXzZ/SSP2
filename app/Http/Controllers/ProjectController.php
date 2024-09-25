@@ -36,16 +36,24 @@ class ProjectController extends Controller
         $search = $request->get('search');
     
         if ($user->hasRole('Admin') || $user->hasRole('Viewer')) {
-            $projects = Project::with('subProjects' ,'users')
+            $projects = Project::with('subProjects', 'users')
                 ->when($search, function ($query, $search) {
                     return $query->where('ort', 'like', '%' . $search . '%')
-                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%');
+                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%')
+                                 ->orWhere('strasse', 'like', '%' . $search . '%') // Suche nach Straße
+                                 ->orWhereHas('users', function ($query) use ($search) {
+                                     $query->where('name', 'like', '%' . $search . '%'); // Suche nach Benutzernamen
+                                 });
                 })->get();
         } else {
             $projects = $user->projects()->with('subProjects', 'users')
                 ->when($search, function ($query, $search) {
                     return $query->where('ort', 'like', '%' . $search . '%')
-                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%');
+                                 ->orWhere('postleitzahl', 'like', '%' . $search . '%')
+                                 ->orWhere('strasse', 'like', '%' . $search . '%') // Suche nach Straße
+                                 ->orWhereHas('users', function ($query) use ($search) {
+                                     $query->where('name', 'like', '%' . $search . '%'); // Suche nach Benutzernamen
+                                 });
                 })->get();
         }
     
@@ -67,9 +75,10 @@ class ProjectController extends Controller
                 $counts[$project->id][$status] = $subProjects->count();
             }
         }
-        
+    
         return view('projects.index', compact('projects', 'counts', 'user', 'search'));
     }
+    
 
     
 

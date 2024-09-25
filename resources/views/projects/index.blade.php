@@ -6,43 +6,53 @@
     @if(auth()->check() && auth()->user()->hasRole('Admin'))
     <form method="GET" action="{{ route('projects.index') }}" class="mb-2 mt-4" id="searchForm">
         <div class="input-group input-group-sm" style="max-width: 400px;">
-            <input type="text" name="search" id="searchInput" class="form-control" style="" placeholder="Projekt suchen" value="{{ request()->get('search') }}">
+            <input type="text" name="search" id="searchInput" class="form-control" placeholder="Projekt suchen" value="{{ request()->get('search') }}">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary ml-1" type="submit">Suchen</button>
             </div>
         </div>
     </form>
     @endif
+
+    @php
+        $hasStreet = $projects->contains(function($project) {
+            return !empty($project->strasse);
+        });
+    @endphp
     
     <table class="table ml-1">
         <thead>
             <tr>
                 <th data-sort="0">Ort</th>
-                @if(auth()->check() && auth()->user()->hasRole('Admin'))
-                <th data-sort="1">Benutzer</th>
+                @if(request()->has('search') && $hasStreet)
+                <th data-sort="1">Straße</th>
                 @endif
-                <th data-sort="2">Postleitzahl</th>
-                <th data-sort="3">Wohneinheiten</th>
-                <th data-sort="4">Unbesuchte</th>
-                <th data-sort="5">Vertrag</th>
-                <th data-sort="6">Überleger</th>
-                <th data-sort="7">Karte</th>
-                <th data-sort="8">Kein Interesse</th>
-                <th data-sort="9">Kein Potenzial</th>
-                <th data-sort="10">Prozentsatz Vertrag</th>
-                <th data-sort="11">Bearbeitungsdatum</th>
+                @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                <th data-sort="2">Benutzer</th>
+                @endif
+                <th data-sort="3">Postleitzahl</th>
+                <th data-sort="4">Wohneinheiten</th>
+                <th data-sort="5">Unbesuchte</th>
+                <th data-sort="6">Vertrag</th>
+                <th data-sort="7">Überleger</th>
+                <th data-sort="8">Karte</th>
+                <th data-sort="9">Kein Interesse</th>
+                <th data-sort="10">Kein Potenzial</th>
+                <th data-sort="11">Prozentsatz Vertrag</th>
+                <th data-sort="12">Bearbeitungsdatum</th>
                 @if(auth()->check() && auth()->user()->hasRole('Admin'))
                     <th>Aktionen</th>
                 @endif
             </tr>
         </thead>
-        <tbody >
+        <tbody>
             @php
             $uniqueNames = $projects->unique('ort');
-            $perPage = 10; 
-            $currentPage = request()->get('page', 1); 
+            $perPage = 10;
+            $currentPage = request()->get('page', 1);
             $slicedProjects = array_slice($uniqueNames->all(), ($currentPage - 1) * $perPage, $perPage);
-            $uniqueProjectsPaginated = new \Illuminate\Pagination\LengthAwarePaginator($slicedProjects, count($uniqueNames), $perPage, $currentPage, ['path' => request()->url(), 'query' => ['search' => request()->get('search')]]);            @endphp
+            $uniqueProjectsPaginated = new \Illuminate\Pagination\LengthAwarePaginator($slicedProjects, count($uniqueNames), $perPage, $currentPage, ['path' => request()->url(), 'query' => ['search' => request()->get('search')]]);
+            @endphp
 
             @foreach ($uniqueProjectsPaginated as $project)
             @php
@@ -53,7 +63,7 @@
                 }
             }
             $users = $users->unique('id');
-        @endphp
+            @endphp
                 @php
                     $filteredProjects = $projects
                         ->where('ort', $project->ort)
@@ -72,7 +82,7 @@
                     $countKarte = $groupedSubProjects->get('Karte', collect())->count();
                     $countKeinInteresse = $groupedSubProjects->get('Kein Interesse', collect())->count();
                     $countKeinPotenzial = $groupedSubProjects->get('Kein Potenzial', collect())->count();
-                    
+
                     // Zählungen für Projekte ohne Subprojekte
                     $countUnbesucht += $filteredProjects->where('status', 'Unbesucht')->count();
                     $countVertrag += $filteredProjects->where('status', 'Vertrag')->count();
@@ -80,7 +90,7 @@
                     $countKarte += $filteredProjects->where('status', 'Karte')->count();
                     $countKeinInteresse += $filteredProjects->where('status', 'Kein Interesse')->count();
                     $countKeinPotenzial += $filteredProjects->where('status', 'Kein Potenzial')->count();
-                    
+
                     $totalWohneinheiten = $filteredProjects->sum('wohneinheiten');
 
                     $percentage = ($totalWohneinheiten > 0) ? ($countVertrag / $totalWohneinheiten) * 100 : 0;
@@ -88,7 +98,14 @@
                     $lastUpdated = $filteredProjects->max('updated_at');
                 @endphp
                 <tr>
-                    <td><a class="locc" href="{{ route('projects.street', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" style="text-decoration : none">{{ $project->ort }}</a></td>
+                    <td>
+                        <a class="locc" href="{{ route('projects.street', ['ort' => $project->ort, 'postleitzahl' => $project->postleitzahl]) }}" style="text-decoration: none">
+                            {{ $project->ort }}
+                        </a>
+                    </td>
+                    @if(request()->has('search') && $hasStreet)
+                    <td>{{ $project->strasse }}</td>
+                    @endif
                     @if(auth()->check() && auth()->user()->hasRole('Admin'))
                     <td>
                         @foreach ($users as $user)
@@ -133,7 +150,8 @@
             @endforeach
         </tbody>
     </table>
-    {{ $uniqueProjectsPaginated->links() }}
+{{ $uniqueProjectsPaginated->links() }}
+
 
     <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">

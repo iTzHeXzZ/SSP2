@@ -22,7 +22,7 @@
             content: ' ↑'; /* Pfeilsymbol nach oben für aufsteigende Sortierung */
         }
         #loadingOverlay {
-            display: none;
+            display: none ;
             position: fixed;
             top: 0;
             left: 0;
@@ -171,6 +171,11 @@
 </html>
 <script>
 $(document).ready(function () {
+    window.onpageshow = function (event) {
+        if (event.persisted) {
+            hideLoadingOverlay();
+        }
+    };
     const sortTable = function (column, descending = false) {
         const $table = $('table');
         const $rows = $table.find('tbody tr').toArray();
